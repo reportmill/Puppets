@@ -3,7 +3,7 @@ import snap.gfx.*;
 import snap.view.*;
 
 /**
- * A custom class.
+ * The top level document UI management class for displaying and editing puppets and actions.
  */
 public class DocPane extends ViewOwner {
     
@@ -17,7 +17,7 @@ public class DocPane extends ViewOwner {
     RowView            _docBox;
     
     // The PuppetView
-    PuppetView         _pupView;
+    PuppetPane         _pupPane;
     
     // The ActionPane
     ActionPane         _actionPane;
@@ -50,9 +50,8 @@ public void showDisplayPane()
 {
     _docBox.removeChildren();
     
-    _pupView = new PuppetView(_puppet, _scale);
-    _pupView.setBorder(Color.PINK,1);
-    _docBox.addChild(_pupView);
+    _pupPane = new PuppetPane(this);
+    _docBox.addChild(_pupPane.getUI());
 }
 
 /**
