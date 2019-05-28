@@ -110,7 +110,7 @@ public String[] getPartNames()
 {
     return new String[] {
         RArmTop, RArmBtm, RHand, RLegTop, RLegBtm, RFoot, Torso, Head,
-        LArmTop, LArmBtm, LHand, LLegTop, LLegBtm, LFoot };
+        LLegTop, LLegBtm, LFoot, LArmTop, LArmBtm, LHand };
 }
 
 /**
@@ -130,6 +130,38 @@ public String[] getMarkerNames()
 {
     return new String[] { Anchor_Marker, HeadTop_Marker,
         RHandEnd_Marker, RFootEnd_Marker, LHandEnd_Marker, LFootEnd_Marker };
+}
+
+/**
+ * Returns names of parts linked to given joint/marker name.
+ */
+public String[] getLinkNamesForJointOrMarker(String aName)
+{
+    switch(aName) {
+        
+        // Joints
+        case Head_Joint: return new String[] { Head, Torso };
+        case RArm_Joint: return new String[] { Torso, RArmTop };
+        case RArmMid_Joint: return new String[] { RArmTop, RArmBtm };
+        case RHand_Joint: return new String[] { RArmBtm, RHand };
+        case RLeg_Joint: return new String[] { Torso, RLegTop };
+        case RLegMid_Joint: return new String[] { RLegTop, RLegBtm };
+        case RFoot_Joint: return new String[] { RLegBtm, RFoot };
+        case LArm_Joint: return new String[] { Torso, LArmTop };
+        case LArmMid_Joint: return new String[] { LArmTop, LArmBtm };
+        case LHand_Joint: return new String[] { LArmBtm, LHand };
+        case LLeg_Joint: return new String[] { Torso, LLegTop };
+        case LLegMid_Joint: return new String[] { LLegTop, LLegBtm };
+        case LFoot_Joint: return new String[] { LLegBtm, LFoot };
+        
+        // Markers
+        case HeadTop_Marker: return new String[] { Head };
+        case RHandEnd_Marker: return new String[] { RHand };
+        case RFootEnd_Marker: return new String[] { RFoot };
+        case LHandEnd_Marker: return new String[] { LHand };
+        case LFootEnd_Marker: return new String[] { LFoot };
+        default: return new String[0];
+    }
 }
 
 /**

@@ -213,8 +213,8 @@ Rect getSplitBoundsForView(Part aPart, Part aJoint, boolean doTop)
         
         // Handle Right arm/leg
         if(aPart.name.startsWith("R")) {
-            if(doTop) { y = jbnds.y; w = jbnds.getMaxX() - x; h = pbnds.getMaxY() - y; }
-            else { x = jbnds.x; w = pbnds.getMaxX() - x; h = jbnds.getMaxY() - y; }
+            if(doTop) { x = jbnds.x; w = pbnds.getMaxX() - x; h = jbnds.getMaxY() - y; }
+            else { y = jbnds.y; w = jbnds.getMaxX() - x; h = pbnds.getMaxY() - y; }
         }
         
         // Handle Left arm/leg

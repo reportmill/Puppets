@@ -53,7 +53,8 @@ public PhysicsRunner(ParentView aView)
     // Add bodies for view children
     List <View> joints = new ArrayList();
     for(View child : _view.getChildren()) { ViewPhysics phys = child.getPhysics(true);
-        if(phys.isJoint() || "joint".equals(child.getName())) joints.add(child);
+        if(phys.isJoint())
+            joints.add(child);
         else if(child.isVisible()) { 
             phys.setDynamic(true);
             createBody(child);
@@ -334,19 +335,15 @@ public org.jbox2d.collision.shapes.Shape createShape(Polygon aPoly)
 public void createJoint(View aView)
 {
     // Get shapes interesting joint view
-    ParentView editor = aView.getParent();
-    List <View> hits = new ArrayList();
-    Rect bnds = aView.getBoundsParent();
-    for(View v : editor.getChildren()) {
-        if(v!=aView && v.getBoundsLocal().intersects(v.parentToLocal(bnds)))
-            hits.add(v);
-    }
-    
-    // if less than two, bail
-    if(hits.size()<2) {
-        System.out.println("PhysicsRunner.createJoint: 2 Bodies not found for joint: " + aView.getName()); return; }
-    View viewA = hits.get(0);
-    View viewB = hits.get(1);
+    PuppetView pupView = (PuppetView)aView.getParent();
+    Puppet puppet = pupView.getPuppet();
+    String name = aView.getName(), linkNames[] = puppet.getLinkNamesForJointOrMarker(name);
+    if(linkNames.length<2) {
+        System.out.println("PhysicsRunner.createJoint: 2 Bodies not found for joint: " + name); return; }
+
+    // Get linked views
+    View viewA = pupView.getChild(linkNames[0]);
+    View viewB = pupView.getChild(linkNames[1]);
     
     // Create joint def and set body A/B
     RevoluteJointDef jointDef = new RevoluteJointDef();
