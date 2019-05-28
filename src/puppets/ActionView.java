@@ -1,5 +1,6 @@
 package puppets;
 import snap.gfx.*;
+import snap.view.*;
 
 /**
  * A class to edit puppet.
@@ -15,6 +16,12 @@ public ActionView(Puppet aPuppet, double aScale)
     setPuppet(aPuppet);
     setFill(new Color(.95));
     setBorder(Color.GRAY, 1);
+    
+    // Remove markers
+    for(String name : _puppet.getMarkerNames()) {
+        View child = getChild(name);
+        removeChild(child);
+    }
 }
 
 

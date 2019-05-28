@@ -26,6 +26,7 @@ public ActionPane(DocPane aDP)  { _docPane = aDP; }
  */
 protected View createUI()
 {
+    // Create ActionView
     _actView = new ActionView(_docPane._puppet, _docPane._scale);
     
     // Create PuppetBox
@@ -49,6 +50,7 @@ protected View createUI()
  */
 protected void initUI()
 {
+    // Create/start PhysRunner
     _physRunner = new PhysicsRunner(_actView);
     _physRunner.setRunning(true);
 }

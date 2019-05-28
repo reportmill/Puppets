@@ -123,6 +123,9 @@ String getLayerNameForPuppetName(String aName)
         case Puppet.LLegMid_Joint: return "LShank";
         case Puppet.LFoot_Joint: return "LFoot";
         
+        // Landmarks
+        case Puppet.Anchor_Marker: return "ObjectPivot";
+        
         // Failure
         default: System.err.println("ORAPuppet.getLayerNameForPuppetName: failed for " + aName); return null;
     }
@@ -153,7 +156,8 @@ Layer getLayer(Layer aLayer, String aName)
  */
 public Layer getLayerForPartName(String aName)
 {
-    if(aName.equals("RL_TalkingHead")) return _stack.getLayer(aName);
+    if(aName.equals("RL_TalkingHead") || aName.equals("ObjectPivot"))
+        return _stack.getLayer(aName);
     return _bodyStack.getLayer(aName);
 }
 

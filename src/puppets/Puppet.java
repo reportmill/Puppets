@@ -53,6 +53,9 @@ public class Puppet {
     public static final String LLeg_Joint = "LLegJoint";
     public static final String LLegMid_Joint = "LLegMidJoint";
     public static final String LFoot_Joint = "LFoot_Joint";
+    
+    // Constants for markers
+    public static final String Anchor_Marker = "AnchorMarker";
 
 /**
  * Returns the source.
@@ -113,6 +116,11 @@ public String[] getJointNames()
         RArm_Joint, RArmMid_Joint, RHand_Joint, RLeg_Joint, RLegMid_Joint, RFoot_Joint,
         LArm_Joint, LArmMid_Joint, LHand_Joint, LLeg_Joint, LLegMid_Joint, LFoot_Joint };
 }
+
+/**
+ * Returns the puppet landmarks.
+ */
+public String[] getMarkerNames()  { return new String[] { Anchor_Marker }; }
 
 /**
  * Returns the bounds.

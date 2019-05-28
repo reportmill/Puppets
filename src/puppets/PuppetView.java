@@ -83,6 +83,12 @@ void addAllParts()
         addImageViewForJoint(joint);
     }
     
+    // Iterate over markers
+    for(String pname : _puppet.getMarkerNames()) {
+        Part part = _puppet.getPart(pname);
+        addImageViewForPart(part);
+    }
+    
     // Make Torso really dense
     getChild(Puppet.Torso).getPhysics().setDensity(1000);
     
@@ -104,7 +110,7 @@ ImageView addImageViewForPart(Part aPart)
 }
 
 /**
- * Adds an image shape for given layer.
+ * Adds an image shape for body part.
  */
 ImageView addImageViewForBodyPart(Part aPart)
 {
@@ -114,7 +120,7 @@ ImageView addImageViewForBodyPart(Part aPart)
 }
 
 /**
- * Adds an image shape for given layer.
+ * Adds an image shape for given joint.
  */
 ImageView addImageViewForJoint(Part aPart)
 {
