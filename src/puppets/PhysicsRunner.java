@@ -50,11 +50,17 @@ public PhysicsRunner(ParentView aView)
     // Create world
     _world = new World(new Vec2(0, 0));//-9.8f));
     
+    // Get PuppetView, Puppet
+    PuppetView pupView = (PuppetView)aView;
+    Puppet puppet = pupView.getPuppet();
+    
     // Add bodies for view children
-    List <View> joints = new ArrayList();
+    List <View> joints = new ArrayList(), markers = new ArrayList();
     for(View child : _view.getChildren()) { ViewPhysics phys = child.getPhysics(true);
         if(phys.isJoint())
             joints.add(child);
+        else if(puppet.isMarkerName(child.getName()))
+            markers.add(child);
         else if(child.isVisible()) { 
             phys.setDynamic(true);
             createBody(child);
@@ -65,6 +71,8 @@ public PhysicsRunner(ParentView aView)
     // Add joints
     for(View v : joints)
         createJoint(v);
+    for(View v : markers)
+        createMarker(v);
     
     // Add sidewalls
     double vw = _view.getWidth(), vh = _view.getHeight();
@@ -359,6 +367,43 @@ public void createJoint(View aView)
     jointDef.localAnchorB = viewToBoxLocal(jointPntB.x, jointPntB.y, viewB);
     RevoluteJoint joint = (RevoluteJoint)_world.createJoint(jointDef);
     aView.getPhysics(true).setNative(joint);
+    
+    // Remove view for joint
+    aView.setVisible(false);
+}
+
+/**
+ * Creates a Joint.
+ */
+public void createMarker(View aView)
+{
+    // Get shapes interesting joint view
+    PuppetView pupView = (PuppetView)aView.getParent();
+    Puppet puppet = pupView.getPuppet();
+    String name = aView.getName(), linkNames[] = puppet.getLinkNamesForJointOrMarker(name);
+    if(linkNames.length<1)
+        return;
+
+    aView.getPhysics(true).setDynamic(true);
+    createBody(aView);
+    
+    // Get linked views
+    View viewA = pupView.getChild(linkNames[0]);
+    View viewB = aView;
+    
+    // Create joint def and set body A/B
+    RevoluteJointDef jointDef = new RevoluteJointDef();
+    jointDef.bodyA = (Body)viewA.getPhysics().getNative();
+    jointDef.bodyB = (Body)viewB.getPhysics().getNative();
+    jointDef.collideConnected = false;
+    
+    // Set anchors
+    Point jointPnt = aView.localToParent(aView.getWidth()/2, aView.getHeight()/2);
+    Point jointPntA = viewA.parentToLocal(jointPnt.x, jointPnt.y);
+    Point jointPntB = viewB.parentToLocal(jointPnt.x, jointPnt.y);
+    jointDef.localAnchorA = viewToBoxLocal(jointPntA.x, jointPntA.y, viewA);
+    jointDef.localAnchorB = viewToBoxLocal(jointPntB.x, jointPntB.y, viewB);
+    RevoluteJoint joint = (RevoluteJoint)_world.createJoint(jointDef);
     
     // Remove view for joint
     aView.setVisible(false);
