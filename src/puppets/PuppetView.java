@@ -85,7 +85,7 @@ void addAllParts()
     
     // Iterate over markers
     for(String pname : _puppet.getMarkerNames()) {
-        Part part = _puppet.getPart(pname);
+        Part part = _puppet.getJoint(pname);
         addImageViewForPart(part);
     }
     

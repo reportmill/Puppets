@@ -17,10 +17,10 @@ public ActionView(Puppet aPuppet, double aScale)
     setFill(new Color(.95));
     setBorder(Color.GRAY, 1);
     
-    // Remove markers
+    // Make markers not visible
     for(String name : _puppet.getMarkerNames()) {
         View child = getChild(name);
-        removeChild(child);
+        child.setVisible(false);
     }
 }
 

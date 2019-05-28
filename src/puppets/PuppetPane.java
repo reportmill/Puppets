@@ -109,6 +109,7 @@ protected void initUI()
     List <String> partNames = new ArrayList();
     Collections.addAll(partNames, puppet.getPartNames());
     Collections.addAll(partNames, puppet.getJointNames());
+    Collections.addAll(partNames, puppet.getMarkerNames());
     _partsList.setItems(partNames);
 }
 

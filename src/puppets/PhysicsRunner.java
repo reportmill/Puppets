@@ -54,7 +54,7 @@ public PhysicsRunner(ParentView aView)
     List <View> joints = new ArrayList();
     for(View child : _view.getChildren()) { ViewPhysics phys = child.getPhysics(true);
         if(phys.isJoint() || "joint".equals(child.getName())) joints.add(child);
-        else { 
+        else if(child.isVisible()) { 
             phys.setDynamic(true);
             createBody(child);
             addDragger(child);
@@ -164,7 +164,7 @@ public void updateBody(View aView)
 {
     // Get ViewPhysics and body
     ViewPhysics <Body> phys = aView.getPhysics(); if(phys==null || phys.isDynamic() || phys.isJoint()) return;
-    Body body = phys.getNative();
+    Body body = phys.getNative(); if(body==null) return;
 
     // Get/set position
     Vec2 pos0 = body.getPosition();
@@ -364,7 +364,7 @@ public void createJoint(View aView)
     aView.getPhysics(true).setNative(joint);
     
     // Remove view for joint
-    ViewUtils.removeChild(aView.getParent(), aView);
+    aView.setVisible(false);
 }
 
 Vec2 viewToBoxLocal(double aX, double aY, View aView)

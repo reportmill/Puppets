@@ -56,6 +56,11 @@ public class Puppet {
     
     // Constants for markers
     public static final String Anchor_Marker = "AnchorMarker";
+    public static final String HeadTop_Marker = "HeadTopMarker";
+    public static final String RHandEnd_Marker = "RHandEndMarker";
+    public static final String RFootEnd_Marker = "RFootEndMarker";
+    public static final String LHandEnd_Marker = "LHandEndMarker";
+    public static final String LFootEnd_Marker = "LFootEndMarker";
 
 /**
  * Returns the source.
@@ -120,7 +125,11 @@ public String[] getJointNames()
 /**
  * Returns the puppet landmarks.
  */
-public String[] getMarkerNames()  { return new String[] { Anchor_Marker }; }
+public String[] getMarkerNames()
+{
+    return new String[] { Anchor_Marker, HeadTop_Marker,
+        RHandEnd_Marker, RFootEnd_Marker, LHandEnd_Marker, LFootEnd_Marker };
+}
 
 /**
  * Returns the bounds.
