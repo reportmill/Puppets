@@ -1,6 +1,5 @@
 package puppets;
 import snap.gfx.*;
-import snap.util.*;
 import snap.view.*;
 import puppets.Puppet.Part;
 
@@ -127,53 +126,6 @@ ImageView addImageViewForJoint(Part aPart)
     ImageView iview = addImageViewForPart(aPart);
     iview.getPhysics(true).setJoint(true);
     return iview;
-}
-
-/**
- * Convert to preview Views.
- */
-public void convertToPreview()
-{
-    View children[] = getChildren();
-    double x = getX(), y = getY();
-    ChildView par = (ChildView)getParent();
-    for(View c : children) {
-        par.addChild(c); c.setXY(c.getX() + x, c.getY() + y);
-    }
-    par.removeChild(this);
-}
-
-/**
- * XML Archival.
- */
-public XMLElement toXML(XMLArchiver anArchiver)
-{
-    // Do normal unarchive
-    XMLElement xml = super.toXML(anArchiver); xml.setName("PuppetView");
-    
-    xml.add("Path", _puppet.getSource());
-    xml.add("Scale", _scale);
-    
-    // Return xml
-    return xml;
-}
-
-/**
- * XML unarchival.
- */
-public ParentView fromXML(XMLArchiver anArchiver, XMLElement anElement)
-{
-    // Do normal version
-    ParentView obj = (ParentView)super.fromXML(anArchiver, anElement);
-    
-    // Unarchive Path, Scale
-    String path = anElement.getAttributeValue("Path");
-    Puppet puppet = new ORAPuppet(path);
-    _scale = anElement.getAttributeDoubleValue("Scale");
-    setPuppet(puppet);
-    
-    // Return
-    return obj;
 }
 
 }

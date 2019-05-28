@@ -1,6 +1,7 @@
 package puppets;
 import java.util.*;
 import snap.gfx.*;
+import snap.util.ArrayUtils;
 
 /**
  * A class to hold information providing image parts of a graphic of a human.
@@ -130,6 +131,21 @@ public String[] getMarkerNames()
     return new String[] { Anchor_Marker, HeadTop_Marker,
         RHandEnd_Marker, RFootEnd_Marker, LHandEnd_Marker, LFootEnd_Marker };
 }
+
+/**
+ * Returns whether given name is joint name.
+ */
+public boolean isJointName(String aName)  { return ArrayUtils.contains(getJointNames(), aName); }
+
+/**
+ * Returns whether given name is marker name.
+ */
+public boolean isMarkerName(String aName)  { return ArrayUtils.contains(getMarkerNames(), aName); }
+
+/**
+ * Returns whether given name is marker name.
+ */
+public boolean isJointOrMarkerName(String aName)  { return isJointName(aName) || isMarkerName(aName); }
 
 /**
  * Returns the bounds.
