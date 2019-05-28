@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView Padding="4" Spacing="4">
+  <RowView Padding="4" GrowWidth="true" Spacing="4">
+    <ToggleButton Name="DisplayButton" PrefWidth="80" PrefHeight="24" Padding="2" text="Display" Selected="true" Group="bg1" />
+    <ToggleButton Name="ActionButton" PrefWidth="80" PrefHeight="24" Padding="2" text="Animate" Group="bg1" />
+    <Button Name="LadyButton" MinHeight="0" PrefWidth="70" Padding="2" LeanX="RIGHT" text="Lady" />
+    <Button Name="ManButton" MinHeight="0" PrefWidth="70" Padding="2" LeanX="RIGHT" text="Man" />
+  </RowView>
+  <RowView Name="DocBox" MinWidth="800" MinHeight="800" Padding="4" GrowWidth="true" GrowHeight="true" Spacing="4" />
+</ColView>
