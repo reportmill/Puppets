@@ -28,9 +28,19 @@ protected View createUI()
 {
     _actView = new ActionView(_docPane._puppet, _docPane._scale);
     
-    RowView mainRowView = new RowView();
+    // Create PuppetBox
+    BoxView pupBox = new BoxView(_actView); pupBox.setGrowWidth(true);
+    pupBox.setFill(Color.WHITE); pupBox.setBorder(Color.BLACK, 1);
+    
+    // Create ToolsColView to hold puppet inspector UI
+    ColView toolsColView = new ColView(); toolsColView.setPadding(20,8,8,8);
+    toolsColView.setSpacing(5); toolsColView.setFillWidth(true); toolsColView.setPrefWidth(300);
+    
+    // Create MainRowView
+    RowView mainRowView = new RowView(); mainRowView.setGrowWidth(true); mainRowView.setFillHeight(true);
     mainRowView.setAlign(Pos.CENTER);
-    mainRowView.addChild(_actView);
+    mainRowView.addChild(pupBox);
+    mainRowView.addChild(toolsColView);
     return mainRowView;
 }
 

@@ -1,5 +1,4 @@
 package puppets;
-import snap.gfx.*;
 import snap.view.*;
 
 /**
@@ -14,7 +13,7 @@ public class DocPane extends ViewOwner {
     double             _scale = 1;
     
     // The view that holds the document
-    RowView            _docBox;
+    BoxView            _docBox;
     
     // The PuppetView
     PuppetPane         _pupPane;
@@ -27,9 +26,7 @@ public class DocPane extends ViewOwner {
  */
 protected void initUI()
 {
-    _docBox = getView("DocBox", RowView.class);
-    _docBox.setFill(Color.WHITE);
-    _docBox.setAlign(Pos.CENTER);
+    _docBox = getView("DocBox", BoxView.class);
 }
 
 /**
@@ -51,7 +48,7 @@ public void showDisplayPane()
     _docBox.removeChildren();
     
     _pupPane = new PuppetPane(this);
-    _docBox.addChild(_pupPane.getUI());
+    _docBox.setContent(_pupPane.getUI());
 }
 
 /**
@@ -62,7 +59,7 @@ public void showActionPane()
     _docBox.removeChildren();
     
     _actionPane = new ActionPane(this);
-    _docBox.addChild(_actionPane.getUI());
+    _docBox.setContent(_actionPane.getUI());
 }
 
 /**
