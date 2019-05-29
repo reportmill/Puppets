@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RowView PrefWidth="500" PrefHeight="500" Align="CENTER" GrowWidth="true" FillHeight="true">
+  <BoxView Name="PuppetBox" GrowWidth="true">
+    <LineBorder />
+    <color value="#ffffff" />
+  </BoxView>
+  <ColView Name="ToolBox" PrefWidth="300" Padding="20,8,8,8" Spacing="5" FillWidth="true">
+    <CheckBox Name="ShowMarkersCheckBox" text="Show Markers" />
+    <TextView Name="PoseText" MinWidth="120" PrefHeight="200" />
+    <ListView Name="PoseList" PrefHeight="180">
+      <LineBorder Color="#c0c0c0" />
+    </ListView>
+  </ColView>
+</RowView>

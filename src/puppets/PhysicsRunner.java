@@ -38,6 +38,12 @@ public class PhysicsRunner {
     
     // MouseJoint used for dragging
     MouseJoint     _dragJoint;
+    
+    // List of MouseJoints used to move joints into poses
+    List <MouseJoint>  _poseMouseJoints = new ArrayList();
+    
+    //
+    long               _poseMouseTime;
 
 /**
  * Create new PhysicsRunner.
@@ -95,6 +101,16 @@ public double getScreenPointsToWorldMeters(double aScale)  { return _scale; }
 public void setScreenPointsToWorldMeters(double aScale)  { _scale = aScale; }
 
 /**
+ * Returns a view for given name.
+ */
+public View getView(String aName)  { return _view.getChild(aName); }
+
+/**
+ * Returns the puppet.
+ */
+public Puppet getPuppet()  { return ((PuppetView)_view).getPuppet(); }
+
+/**
  * Returns whether physics is running.
  */
 public boolean isRunning()  { return _runner!=null; }
@@ -129,6 +145,12 @@ void timerFired()
     // Update Dynamics
     for(int i=0,iMax=_view.getChildCount();i<iMax;i++)
         updateView(_view.getChild(i));
+        
+    // Clear PoseMouseJoints
+    if(_poseMouseTime>0 && System.currentTimeMillis()>_poseMouseTime+500) {
+        for(MouseJoint mj : _poseMouseJoints) _world.destroyJoint(mj);
+        _poseMouseJoints.clear(); _poseMouseTime = 0;
+    }
 }
 
 /**
@@ -145,7 +167,7 @@ public void updateView(View aView)
     
         // Get/set position
         Vec2 pos = body.getPosition();
-        Point posV = boxToView(pos.x, pos.y);
+        Point posV = worldToView(pos.x, pos.y);
         aView.setXY(posV.x-aView.getWidth()/2, posV.y-aView.getHeight()/2);
         
         // Get set rotation
@@ -158,7 +180,7 @@ public void updateView(View aView)
     
         // Get/set position
         Vec2 pos = new Vec2(0,0); joint.getAnchorA(pos);
-        Point posV = boxToView(pos.x, pos.y);
+        Point posV = worldToView(pos.x, pos.y);
         aView.setXY(posV.x-aView.getWidth()/2, posV.y-aView.getHeight()/2);
         
         // Get set rotation
@@ -177,7 +199,7 @@ public void updateBody(View aView)
 
     // Get/set position
     Vec2 pos0 = body.getPosition();
-    Vec2 pos1 = viewToBox(aView.getMidX(), aView.getMidY());
+    Vec2 pos1 = viewToWorld(aView.getMidX(), aView.getMidY());
     double vx = (pos1.x - pos0.x)*25;
     double vy = (pos1.y - pos0.y)*25;
     body.setLinearVelocity(new Vec2((float)vx, (float)vy));
@@ -191,49 +213,6 @@ public void updateBody(View aView)
 }
 
 /**
- * Convert View coord to Box2D.
- */
-public float viewToBox(double aValue)  { return (float)(aValue/_scale); }
-
-/**
- * Convert View coord to Box2D.
- */
-public Vec2 viewToBox(double aX, double aY)  { return getVec(getViewToBox().transform(aX, aY)); }
-
-/**
- * Convert Box2D coord to View.
- */
-public double boxToView(double aValue)  { return aValue*_scale; }
-
-/**
- * Convert Box2D coord to View.
- */
-public Point boxToView(double aX, double aY)  { return getBoxToView().transform(aX, aY); }
-
-/**
- * Returns transform from View coords to Box coords.
- */
-public Transform getViewToBox()
-{
-    // If already set, just return
-    if(_localToBox!=null) return _localToBox;
-    
-    // Create transform from WorldView bounds to World bounds
-    Rect r0 = _view.getBoundsLocal();
-    Rect r1 = new Rect(0, 0, r0.width/_scale, -r0.height/_scale);
-    double bw = r0.width, bh = r0.height;
-    double sx = bw!=0? r1.width/bw : 0, sy = bh!=0? r1.height/bh : 0;
-    Transform trans = Transform.getScale(sx, sy);
-    trans.translate(r1.x - r0.x, r1.y - r0.y);
-    return trans;
-}
-
-/**
- * Returns transform from Box coords to View coords.
- */
-public Transform getBoxToView()  { return getViewToBox().getInverse(); }
-    
-/**
  * Returns a body for a view.
  */
 public Body createBody(View aView)
@@ -241,7 +220,7 @@ public Body createBody(View aView)
     // Create BodyDef
     ViewPhysics <Body> phys = aView.getPhysics();
     BodyDef bdef = new BodyDef(); bdef.type = phys.isDynamic()? BodyType.DYNAMIC : BodyType.KINEMATIC;
-    bdef.position.set(viewToBox(aView.getMidX(), aView.getMidY()));
+    bdef.position.set(viewToWorld(aView.getMidX(), aView.getMidY()));
     bdef.angle = (float)Math.toRadians(-aView.getRotate());
     bdef.linearDamping = 10;
     bdef.angularDamping = 10;
@@ -273,8 +252,8 @@ public org.jbox2d.collision.shapes.Shape[] createShape(Shape aShape)
     // Handle Rect (simple case)
     if(aShape instanceof Rect) { Rect rect = (Rect)aShape;
         PolygonShape pshape = new PolygonShape();
-        float pw = viewToBox(rect.width/2);
-        float ph = viewToBox(rect.height/2);
+        float pw = viewToWorld(rect.width/2);
+        float ph = viewToWorld(rect.height/2);
         pshape.setAsBox(pw, ph);
         return new org.jbox2d.collision.shapes.Shape[] { pshape };
     }
@@ -282,7 +261,7 @@ public org.jbox2d.collision.shapes.Shape[] createShape(Shape aShape)
     // Handle Ellipse
     if(aShape instanceof Ellipse && aShape.getWidth()==aShape.getHeight()) { Ellipse elp = (Ellipse)aShape;
         CircleShape cshape = new CircleShape();
-        cshape.setRadius(viewToBox(elp.getWidth()/2));
+        cshape.setRadius(viewToWorld(elp.getWidth()/2));
         return new org.jbox2d.collision.shapes.Shape[] { cshape };
     }
     
@@ -290,7 +269,7 @@ public org.jbox2d.collision.shapes.Shape[] createShape(Shape aShape)
     if(aShape instanceof Arc && aShape.getWidth()==aShape.getHeight()) { Arc arc = (Arc)aShape;
         if(arc.getSweepAngle()==360) {
             CircleShape cshape = new CircleShape();
-            cshape.setRadius(viewToBox(arc.getWidth()/2));
+            cshape.setRadius(viewToWorld(arc.getWidth()/2));
             return new org.jbox2d.collision.shapes.Shape[] { cshape };
         }
     }
@@ -332,7 +311,7 @@ public org.jbox2d.collision.shapes.Shape createShape(Polygon aPoly)
     
     // Create Box2D PolygonShape and return
     int pc = aPoly.getPointCount();
-    Vec2 vecs[] = new Vec2[pc]; for(int i=0;i<pc;i++) vecs[i] = viewToBox(aPoly.getX(i), aPoly.getY(i));
+    Vec2 vecs[] = new Vec2[pc]; for(int i=0;i<pc;i++) vecs[i] = viewToWorld(aPoly.getX(i), aPoly.getY(i));
     PolygonShape pshape = new PolygonShape(); pshape.set(vecs, vecs.length);
     return pshape;
 }
@@ -343,15 +322,14 @@ public org.jbox2d.collision.shapes.Shape createShape(Polygon aPoly)
 public void createJoint(View aView)
 {
     // Get shapes interesting joint view
-    PuppetView pupView = (PuppetView)aView.getParent();
-    Puppet puppet = pupView.getPuppet();
+    Puppet puppet = getPuppet();
     String name = aView.getName(), linkNames[] = puppet.getLinkNamesForJointOrMarker(name);
     if(linkNames.length<2) {
         System.out.println("PhysicsRunner.createJoint: 2 Bodies not found for joint: " + name); return; }
 
     // Get linked views
-    View viewA = pupView.getChild(linkNames[0]);
-    View viewB = pupView.getChild(linkNames[1]);
+    View viewA = getView(linkNames[0]);
+    View viewB = getView(linkNames[1]);
     
     // Create joint def and set body A/B
     RevoluteJointDef jointDef = new RevoluteJointDef();
@@ -378,8 +356,7 @@ public void createJoint(View aView)
 public void createMarker(View aView)
 {
     // Get shapes interesting joint view
-    PuppetView pupView = (PuppetView)aView.getParent();
-    Puppet puppet = pupView.getPuppet();
+    Puppet puppet = getPuppet();
     String name = aView.getName(), linkNames[] = puppet.getLinkNamesForJointOrMarker(name);
     if(linkNames.length<1)
         return;
@@ -388,7 +365,7 @@ public void createMarker(View aView)
     createBody(aView);
     
     // Get linked views
-    View viewA = pupView.getChild(linkNames[0]);
+    View viewA = getView(linkNames[0]);
     View viewB = aView;
     
     // Create joint def and set body A/B
@@ -409,17 +386,36 @@ public void createMarker(View aView)
     aView.setVisible(false);
 }
 
-Vec2 viewToBoxLocal(double aX, double aY, View aView)
-{
-    float x = viewToBox(aX - aView.getWidth()/2);
-    float y = viewToBox(aView.getHeight()/2 - aY);
-    return new Vec2(x,y);
-}
-
 /**
- * Return Vec2 for snap Point.
+ * Moves a joint or marker to given XY in world view coords using mouse joint.
  */
-Vec2 getVec(Point aPnt)  { return new Vec2((float)aPnt.x, (float)aPnt.y); }
+public void setJointOrMarkerToViewXY(String aName, double aX, double aY)
+{
+    // Get joint or marker link name(s)
+    Puppet puppet = getPuppet();
+    String linkNames[] = puppet.getLinkNamesForJointOrMarker(aName); if(linkNames.length<1) return;
+        
+    // Get Joint view
+    View jview = getView(aName);
+    Point jpnt = jview.localToParent(jview.getWidth()/2, jview.getHeight()/2);
+    if(equals(jpnt.x, jpnt.y, aX, aY)) return;
+    System.out.println("Setting point for marker: " + aName);
+    Vec2 jointVec = viewToWorld(jpnt.x, jpnt.y);
+
+    // Get linked view, body and X/Y in body coords
+    View view = getView(linkNames[0]);
+    Body body = (Body)view.getPhysics().getNative();
+    
+    // Create MouseJoint and target X/Y
+    MouseJointDef jdef = new MouseJointDef(); jdef.bodyA = _groundBody; jdef.bodyB = body;
+    jdef.collideConnected = true; jdef.maxForce = 1000f*body.getMass();
+    jdef.target.set(jointVec);
+    MouseJoint mjnt = (MouseJoint)_world.createJoint(jdef);
+    mjnt.setTarget(viewToWorld(aX, aY));
+    _poseMouseJoints.add(mjnt);
+    body.setAwake(true);
+    _poseMouseTime = System.currentTimeMillis();
+}
 
 /**
  * Adds DragFilter to view.
@@ -444,14 +440,14 @@ void handleDrag(ViewEvent anEvent)
     if(anEvent.isMousePress()) {
         MouseJointDef jdef = new MouseJointDef(); jdef.bodyA = _groundBody; jdef.bodyB = body;
         jdef.collideConnected = true; jdef.maxForce = 1000f*body.getMass();
-        jdef.target.set(viewToBox(pnt.x, pnt.y));
+        jdef.target.set(viewToWorld(pnt.x, pnt.y));
         _dragJoint = (MouseJoint)_world.createJoint(jdef);
         body.setAwake(true);
     }
     
     // Handle MouseDrag: Update drag MouseJoint
     else if(anEvent.isMouseDrag()) {
-        Vec2 target = viewToBox(pnt.x, pnt.y);
+        Vec2 target = viewToWorld(pnt.x, pnt.y);
         _dragJoint.setTarget(target);
     }
     
@@ -460,32 +456,68 @@ void handleDrag(ViewEvent anEvent)
         _world.destroyJoint(_dragJoint); _dragJoint = null; }
 }
 
-/** Called when View gets drag event. */
-void handleDragOld(ViewEvent anEvent)
+/**
+ * Return Vec2 for snap Point.
+ */
+Vec2 getVec(Point aPnt)  { return new Vec2((float)aPnt.x, (float)aPnt.y); }
+
+/**
+ * Convert View coord to Box2D world.
+ */
+float viewToWorld(double aValue)  { return (float)(aValue/_scale); }
+
+/**
+ * Convert View coord to Box2D world.
+ */
+Vec2 viewToWorld(double aX, double aY)  { return getVec(getViewToWorld().transform(aX, aY)); }
+
+/**
+ * Returns a Vec2 in world coords for a point in View coords.
+ */
+Vec2 viewToBoxLocal(double aX, double aY, View aView)
 {
-    // Get View, ViewPhysics, Body and Event point in page view
-    View view = anEvent.getView(); ViewPhysics <Body> phys = view.getPhysics();
-    Body body = phys.getNative();
-    Point pnt = anEvent.getPoint(view.getParent()); anEvent.consume();
-    
-    // Handle MousePress
-    if(anEvent.isMousePress()) { body.setType(BodyType.KINEMATIC); body.setAngularVelocity(0); }
-    else if(anEvent.isMouseDrag()) updateDrag(view, pnt.x, pnt.y);
-    else if(anEvent.isMouseRelease()) body.setType(phys.isDynamic()? BodyType.DYNAMIC : BodyType.KINEMATIC);
+    float x = viewToWorld(aX - aView.getWidth()/2);
+    float y = viewToWorld(aView.getHeight()/2 - aY);
+    return new Vec2(x,y);
 }
 
-/** Updates drag view's body. */
-void updateDrag(View aView, double dragX, double dragY)
+/**
+ * Convert Box2D world coord to View.
+ */
+double worldToView(double aValue)  { return aValue*_scale; }
+
+/**
+ * Convert Box2D world coord to View.
+ */
+Point worldToView(double aX, double aY)  { return getWorldToView().transform(aX, aY); }
+
+/**
+ * Returns transform from View coords to Box coords.
+ */
+public Transform getViewToWorld()
 {
-    ViewPhysics <Body> phys = aView.getPhysics();
-    Body body = phys.getNative();
-    Vec2 pos0 = body.getPosition();
-    Vec2 pos1 = viewToBox(dragX, dragY);
-    double dx = pos1.x - pos0.x;
-    double dy = pos1.y - pos0.y;
-    double vx = (pos1.x - pos0.x)*25;
-    double vy = (pos1.y - pos0.y)*25;
-    body.setLinearVelocity(new Vec2((float)vx, (float)vy));
+    // If already set, just return
+    if(_localToBox!=null) return _localToBox;
+    
+    // Create transform from WorldView bounds to World bounds
+    Rect r0 = _view.getBoundsLocal();
+    Rect r1 = new Rect(0, 0, r0.width/_scale, -r0.height/_scale);
+    double bw = r0.width, bh = r0.height;
+    double sx = bw!=0? r1.width/bw : 0, sy = bh!=0? r1.height/bh : 0;
+    Transform trans = Transform.getScale(sx, sy);
+    trans.translate(r1.x - r0.x, r1.y - r0.y);
+    return trans;
 }
+
+/**
+ * Returns transform from Box coords to View coords.
+ */
+public Transform getWorldToView()  { return getViewToWorld().getInverse(); }
+    
+/** Returns whether given points are equal */
+public static boolean equals(double x0, double y0, double x1, double y1)  { return equals(x0, x1) && equals(y0, y1); }
+
+/** Returns whether given coords are equal */
+public static boolean equals(double a, double b)  { return Math.abs(a - b) < 0.5; }
 
 }

@@ -124,12 +124,24 @@ public String[] getJointNames()
 }
 
 /**
- * Returns the puppet landmarks.
+ * Returns the puppet marker names.
  */
 public String[] getMarkerNames()
 {
     return new String[] { Anchor_Marker, HeadTop_Marker,
         RHandEnd_Marker, RFootEnd_Marker, LHandEnd_Marker, LFootEnd_Marker };
+}
+
+/**
+ * Returns the puppet joint and marker names that define a pose for puppet.
+ */
+public String[] getPoseKeys()
+{
+    return new String[] { Puppet.HeadTop_Marker, Puppet.Head_Joint,
+        Puppet.RArm_Joint, Puppet.RArmMid_Joint, Puppet.RHand_Joint, Puppet.RHandEnd_Marker,
+        Puppet.RLeg_Joint, Puppet.RLegMid_Joint, Puppet.RFoot_Joint, Puppet.RFootEnd_Marker,
+        Puppet.LArm_Joint, Puppet.LArmMid_Joint, Puppet.LHand_Joint, Puppet.LHandEnd_Marker,
+        Puppet.LLeg_Joint, Puppet.LLegMid_Joint, Puppet.LFoot_Joint, Puppet.LFootEnd_Marker };
 }
 
 /**

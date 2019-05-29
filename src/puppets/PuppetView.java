@@ -1,5 +1,7 @@
 package puppets;
+import java.util.*;
 import snap.gfx.*;
+import snap.util.*;
 import snap.view.*;
 import puppets.Puppet.Part;
 
@@ -126,6 +128,55 @@ ImageView addImageViewForJoint(Part aPart)
     ImageView iview = addImageViewForPart(aPart);
     iview.getPhysics(true).setJoint(true);
     return iview;
+}
+
+/**
+ * Returns a Map of Pose info.
+ */
+public String getPoseString()
+{
+    Map poseInfoMap = getPoseMap();
+    JSONNode json = new JSONArchiver().writeObject(poseInfoMap);
+    return json.toString();
+}
+
+/**
+ * Returns a Map of Pose info.
+ */
+public Map <String,Object> getPoseMap()
+{
+    View anchorView = getChild(Puppet.Anchor_Marker);
+    Point anchor = anchorView.localToParent(anchorView.getWidth()/2, anchorView.getHeight()/2);
+    Map <String,Object> map = new LinkedHashMap();
+    
+    // Iterate over pose keys and add pose marker and x/y location to map
+    for(String pkey : getPuppet().getPoseKeys()) {
+        View pview = getChild(pkey);
+        Point pnt = pview.localToParent(pview.getWidth()/2, pview.getHeight()/2);
+        pnt.x = pnt.x - anchor.x; pnt.y = anchor.y - pnt.y;
+        map.put(pkey, Arrays.asList(StringUtils.formatNum("#.#", pnt.x), StringUtils.formatNum("#.#", pnt.y)));
+    }
+
+    // Return map wrapped in map to get Pose { ... }
+    return map;
+}
+
+/**
+ * Sets a pose map.
+ */
+public void setPoseMap(Map <String,Object> aMap, PhysicsRunner aPR)
+{
+    View anchorView = getChild(Puppet.Anchor_Marker);
+    Point anchor = anchorView.localToParent(anchorView.getWidth()/2, anchorView.getHeight()/2);
+    
+    // Iterate over pose keys and add pose marker and x/y location to map
+    for(String pkey : getPuppet().getPoseKeys()) {
+        View pview = getChild(pkey);
+        List <String> plist = (List)aMap.get(pkey);
+        double px = Double.valueOf(plist.get(0)), py = Double.valueOf(plist.get(1));
+        px = px + anchor.x; py = anchor.y - py;
+        aPR.setJointOrMarkerToViewXY(pkey, px, py);
+    }
 }
 
 }
