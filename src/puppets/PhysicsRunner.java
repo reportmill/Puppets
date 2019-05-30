@@ -399,7 +399,6 @@ public void setJointOrMarkerToViewXY(String aName, double aX, double aY)
     View jview = getView(aName);
     Point jpnt = jview.localToParent(jview.getWidth()/2, jview.getHeight()/2);
     if(equals(jpnt.x, jpnt.y, aX, aY)) return;
-    System.out.println("Setting point for marker: " + aName);
     Vec2 jointVec = viewToWorld(jpnt.x, jpnt.y);
 
     // Get linked view, body and X/Y in body coords

@@ -11,14 +11,17 @@ import puppets.Puppet.Part;
 public class PuppetView extends ParentView {
     
     // The puppet
-    Puppet     _puppet;
+    Puppet         _puppet;
     
     // The scale
-    double     _scale = 1;
+    double         _scale = 1;
     
     // The puppet height in points
-    double     _pupHeight = 500;
+    double         _pupHeight = 500;
 
+    // The PhysicsRunner
+    PhysicsRunner  _physRunner;
+    
 /**
  * Creates a PuppetView.
  */
@@ -165,7 +168,7 @@ public Map <String,Object> getPoseMap()
 /**
  * Sets a pose map.
  */
-public void setPoseMap(Map <String,Object> aMap, PhysicsRunner aPR)
+public void setPoseMap(Map <String,Object> aMap)
 {
     View anchorView = getChild(Puppet.Anchor_Marker);
     Point anchor = anchorView.localToParent(anchorView.getWidth()/2, anchorView.getHeight()/2);
@@ -176,7 +179,32 @@ public void setPoseMap(Map <String,Object> aMap, PhysicsRunner aPR)
         List <String> plist = (List)aMap.get(pkey);
         double px = Double.valueOf(plist.get(0)), py = Double.valueOf(plist.get(1));
         px = px + anchor.x; py = anchor.y - py;
-        aPR.setJointOrMarkerToViewXY(pkey, px, py);
+        _physRunner.setJointOrMarkerToViewXY(pkey, px, py);
+    }
+}
+
+/**
+ * Returns whether puppet is posable via user interaction.
+ */
+public boolean isPosable()  { return _physRunner!=null; }
+
+/**
+ * Sets whether puppet is posable via user interaction.
+ */
+public void setPosable(boolean aValue)
+{
+    if(aValue==isPosable()) return;
+    
+    // Create/start PhysRunner
+    if(aValue) {
+        _physRunner = new PhysicsRunner(this);
+        _physRunner.setRunning(true);
+    }
+    
+    // Stop PhysRunner
+    else {
+        _physRunner.setRunning(false);
+        _physRunner = null;
     }
 }
 

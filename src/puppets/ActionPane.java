@@ -16,9 +16,6 @@ public class ActionPane extends ViewOwner {
     // The puppet action view
     ActionView         _actView;
     
-    // The PhysicsRunner
-    PhysicsRunner      _physRunner;
-    
     // A List of PoseMaps
     List <Map>         _poseMaps = new ArrayList();
     
@@ -88,9 +85,8 @@ protected void initUI()
     _poseList.setItems(_poseMaps);
     _poseList.setSelIndex(0);
     
-    // Create/start PhysRunner
-    _physRunner = new PhysicsRunner(_actView);
-    _physRunner.setRunning(true);
+    // Make PuppetView interactive
+    _actView.setPosable(true);
 }
 
 /**
@@ -117,7 +113,7 @@ protected void respondUI(ViewEvent anEvent)
         
     // Handle PoseList
     if(anEvent.equals("PoseList"))
-        _actView.setPoseMap(_poseList.getSelItem(), _physRunner);
+        _actView.setPoseMap(_poseList.getSelItem());
 }
 
 }
