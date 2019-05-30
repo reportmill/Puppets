@@ -1,6 +1,6 @@
 package puppets;
-import java.util.*;
 import snap.view.*;
+import snap.viewx.DialogBox;
 
 /**
  * A class to manage UI to create and edit puppet animations.
@@ -8,19 +8,19 @@ import snap.view.*;
 public class ActionPane extends ViewOwner {
 
     // The DocPane
-    DocPane            _docPane;
+    DocPane                _docPane;
     
     // Whether to show markers
-    boolean            _showMarkers;
+    boolean                _showMarkers;
     
     // The puppet action view
-    ActionView         _actView;
+    ActionView             _actView;
     
     // A List of PoseMaps
-    List <Map>         _poseMaps = new ArrayList();
+    PoseList               _poses = new PoseList();
     
     // A ListView to show poses
-    ListView <Map>     _poseList;
+    ListView <PuppetPose>  _poseList;
 
 /**
  * Creates ActionPane.
@@ -59,9 +59,7 @@ public void setShowMarkers(boolean aValue)
  */
 void actViewDidMouseRelease()
 {
-    _poseMaps.add(_actView.getPoseMap());
-    _poseList.setItems(_poseMaps);
-    _poseList.setSelIndex(_poseMaps.size()-1);
+    _poseList.setSelIndex(-1);
     resetLater();
 }
 
@@ -80,10 +78,8 @@ protected void initUI()
     
     // Set PoseList
     _poseList = getView("PoseList", ListView.class);
-    _poseList.setItemTextFunction(map -> { return String.valueOf(_poseMaps.indexOf(map)); });
-    _poseMaps.add(_actView.getPoseMap());
-    _poseList.setItems(_poseMaps);
-    _poseList.setSelIndex(0);
+    _poseList.setItemTextFunction(pose -> { return pose.getName(); });
+    _poseList.setItems(_poses.getPoses());
     
     // Make PuppetView interactive
     _actView.setPosable(true);
@@ -98,8 +94,12 @@ protected void resetUI()
     setViewValue("ShowMarkersCheckBox", _showMarkers);
     
     // Update PoseText
-    String poseInfo = _actView.getPoseString().replace("\"", "");
+    String poseInfo = _actView.getPose().getAsString();
     setViewText("PoseText", poseInfo);
+    
+    // Update RenamePoseButton, DeletePoseButton
+    setViewEnabled("RenamePoseButton", _poseList.getSelIndex()>=0);
+    setViewEnabled("DeletePoseButton", _poseList.getSelIndex()>=0);
 }
 
 /**
@@ -113,7 +113,30 @@ protected void respondUI(ViewEvent anEvent)
         
     // Handle PoseList
     if(anEvent.equals("PoseList"))
-        _actView.setPoseMap(_poseList.getSelItem());
+        _actView.setPose(_poseList.getSelItem());
+        
+    // Handle AddPoseButton
+    if(anEvent.equals("AddPoseButton")) {
+        PuppetPose pose = _actView.getPose();
+        pose.setName("Pose " + (_poses.getPoseCount() + 1));
+        _poses.addPose(pose);
+        _poseList.setItems(_poses.getPoses());
+        _poseList.setSelIndex(_poses.getPoseCount()-1);
+    }
+    
+    // Handle RenamePoseButton
+    if(anEvent.equals("RenamePoseButton")) {
+        PuppetPose pose = _poseList.getSelItem();
+        String name = DialogBox.showInputDialog(_docPane.getUI(), "Rename Pose", "Enter Pose Name:", pose.getName());
+        if(name!=null && name.length()>0) pose.setName(name);
+        _poseList.updateItems(pose);
+        _poses.savePoses();
+    }
+
+    // Handle DeletePoseButton
+    if(anEvent.equals("DeletePoseButton")) {
+        _poses.removePose(_poseList.getSelIndex());
+    }
 }
 
 }

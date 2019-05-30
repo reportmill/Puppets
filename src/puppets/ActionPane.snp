@@ -10,5 +10,10 @@
     <ListView Name="PoseList" PrefHeight="180">
       <LineBorder Color="#c0c0c0" />
     </ListView>
+    <RowView Align="CENTER" Padding="4" GrowWidth="true" Spacing="15">
+      <Button Name="AddPoseButton" PrefWidth="60" Padding="2" text="Add Pose" />
+      <Button Name="RenamePoseButton" PrefWidth="60" Padding="2" text="Rename" />
+      <Button Name="DeletePoseButton" PrefWidth="60" Padding="2" text="Delete" />
+    </RowView>
   </ColView>
 </RowView>

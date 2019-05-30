@@ -1,7 +1,6 @@
 package puppets;
 import java.util.*;
 import snap.gfx.*;
-import snap.util.*;
 import snap.view.*;
 import puppets.Puppet.Part;
 
@@ -135,40 +134,29 @@ ImageView addImageViewForJoint(Part aPart)
 }
 
 /**
- * Returns a Map of Pose info.
+ * Returns a Puppet pose for current puppet articulation.
  */
-public String getPoseString()
-{
-    Map poseInfoMap = getPoseMap();
-    JSONNode json = new JSONArchiver().writeObject(poseInfoMap);
-    return json.toString();
-}
-
-/**
- * Returns a Map of Pose info.
- */
-public Map <String,Object> getPoseMap()
+public PuppetPose getPose()
 {
     View anchorView = getChild(Puppet.Anchor_Marker);
     Point anchor = anchorView.localToParent(anchorView.getWidth()/2, anchorView.getHeight()/2);
-    Map <String,Object> map = new LinkedHashMap();
+    Map <String,Point> map = new LinkedHashMap();
     
     // Iterate over pose keys and add pose marker and x/y location to map
-    for(String pkey : getPuppet().getPoseKeys()) {
-        View pview = getChild(pkey);
+    for(String pkey : getPuppet().getPoseKeys()) { View pview = getChild(pkey);
         Point pnt = pview.localToParent(pview.getWidth()/2, pview.getHeight()/2);
         pnt.x = pnt.x - anchor.x; pnt.y = anchor.y - pnt.y;
-        map.put(pkey, Arrays.asList(StringUtils.formatNum("#.#", pnt.x), StringUtils.formatNum("#.#", pnt.y)));
+        map.put(pkey, pnt);
     }
 
     // Return map wrapped in map to get Pose { ... }
-    return map;
+    return new PuppetPose("Untitled", map);
 }
 
 /**
- * Sets a pose map.
+ * Sets a Puppet pose.
  */
-public void setPoseMap(Map <String,Object> aMap)
+public void setPose(PuppetPose aPose)
 {
     View anchorView = getChild(Puppet.Anchor_Marker);
     Point anchor = anchorView.localToParent(anchorView.getWidth()/2, anchorView.getHeight()/2);
@@ -176,9 +164,8 @@ public void setPoseMap(Map <String,Object> aMap)
     // Iterate over pose keys and add pose marker and x/y location to map
     for(String pkey : getPuppet().getPoseKeys()) {
         View pview = getChild(pkey);
-        List <String> plist = (List)aMap.get(pkey);
-        double px = Double.valueOf(plist.get(0)), py = Double.valueOf(plist.get(1));
-        px = px + anchor.x; py = anchor.y - py;
+        Point pnt = aPose.getMarkerPoint(pkey);
+        double px = pnt.x + anchor.x, py = anchor.y - pnt.y;
         _physRunner.setJointOrMarkerToViewXY(pkey, px, py);
     }
 }
