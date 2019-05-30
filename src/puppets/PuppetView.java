@@ -15,6 +15,9 @@ public class PuppetView extends ParentView {
     
     // The scale
     double     _scale = 1;
+    
+    // The puppet height in points
+    double     _pupHeight = 500;
 
 /**
  * Creates a PuppetView.
@@ -24,9 +27,8 @@ public PuppetView()  { }
 /**
  * Creates a PuppetView.
  */
-public PuppetView(String aSource, double aScale)
+public PuppetView(String aSource)
 {
-    _scale = aScale;
     Puppet puppet = new ORAPuppet(aSource);
     setPuppet(puppet);
 }
@@ -34,9 +36,8 @@ public PuppetView(String aSource, double aScale)
 /**
  * Creates a PuppetView.
  */
-public PuppetView(Puppet aPuppet, double aScale)
+public PuppetView(Puppet aPuppet)
 {
-    _scale = aScale;
     setPuppet(aPuppet);
 }
 
@@ -52,22 +53,13 @@ protected void setPuppet(Puppet aPuppet)
 {
     // Set puppet
     _puppet = aPuppet;
-    
-    // Add parts/joints
-    addAllParts();
-    
-    // Set pref size to puppet size plus margin
-    Rect bnds = _puppet.getBounds();
-    double pw = bnds.getX()*2 + bnds.getWidth(); pw *= _scale;
-    double ph = bnds.getY()*2 + bnds.getHeight(); ph *= _scale;
-    setSize(pw, ph);
-    setPrefSize(pw, ph);
+    rebuildChildren();
 }
 
 /**
- * Adds all parts.
+ * Rebuilds children.
  */
-void addAllParts()
+protected void rebuildChildren()
 {
     // Remove children
     removeChildren();
@@ -93,9 +85,18 @@ void addAllParts()
     // Make Torso really dense
     getChild(Puppet.Torso).getPhysics().setDensity(1000);
     
+    // Calculate scale to make puppet 500 pnts tall
+    Rect bnds = _puppet.getBounds();
+    _scale = _pupHeight/bnds.height;
+    
     // Resize children
     for(View c : getChildren())
         c.setBounds(c.getX()*_scale, c.getY()*_scale, c.getWidth()*_scale, c.getHeight()*_scale);
+        
+    // Resize PuppetView
+    double pw = bnds.x*2 + bnds.width; pw *= _scale;
+    double ph = bnds.y*2 + bnds.height; ph *= _scale;
+    setSize(pw, ph); setPrefSize(pw, ph);
 }
 
 /**

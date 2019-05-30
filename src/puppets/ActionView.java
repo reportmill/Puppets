@@ -10,9 +10,8 @@ public class ActionView extends PuppetView {
 /**
  * Creates an ActionView.
  */
-public ActionView(Puppet aPuppet, double aScale)
+public ActionView(Puppet aPuppet)
 {
-    _scale = aScale;
     setPuppet(aPuppet);
     setFill(new Color(.95));
     setBorder(Color.GRAY, 1);

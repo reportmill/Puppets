@@ -9,9 +9,6 @@ public class DocPane extends ViewOwner {
     // The Puppet
     Puppet             _puppet;
     
-    // The puppet scale
-    double             _scale = 1;
-    
     // The view that holds the document
     BoxView            _docBox;
     
@@ -32,10 +29,9 @@ protected void initUI()
 /**
  * Opens the given source.
  */
-public void open(String aSource, double aScale)
+public void open(String aSource)
 {
     _puppet = new ORAPuppet(aSource);
-    _scale = aScale;
     
     showDisplayPane();
 }
@@ -72,8 +68,8 @@ protected void respondUI(ViewEvent anEvent)
     if(anEvent.equals("ActionButton")) showActionPane();
         
     // Handle LadyButton
-    if(anEvent.equals("LadyButton")) open("/Temp/ComicLib/chars/CTLady",.2);
-    if(anEvent.equals("ManButton")) open("/Temp/ComicLib/chars/CTMan",.5);
+    if(anEvent.equals("LadyButton")) open("/Temp/ComicLib/chars/CTLady");
+    if(anEvent.equals("ManButton")) open("/Temp/ComicLib/chars/CTMan");
 }
 
 }

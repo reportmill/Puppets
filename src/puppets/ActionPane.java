@@ -74,7 +74,7 @@ void actViewDidMouseRelease()
 protected void initUI()
 {
     // Create ActionView
-    _actView = new ActionView(_docPane._puppet, _docPane._scale);
+    _actView = new ActionView(_docPane._puppet);
     _actView.addEventFilter(e -> actViewDidMouseRelease(), MouseRelease);
     
     // Get PuppetBox and add ActionView

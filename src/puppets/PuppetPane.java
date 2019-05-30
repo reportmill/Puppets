@@ -75,7 +75,7 @@ public void puppetViewMousePressed(ViewEvent anEvent)
 protected View createUI()
 {
     // Create PuppetView
-    _pupView = new PuppetView(_docPane._puppet, _docPane._scale);
+    _pupView = new PuppetView(_docPane._puppet);
     _pupView.setBorder(Color.LIGHTGRAY, 1);
     
     // Create PuppetBox
