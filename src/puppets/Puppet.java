@@ -177,6 +177,24 @@ public String[] getLinkNamesForJointOrMarker(String aName)
 }
 
 /**
+ * Returns names of parts linked to given joint/marker name.
+ */
+public String[] getOuterJointNamesForPartName(String aName)
+{
+    switch(aName) {
+        case RArmTop: return new String[] { RArmMid_Joint, RHand_Joint };
+        case RArmBtm: return new String[] { RHand_Joint };
+        case RLegTop: return new String[] { RLegMid_Joint, RFoot_Joint };
+        case RLegBtm: return new String[] { RFoot_Joint };
+        case LArmTop: return new String[] { LArmMid_Joint, LHand_Joint };
+        case LArmBtm: return new String[] { LHand_Joint };
+        case LLegTop: return new String[] { LLegMid_Joint, LFoot_Joint };
+        case LLegBtm: return new String[] { LFoot_Joint };
+        default: return new String[0];
+    }
+}
+
+/**
  * Returns whether given name is joint name.
  */
 public boolean isJointName(String aName)  { return ArrayUtils.contains(getJointNames(), aName); }
