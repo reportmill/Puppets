@@ -158,6 +158,7 @@ public PuppetPose getPose()
  */
 public void setPose(PuppetPose aPose)
 {
+    _physRunner.resolveMouseJoints();
     View anchorView = getChild(Puppet.Anchor_Marker);
     Point anchor = anchorView.localToParent(anchorView.getWidth()/2, anchorView.getHeight()/2);
     
@@ -185,12 +186,12 @@ public void setPosable(boolean aValue)
     // Create/start PhysRunner
     if(aValue) {
         _physRunner = new PhysicsRunner(this);
-        _physRunner.setRunning(true);
+        //_physRunner.setRunning(true);
     }
     
     // Stop PhysRunner
     else {
-        _physRunner.setRunning(false);
+        //_physRunner.setRunning(false);
         _physRunner = null;
     }
 }

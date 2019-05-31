@@ -44,6 +44,10 @@ public class PhysicsRunner {
     
     //
     long               _poseMouseTime;
+    
+    // Constants
+    static int   FRAME_DELAY_MILLIS = 20;
+    static float FRAME_DELAY_SECS = 20/1000f;
 
 /**
  * Create new PhysicsRunner.
@@ -125,7 +129,7 @@ public void setRunning(boolean aValue)
     
     // Set timer to call timerFired 25 times a second
     if(_runner==null)
-        ViewEnv.getEnv().runIntervals(_runner = () -> timerFired(), 40, 0, true, true);
+        ViewEnv.getEnv().runIntervals(_runner = () -> timerFired(), FRAME_DELAY_MILLIS, 0, true, true);
     else {
         ViewEnv.getEnv().stopIntervals(_runner); _runner = null; }
 }
@@ -140,17 +144,15 @@ void timerFired()
         updateBody(_view.getChild(i));
         
     // Update world  
-    _world.step(.040f,20,20);
+    _world.step(FRAME_DELAY_SECS,20,20);
     
     // Update Dynamics
     for(int i=0,iMax=_view.getChildCount();i<iMax;i++)
         updateView(_view.getChild(i));
         
     // Clear PoseMouseJoints
-    if(_poseMouseTime>0 && System.currentTimeMillis()>_poseMouseTime+500) {
-        for(MouseJoint mj : _poseMouseJoints) _world.destroyJoint(mj);
-        _poseMouseJoints.clear(); _poseMouseTime = 0;
-    }
+    if(_poseMouseTime>0 && System.currentTimeMillis()>_poseMouseTime+500)
+        clearMouseJoints();
 }
 
 /**
@@ -411,9 +413,47 @@ public void setJointOrMarkerToViewXY(String aName, double aX, double aY)
     jdef.target.set(jointVec);
     MouseJoint mjnt = (MouseJoint)_world.createJoint(jdef);
     mjnt.setTarget(viewToWorld(aX, aY));
-    _poseMouseJoints.add(mjnt);
     body.setAwake(true);
+    _poseMouseJoints.add(mjnt);
     _poseMouseTime = System.currentTimeMillis();
+    
+    // If not running, register to resolve MouseJoints
+    if(!isRunning()) resolveMouseJointsOverTimeLater();
+}
+
+/**
+ * Resolve mouse joints.
+ */
+public void resolveMouseJoints()
+{
+    if(_poseMouseTime==0) return;
+    for(int i=0;i<50;i++) timerFired();
+    clearMouseJoints();
+}
+
+/**
+ * Resolve mouse joints.
+ */
+void resolveMouseJointsOverTime()
+{
+    if(isRunning() || _poseMouseTime==0) return;
+    timerFired();
+    ViewUtils.runDelayed(() -> resolveMouseJointsOverTime(), FRAME_DELAY_MILLIS, true);
+}
+
+/**
+ * Resolve mouse joints.
+ */
+void resolveMouseJointsOverTimeLater()  { if(_rmjRun==null) ViewUtils.runLater(_rmjRun = _rmjRunCached); }
+Runnable _rmjRun, _rmjRunCached = () -> { resolveMouseJointsOverTime(); _rmjRun = null; };
+
+/**
+ * Clear mouse joints.
+ */
+void clearMouseJoints()
+{
+    for(MouseJoint mj : _poseMouseJoints) _world.destroyJoint(mj);
+    _poseMouseJoints.clear(); _poseMouseTime = 0;
 }
 
 /**
@@ -437,6 +477,7 @@ void handleDrag(ViewEvent anEvent)
     
     // Handle MousePress: Create & install drag MouseJoint
     if(anEvent.isMousePress()) {
+        setRunning(true);
         MouseJointDef jdef = new MouseJointDef(); jdef.bodyA = _groundBody; jdef.bodyB = body;
         jdef.collideConnected = true; jdef.maxForce = 1000f*body.getMass();
         jdef.target.set(viewToWorld(pnt.x, pnt.y));
@@ -452,7 +493,9 @@ void handleDrag(ViewEvent anEvent)
     
     // Handle MouseRelease: Remove drag MouseJoint
     else if(anEvent.isMouseRelease()) {
-        _world.destroyJoint(_dragJoint); _dragJoint = null; }
+        _world.destroyJoint(_dragJoint); _dragJoint = null;
+        setRunning(false);
+    }
 }
 
 /**
