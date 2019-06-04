@@ -79,7 +79,7 @@ protected Part createJoint(String aName)
     if(layer==null) { System.out.println("ORAPuppet.createJoint: Layer not found for joint " + aName); return null; }
     
     // Create part
-    Part part = new ORAPart(aName, layer);
+    Part part = new ORAPart(aName, layer); part._img = aName==Anchor_Marker? getAnchorImage() : getMarkerImage();
     return part;
 }
 
