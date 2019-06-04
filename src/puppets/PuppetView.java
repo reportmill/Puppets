@@ -55,7 +55,10 @@ protected void setPuppet(Puppet aPuppet)
 {
     // Set puppet
     _puppet = aPuppet;
-    rebuildChildren();
+    
+    // Rebuild children
+    if(aPuppet.isLoaded()) rebuildChildren();
+    else aPuppet.addLoadListener(pc -> rebuildChildren());
 }
 
 /**
@@ -63,6 +66,9 @@ protected void setPuppet(Puppet aPuppet)
  */
 protected void rebuildChildren()
 {
+    Part arm = _puppet.getPart(Puppet.RArm);
+    Part armTop = _puppet.getPart(Puppet.RArmTop);
+    
     // Remove children
     removeChildren();
     
@@ -99,6 +105,7 @@ protected void rebuildChildren()
     double pw = bnds.x*2 + bnds.width; pw *= _scale;
     double ph = bnds.y*2 + bnds.height; ph *= _scale;
     setSize(pw, ph); setPrefSize(pw, ph);
+    relayoutParent();
 }
 
 /**

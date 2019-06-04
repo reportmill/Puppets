@@ -47,10 +47,8 @@ Stack readStack(XMLElement aXML)
     for(XMLElement xml : aXML.getElements()) {
         String type = xml.getName();
         Layer entry = null;
-        if(type.equals("stack"))
-            entry = readStack(xml);
-        else if(type.equals("layer"))
-             entry = readLayer(xml);
+        if(type.equals("stack")) entry = readStack(xml);
+        else if(type.equals("layer")) entry = readLayer(xml);
         else System.out.println("Unknown type: " + type);
         if(entry!=null) {
             stack.entries.add(entry);
@@ -59,6 +57,7 @@ Stack readStack(XMLElement aXML)
     }
     
     _indent--;
+    stack.getXY();
     return stack;
 }
 
@@ -96,8 +95,6 @@ public static class Layer {
     
     public Stack stack;
     
-    public Object view;
-    
     Image  _img;
     
     /** Creates an ORA Layer. */
@@ -116,10 +113,11 @@ public static class Layer {
         return _img = Image.get(src);
     }
     
-    public String toString()
-    {
-        return "Layer: name=" + name + ", src=" + src + ", x=" + x + ", y=" + y;
-    }
+    /** Returns the images that need to be loaded for this stack. */
+    public Image[] getLoadImages()  { return new Image[] { getImage() }; }
+    
+    /** Standard toString implementation. */
+    public String toString()  { return "Layer: name=" + name + ", src=" + src + ", x=" + x + ", y=" + y; }
     
     String strip(String str)
     {
@@ -133,34 +131,44 @@ public static class Layer {
  */
 public static class Stack extends Layer {
     
+    // The list of layers (or nested stacks) in this stack
     public List <Layer> entries = new ArrayList();
     
     /** Creates an ORA Stack. */
     public Stack(String aName)  { super(aName); }
+    
+    /** Loads the x/y vals. */
+    public void getXY()
+    {
+        for(Layer entry : entries) { if(!entry.visible) continue;
+            x = Math.min(x, entry.x);
+            y = Math.min(y, entry.y);
+        }
+    }
     
     /** Returns the image. */
     public Image getImage()
     {
         // If already set, just return
         if(_img!=null) return _img;
+        if(entries.size()==0) return null;
         
         // Iterate over entries and find x, y, maxX, maxY
-        double mx = 0, my = 0;
-        for(Layer entry : entries) {
-            if(!entry.visible) continue;
+        double mx = 0, my = 0; x = y = Float.MAX_VALUE;
+        for(Layer entry : entries) { if(!entry.visible) continue;
             Image img = entry.getImage(); if(img==null) continue;
             x = Math.min(x, entry.x);
             y = Math.min(y, entry.y);
-            mx = Math.max(mx, entry.x + img.getPixWidth());
-            my = Math.max(my, entry.y + img.getPixHeight());
+            mx = Math.max(mx, entry.x + (int)img.getWidth());
+            my = Math.max(my, entry.y + (int)img.getHeight());
         }
         
         // Get pixels wide/tall
         int px = (int)Math.ceil(mx - x);
         int py = (int)Math.ceil(my - y);
-        if(px<1 || py<1 || px>5000 || py>5000) {
-            System.out.println("Stack.getImage: No image for layer: " + name); return null; }
-        
+        if(px<1 || py<1 || px>5000 || py>5000) { //System.out.println("Stack.getImage: No image for layer: " + name);
+            return null; }
+            
         // Create image and render layer images in it
         Image img = Image.get(px, py, true);
         Painter pntr = img.getPainter();
@@ -190,10 +198,17 @@ public static class Stack extends Layer {
         return null;
     }
     
-    public String toString()
+    /** Returns the images that need to be loaded for this stack. */
+    public Image[] getLoadImages()
     {
-        return "Stack: name=" + name;
+        List <Image> images = new ArrayList();
+        for(Layer entry : entries) { if(!entry.visible) continue;
+            Collections.addAll(images, entry.getLoadImages()); }
+        return images.toArray(new Image[images.size()]);
     }
+    
+    /** Standard toString implementation. */
+    public String toString()  { return "Stack: name=" + name; }
 }
 
 }

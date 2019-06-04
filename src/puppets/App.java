@@ -10,6 +10,8 @@ public class App {
  */
 public static void main(String args[])
 {
+    snaptea.TV.set();
+    
     DocPane docPane = new DocPane();
     docPane.setWindowVisible(true);
 }

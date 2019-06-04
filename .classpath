@@ -5,4 +5,5 @@
   <classpathentry kind="output" path="bin" />
   <classpathentry kind="src" path="/SnapKit" />
   <classpathentry kind="lib" path="lib/jbox2d-2.2.jar" />
+  <classpathentry kind="src" path="/SnapTea" />
 </classpath>

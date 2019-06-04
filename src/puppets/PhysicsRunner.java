@@ -151,7 +151,7 @@ void timerFired()
         updateView(_view.getChild(i));
         
     // Clear PoseMouseJoints
-    if(_poseMouseTime>0 && System.currentTimeMillis()>_poseMouseTime+500)
+    if(_poseMouseTime>0 && System.currentTimeMillis()>_poseMouseTime+800)
         clearMouseJoints();
 }
 

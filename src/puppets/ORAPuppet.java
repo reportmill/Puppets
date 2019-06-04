@@ -1,7 +1,9 @@
 package puppets;
+import java.util.*;
 import puppets.Puppet.Part;
 import snap.gfx.*;
-import puppets.ORAReader.*;
+import puppets.ORAReader.Layer;
+import puppets.ORAReader.Stack;
 
 /**
  * A Puppet subclass that reads from ORA (OpenRaster) file.
@@ -245,11 +247,14 @@ private class ORAPart extends Puppet.Part {
     public ORAPart(String aName, Layer aLayer)
     {
         name = aName; _lyr = aLayer; if(aLayer==null) return;
-        aLayer.getImage(); x = aLayer.x; y = aLayer.y;
+        x = aLayer.x; y = aLayer.y;
     }
         
     /** Returns the image. */
     protected Image getImageImpl()  { return _lyr.getImage(); }
+    
+    /** Returns the images that need to be loaded for this part. */
+    public Image[] getLoadImages()  { return _lyr!=null? _lyr.getLoadImages() : super.getLoadImages(); }
 }
 
 }

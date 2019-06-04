@@ -1,7 +1,8 @@
 package puppets;
 import java.util.*;
 import snap.gfx.*;
-import snap.util.ArrayUtils;
+import snap.util.*;
+import snap.view.ViewUtils;
 
 /**
  * A class to hold information providing image parts of a graphic of a human.
@@ -20,6 +21,12 @@ public class Puppet {
     // The bounds
     Rect                _bounds;
     
+    // Whether the image is loaded
+    Boolean             _loaded;
+     
+    // PropertyChangeSupport
+    PropChangeSupport   _loadLsnrs;
+
     // Constants for human parts
     public static final String Torso = "Torso";
     public static final String Head = "Head";
@@ -62,6 +69,9 @@ public class Puppet {
     public static final String RFootEnd_Marker = "RFootEndMarker";
     public static final String LHandEnd_Marker = "LHandEndMarker";
     public static final String LFootEnd_Marker = "LFootEndMarker";
+
+    // Constants for properties
+    public static final String Loaded_Prop = "Loaded";
 
 /**
  * Returns the source.
@@ -232,6 +242,68 @@ public Rect getBounds()
 }
 
 /**
+ * Returns whether puppet is loaded.
+ */
+public boolean isLoaded()
+{
+    if(_loaded==null) _loaded = isLoadedDefault();
+    return _loaded;
+}
+
+/**
+ * Sets whether image is loaded.
+ */
+protected void setLoaded(boolean aValue)
+{
+    if(aValue==_loaded) return;
+    _loaded = aValue;
+    if(aValue && _loadLsnrs!=null) {
+        _loadLsnrs.firePropChange(new PropChange(this, Loaded_Prop, false, true)); _loadLsnrs = null; }
+}
+
+/**
+ * Adds a load listener. This is cleared automatically when image is loaded.
+ */
+public void addLoadListener(PropChangeListener aLoadLsnr)
+{
+    if(isLoaded()) { aLoadLsnr.propertyChange(new PropChange(this, Loaded_Prop, false, true)); return; }
+    if(_loadLsnrs==null) _loadLsnrs = new PropChangeSupport(this);
+    _loadLsnrs.addPropChangeListener(aLoadLsnr);
+}
+
+/**
+ * Returns whether puppet is loaded.
+ */
+boolean isLoadedDefault()
+{
+    Image images[] = getLoadImages();
+    ImageLoader imgLdr = new ImageLoader(images);
+    if(imgLdr.isLoaded()) return true;
+    imgLdr.addLoadListener(pc -> ViewUtils.runLater(() -> setLoaded(true)));
+    return false;
+}
+
+/**
+ * Returns the images that need to load.
+ */
+protected Image[] getLoadImages()
+{
+    List <Image> images = new ArrayList();
+    for(String name : getJointNames()) Collections.addAll(images, getJoint(name).getLoadImages());
+    for(String name : getMarkerNames()) Collections.addAll(images, getJoint(name).getLoadImages());
+    for(String name : getLoadPartNames()) Collections.addAll(images, getPart(name).getLoadImages());
+    return images.toArray(new Image[images.size()]);
+}
+
+/**
+ * Returns the puppet part names in paint order.
+ */
+String[] getLoadPartNames()
+{
+    return new String[] { RArm, RHand, RLeg, RFoot, Torso, Head, LLeg, LFoot, LArm, LHand };
+}
+
+/**
  * A class representing a part of the puppet.
  */
 public static class Part {
@@ -253,6 +325,9 @@ public static class Part {
     
     /** Returns the bounds. */
     public Rect getBounds()  { return new Rect(x, y, getImage().getWidth(), getImage().getHeight()); }
+    
+    /** Returns the images that need to be loaded for this part. */
+    public Image[] getLoadImages()  { return new Image[0]; }
     
     /** Standard toString implementation. */
     public String toString()

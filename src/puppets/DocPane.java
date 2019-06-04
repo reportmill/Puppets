@@ -1,4 +1,5 @@
 package puppets;
+import snap.util.SnapUtils;
 import snap.view.*;
 
 /**
@@ -17,13 +18,16 @@ public class DocPane extends ViewOwner {
     
     // The ActionPane
     ActionPane         _actionPane;
-
+    
+    // Constants
+    static String ROOT = "/Temp/ComicLib/";
+    
 /**
- * Initialize UI.
+ * Creates a new DocPane.
  */
-protected void initUI()
+public DocPane()
 {
-    _docBox = getView("DocBox", BoxView.class);
+    if(SnapUtils.isTeaVM) ROOT = "http://reportmill.com/ComicLib/";
 }
 
 /**
@@ -59,6 +63,17 @@ public void showActionPane()
 }
 
 /**
+ * Initialize UI.
+ */
+protected void initUI()
+{
+    _docBox = getView("DocBox", BoxView.class);
+    if(SnapUtils.isTeaVM) getWindow().setMaximized(true);
+    
+    runLater(() -> open(ROOT + "chars/CTMan"));
+}
+
+/**
  * Respond to UI.
  */
 protected void respondUI(ViewEvent anEvent)
@@ -68,8 +83,8 @@ protected void respondUI(ViewEvent anEvent)
     if(anEvent.equals("ActionButton")) showActionPane();
         
     // Handle LadyButton
-    if(anEvent.equals("LadyButton")) open("/Temp/ComicLib/chars/CTLady");
-    if(anEvent.equals("ManButton")) open("/Temp/ComicLib/chars/CTMan");
+    if(anEvent.equals("LadyButton")) open(ROOT + "chars/CTLady");
+    if(anEvent.equals("ManButton")) open(ROOT + "chars/CTMan");
 }
 
 }

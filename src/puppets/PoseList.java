@@ -13,7 +13,7 @@ public class PoseList {
     List <PuppetPose>   _poses;
     
     // The file path
-    String              _filePath = "/Temp/ComicLib/chars/HumanPoses.json";
+    String              _filePath = DocPane.ROOT + "chars/HumanPoses.json";
     
 /**
  * Returns the list of poses.
