@@ -1,19 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<RowView PrefWidth="500" PrefHeight="500" Align="CENTER" GrowWidth="true" FillHeight="true">
+<RowView PrefWidth="540" PrefHeight="600" Align="CENTER" GrowWidth="true" FillHeight="true">
   <BoxView Name="PuppetBox" GrowWidth="true">
     <LineBorder />
     <color value="#ffffff" />
   </BoxView>
-  <ColView Name="ToolBox" PrefWidth="300" Padding="20,8,8,8" Spacing="5" FillWidth="true">
-    <CheckBox Name="ShowMarkersCheckBox" text="Show Markers" />
-    <TextView Name="PoseText" MinWidth="120" PrefHeight="200" />
-    <ListView Name="PoseList" PrefHeight="180">
+  <ColView Name="ToolBox" PrefWidth="300" Padding="8" Spacing="5" FillWidth="true">
+    <RowView Padding="2,4,2,4" GrowWidth="true" Spacing="4">
+      <BevelBorder />
+      <Label text="Actions">
+        <font name="Arial" size="14" />
+      </Label>
+      <Button Name="AddActionButton" PrefWidth="22" PrefHeight="22" Padding="2" LeanX="RIGHT" text="+" />
+      <Button Name="RemoveActionButton" PrefWidth="22" PrefHeight="22" Padding="2" LeanX="RIGHT" text="-" />
+    </RowView>
+    <ListView Name="ActionList" PrefHeight="140">
       <LineBorder Color="#c0c0c0" />
     </ListView>
-    <RowView Align="CENTER" Padding="4" GrowWidth="true" Spacing="15">
-      <Button Name="AddPoseButton" PrefWidth="60" Padding="2" text="Add Pose" />
-      <Button Name="RenamePoseButton" PrefWidth="60" Padding="2" text="Rename" />
-      <Button Name="DeletePoseButton" PrefWidth="60" Padding="2" text="Delete" />
+    <RowView Padding="2,4,2,4" GrowWidth="true" Spacing="4">
+      <BevelBorder />
+      <Label text="Poses">
+        <font name="Arial" size="14" />
+      </Label>
+      <Button Name="AddPoseButton" PrefWidth="22" PrefHeight="22" Padding="2" LeanX="RIGHT" text="+" />
+      <Button Name="RemovePoseButton" PrefWidth="22" PrefHeight="22" Padding="2" LeanX="RIGHT" text="-" />
     </RowView>
+    <ListView Name="PoseList" PrefHeight="140">
+      <LineBorder Color="#c0c0c0" />
+    </ListView>
+    <RowView Padding="2,4,2,4" GrowWidth="true" Spacing="4">
+      <BevelBorder />
+      <Label text="Steps">
+        <font name="Arial" size="14" />
+      </Label>
+      <Button Name="AddStepButton" PrefWidth="22" PrefHeight="22" Padding="2" LeanX="RIGHT" text="+" />
+      <Button Name="RemoveStepButton" PrefWidth="22" PrefHeight="22" Padding="2" LeanX="RIGHT" text="-" />
+    </RowView>
+    <ListView Name="StepList" PrefHeight="140">
+      <LineBorder Color="#c0c0c0" />
+    </ListView>
+    <CheckBox Name="ShowMarkersCheckBox" text="Show Markers" />
   </ColView>
 </RowView>

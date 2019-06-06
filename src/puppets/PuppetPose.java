@@ -1,7 +1,7 @@
 package puppets;
 import java.util.*;
 import snap.gfx.Point;
-import snap.util.StringUtils;
+import snap.util.*;
 
 /**
  * A class to hold a pose.
@@ -14,6 +14,11 @@ public class PuppetPose {
     // The pose marker maps
     Map <String,Point>  _markers;
     
+/**
+ * Creates a new pose for name.
+ */
+public PuppetPose()  { _markers = new LinkedHashMap(); }
+
 /**
  * Creates a new pose for name.
  */
@@ -37,7 +42,7 @@ public void setName(String aName)  { _name = aName; }
 /**
  * Returns the maps.
  */
-public Map getMarkers()  { return _markers; }
+public Map <String,Point> getMarkers()  { return _markers; }
 
 /**
  * Returns the point for given marker.
@@ -60,6 +65,48 @@ public String getAsString()
         String str = String.format("%s: [ %s %s ],\n", key, x, y); sb.append(str);
     }
     return sb.toString();
+}
+
+/**
+ * XML Archival.
+ */
+public XMLElement toXML(XMLArchiver anArchiver)
+{
+    // Get new element with name
+    XMLElement e = new XMLElement("Pose");
+    e.add("Name", getName());
+    
+    // Iterate over markers and set
+    for(String key : getMarkers().keySet()) { Point pnt = getMarkerPoint(key);
+        String val = StringUtils.formatNum("#.##", pnt.x) + ' ' + StringUtils.formatNum("#.##", pnt.y);
+        e.add(key,val);
+    }
+    
+    // Return element
+    return e;
+}
+
+/**
+ * XML unarchival.
+ */
+public PuppetPose fromXML(XMLArchiver anArchiver, XMLElement anElement)
+{
+    // Unarchive name
+    String name = anElement.getAttributeValue("Name");
+    setName(name);
+    
+    // Iterate over markers and set
+    Map <String,Point> markers = new LinkedHashMap();
+    for(XMLAttribute attr : anElement.getAttributes()) {
+        String key = attr.getName(), valStr = attr.getValue(); if(key.equals("Name")) continue;
+        String valStrs[] = valStr.split("\\s");
+        Double val0 = Double.valueOf(valStrs[0]), val1 = Double.valueOf(valStrs[1]);
+        Point pnt = new Point(val0, val1);
+        _markers.put(key, pnt);
+    }
+
+    // Return this
+    return this;
 }
 
 }

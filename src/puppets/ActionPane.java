@@ -1,4 +1,5 @@
 package puppets;
+import puppets.PuppetAction.PoseStep;
 import snap.view.*;
 import snap.viewx.DialogBox;
 
@@ -8,19 +9,25 @@ import snap.viewx.DialogBox;
 public class ActionPane extends ViewOwner {
 
     // The DocPane
-    DocPane                _docPane;
+    DocPane                  _docPane;
     
     // Whether to show markers
-    boolean                _showMarkers;
+    boolean                  _showMarkers;
     
     // The puppet action view
-    ActionView             _actView;
+    ActionView               _actView;
     
-    // A List of PoseMaps
-    PoseList               _poses = new PoseList();
+    // A List of Puppet Actions
+    PuppetActions            _actions = new PuppetActions();
     
+    // A ListView to show actions
+    ListView <PuppetAction>  _actionList;
+
     // A ListView to show poses
-    ListView <PuppetPose>  _poseList;
+    ListView <PuppetPose>    _poseList;
+
+    // A ListView to show steps
+    ListView <PoseStep>      _stepList;
 
 /**
  * Creates ActionPane.
@@ -76,10 +83,19 @@ protected void initUI()
     BoxView pupBox = getView("PuppetBox", BoxView.class);
     pupBox.setContent(_actView);
     
+    // Set ActionList
+    _actionList = getView("ActionList", ListView.class);
+    _actionList.setItemTextFunction(action -> { return action.getName(); });
+    _actionList.setItems(_actions.getActions());
+    _actionList.setSelIndex(_actions.getActionCount()-1);
+    
     // Set PoseList
     _poseList = getView("PoseList", ListView.class);
     _poseList.setItemTextFunction(pose -> { return pose.getName(); });
-    _poseList.setItems(_poses.getPoses());
+    
+    // Set StepList
+    _stepList = getView("StepList", ListView.class);
+    _stepList.setItemTextFunction(step -> { return step.getPose().getName(); });
     
     // Make PuppetView interactive
     _actView.setPosable(true);
@@ -94,12 +110,14 @@ protected void resetUI()
     setViewValue("ShowMarkersCheckBox", _showMarkers);
     
     // Update PoseText
-    String poseInfo = _actView.getPose().getAsString();
-    setViewText("PoseText", poseInfo);
+    //String poseInfo = _actView.getPose().getAsString();
+    //setViewText("PoseText", poseInfo);
     
     // Update RenamePoseButton, DeletePoseButton
-    setViewEnabled("RenamePoseButton", _poseList.getSelIndex()>=0);
-    setViewEnabled("DeletePoseButton", _poseList.getSelIndex()>=0);
+    //setViewEnabled("RenamePoseButton", _poseList.getSelIndex()>=0);
+    setViewEnabled("RemoveActionButton", _actionList.getSelIndex()>=0);
+    setViewEnabled("RemovePoseButton", _poseList.getSelIndex()>=0);
+    setViewEnabled("RemoveStepButton", _stepList.getSelIndex()>=0);
 }
 
 /**
@@ -111,31 +129,72 @@ protected void respondUI(ViewEvent anEvent)
     if(anEvent.equals("ShowMarkersCheckBox"))
         setShowMarkers(anEvent.getBoolValue());
         
+    // Handle ActionList
+    if(anEvent.equals("ActionList")) {
+        PuppetAction action = _actionList.getSelItem();
+        if(action!=null) {
+            _poseList.setItems(action.getPoses());
+            _stepList.setItems(action.getSteps());
+        }
+    }
+        
+    // Handle AddActionButton
+    if(anEvent.equals("AddActionButton")) {
+        String name = DialogBox.showInputDialog(_docPane.getUI(), "Add Action", "Enter Action Name:", "Untitled");
+        if(name==null || name.length()==0) return;
+        PuppetAction action = new PuppetAction(name);
+        _actions.addAction(action);
+        _actionList.setItems(_actions.getActions());
+        _actionList.setSelIndex(_actions.getActionCount()-1);
+        _poseList.setItems(action.getPoses());
+        _poseList.setSelIndex(-1);
+        _stepList.setItems(action.getSteps());
+        _stepList.setSelIndex(-1);
+    }
+    
     // Handle PoseList
     if(anEvent.equals("PoseList"))
         _actView.setPose(_poseList.getSelItem());
         
     // Handle AddPoseButton
     if(anEvent.equals("AddPoseButton")) {
+        PuppetAction action = _actionList.getSelItem(); if(action==null) return;
+        String name = DialogBox.showInputDialog(_docPane.getUI(), "Add Pose", "Enter Pose Name:", "Untitled");
+        if(name==null || name.length()==0) return;
         PuppetPose pose = _actView.getPose();
-        pose.setName("Pose " + (_poses.getPoseCount() + 1));
-        _poses.addPose(pose);
-        _poseList.setItems(_poses.getPoses());
-        _poseList.setSelIndex(_poses.getPoseCount()-1);
+        pose.setName(name);
+        action.addPose(pose);
+        _poseList.setItems(action.getPoses());
+        _poseList.setSelIndex(action.getPoseCount()-1);
+        _actions.saveActions();
+    }
+    
+    // Handle StepList
+    if(anEvent.equals("StepList"))
+        _actView.setPose(_stepList.getSelItem().getPose());
+        
+    // Handle AddStepButton
+    if(anEvent.equals("AddStepButton")) {
+        PuppetAction action = _actionList.getSelItem(); if(action==null) return;
+        String name = DialogBox.showInputDialog(_docPane.getUI(), "Add Step", "Enter Step Name:", null);
+        if(name==null || name.length()==0) return;
+        PuppetPose pose = action.getPoseForName(name); if(pose==null) return;
+        action.addStep(pose, 500);
+        _stepList.setItems(action.getSteps());
+        _stepList.setSelIndex(action.getStepCount()-1);
+        _actions.saveActions();
     }
     
     // Handle RenamePoseButton
-    if(anEvent.equals("RenamePoseButton")) {
+    /*if(anEvent.equals("RenamePoseButton")) {
         PuppetPose pose = _poseList.getSelItem();
         String name = DialogBox.showInputDialog(_docPane.getUI(), "Rename Pose", "Enter Pose Name:", pose.getName());
         if(name!=null && name.length()>0) pose.setName(name);
-        _poseList.updateItems(pose);
-        _poses.savePoses();
-    }
+        _poseList.updateItems(pose); //_poses.savePoses(); } */
 
     // Handle DeletePoseButton
     if(anEvent.equals("DeletePoseButton")) {
-        _poses.removePose(_poseList.getSelIndex());
+        //_poses.removePose(_poseList.getSelIndex());
     }
 }
 
