@@ -179,6 +179,36 @@ public void setPose(PuppetPose aPose)
 }
 
 /**
+ * Performs a given action.
+ */
+public void performAction(PuppetAction anAction)
+{
+    ViewAnim anim = getAnimCleared(500);
+    anim.setOnFrame(a -> actionDidFrame(anAction, 1));
+    anim.setOnFinish(a -> actionDidFinishPose(anAction, 1)).play();
+}
+
+void actionDidFrame(PuppetAction anAction, int aPoseIndex)
+{
+    double time = getAnim(0).getTime(), maxTime = getAnim(0).getMaxTime(), ratio = time/maxTime;
+    PuppetPose pose0 = anAction.getPose(aPoseIndex-1);
+    PuppetPose pose1 = anAction.getPose(aPoseIndex);
+    PuppetPose pose2 = pose0.getBlendPose(pose1, ratio);
+    setPose(pose2);
+}
+
+void actionDidFinishPose(PuppetAction anAction, int aPoseIndex)
+{
+    int poseIndex = aPoseIndex + 1;
+    if(poseIndex>=anAction.getPoseCount()) {
+        getAnimCleared(0); return; }
+    
+    ViewAnim anim = getAnimCleared(500);
+    anim.setOnFrame(a -> actionDidFrame(anAction, poseIndex));
+    anim.setOnFinish(a -> actionDidFinishPose(anAction, poseIndex)).play();
+}
+
+/**
  * Returns whether puppet is posable via user interaction.
  */
 public boolean isPosable()  { return _physRunner!=null; }

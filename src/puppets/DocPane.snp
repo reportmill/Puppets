@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView Spacing="4" FillWidth="true" PrefWidth="900" PrefHeight="700">
-  <RowView Padding="4" Spacing="4">
-    <ToggleButton Name="DisplayButton" PrefWidth="80" PrefHeight="24" Padding="2" text="Display" Selected="true" Group="bg1" />
-    <ToggleButton Name="ActionButton" PrefWidth="80" PrefHeight="24" Padding="2" text="Animate" Group="bg1" />
+<ColView PrefWidth="900" PrefHeight="700" Spacing="4" FillWidth="true">
+  <RowView Padding="4,4,4,6" Spacing="4">
+    <RowView>
+      <ToggleButton Name="DisplayButton" PrefWidth="90" PrefHeight="24" Padding="2" text="Display" Position="CENTER_LEFT" Selected="true" Group="bg1" />
+      <ToggleButton Name="ActionButton" PrefWidth="90" PrefHeight="24" Padding="2" text="Animate" Position="CENTER_RIGHT" Group="bg1" />
+    </RowView>
     <Button Name="LadyButton" MinHeight="0" PrefWidth="70" Padding="2" LeanX="RIGHT" text="Lady" />
     <Button Name="ManButton" MinHeight="0" PrefWidth="70" Padding="2" LeanX="RIGHT" text="Man" />
   </RowView>

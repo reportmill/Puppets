@@ -49,6 +49,7 @@ public void showDisplayPane()
     
     _pupPane = new PuppetPane(this);
     _docBox.setContent(_pupPane.getUI());
+    setViewValue("DisplayButton", true);
 }
 
 /**
@@ -60,6 +61,7 @@ public void showActionPane()
     
     _actionPane = new ActionPane(this);
     _docBox.setContent(_actionPane.getUI());
+    setViewValue("ActionButton", true);
 }
 
 /**

@@ -68,6 +68,22 @@ public String getAsString()
 }
 
 /**
+ * Returns a blended pose with this pose and another pose at given ratio.
+ */
+public PuppetPose getBlendPose(PuppetPose aPose, double aRatio)
+{
+    PuppetPose pose = new PuppetPose();
+    for(String name : _markers.keySet()) {
+        Point p0 = getMarkerPoint(name);
+        Point p1 = aPose.getMarkerPoint(name);
+        double x = p0.x + (p1.x-p0.x)*aRatio;
+        double y = p0.y + (p1.y-p0.y)*aRatio;
+        pose._markers.put(name, new Point(x,y));
+    }
+    return pose;
+}
+
+/**
  * XML Archival.
  */
 public XMLElement toXML(XMLArchiver anArchiver)

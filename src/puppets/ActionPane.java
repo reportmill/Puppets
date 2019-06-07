@@ -1,5 +1,4 @@
 package puppets;
-import puppets.PuppetAction.PoseStep;
 import snap.view.*;
 import snap.viewx.DialogBox;
 
@@ -25,9 +24,6 @@ public class ActionPane extends ViewOwner {
 
     // A ListView to show poses
     ListView <PuppetPose>    _poseList;
-
-    // A ListView to show steps
-    ListView <PoseStep>      _stepList;
 
 /**
  * Creates ActionPane.
@@ -87,15 +83,17 @@ protected void initUI()
     _actionList = getView("ActionList", ListView.class);
     _actionList.setItemTextFunction(action -> { return action.getName(); });
     _actionList.setItems(_actions.getActions());
-    _actionList.setSelIndex(_actions.getActionCount()-1);
+    if(_actions.getActionCount()>0)
+        _actionList.setSelIndex(0);
     
     // Set PoseList
     _poseList = getView("PoseList", ListView.class);
     _poseList.setItemTextFunction(pose -> { return pose.getName(); });
     
-    // Set StepList
-    _stepList = getView("StepList", ListView.class);
-    _stepList.setItemTextFunction(step -> { return step.getPose().getName(); });
+    // Intialize PoseList/StepList
+    PuppetAction action = _actionList.getSelItem();
+    if(action!=null)
+        _poseList.setItems(action.getPoses());
     
     // Make PuppetView interactive
     _actView.setPosable(true);
@@ -117,7 +115,6 @@ protected void resetUI()
     //setViewEnabled("RenamePoseButton", _poseList.getSelIndex()>=0);
     setViewEnabled("RemoveActionButton", _actionList.getSelIndex()>=0);
     setViewEnabled("RemovePoseButton", _poseList.getSelIndex()>=0);
-    setViewEnabled("RemoveStepButton", _stepList.getSelIndex()>=0);
 }
 
 /**
@@ -132,10 +129,8 @@ protected void respondUI(ViewEvent anEvent)
     // Handle ActionList
     if(anEvent.equals("ActionList")) {
         PuppetAction action = _actionList.getSelItem();
-        if(action!=null) {
+        if(action!=null)
             _poseList.setItems(action.getPoses());
-            _stepList.setItems(action.getSteps());
-        }
     }
         
     // Handle AddActionButton
@@ -148,8 +143,6 @@ protected void respondUI(ViewEvent anEvent)
         _actionList.setSelIndex(_actions.getActionCount()-1);
         _poseList.setItems(action.getPoses());
         _poseList.setSelIndex(-1);
-        _stepList.setItems(action.getSteps());
-        _stepList.setSelIndex(-1);
     }
     
     // Handle PoseList
@@ -169,10 +162,12 @@ protected void respondUI(ViewEvent anEvent)
         _actions.saveActions();
     }
     
-    // Handle StepList
-    if(anEvent.equals("StepList"))
-        _actView.setPose(_stepList.getSelItem().getPose());
-        
+    // Handle PlayButton
+    if(anEvent.equals("PlayButton")) {
+        PuppetAction action = _actionList.getSelItem(); if(action==null) return;
+        _actView.performAction(action);
+    }
+    
     // Handle AddStepButton
     if(anEvent.equals("AddStepButton")) {
         PuppetAction action = _actionList.getSelItem(); if(action==null) return;
@@ -180,8 +175,6 @@ protected void respondUI(ViewEvent anEvent)
         if(name==null || name.length()==0) return;
         PuppetPose pose = action.getPoseForName(name); if(pose==null) return;
         action.addStep(pose, 500);
-        _stepList.setItems(action.getSteps());
-        _stepList.setSelIndex(action.getStepCount()-1);
         _actions.saveActions();
     }
     

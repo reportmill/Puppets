@@ -27,17 +27,9 @@
     <ListView Name="PoseList" PrefHeight="140">
       <LineBorder Color="#c0c0c0" />
     </ListView>
-    <RowView Padding="2,4,2,4" GrowWidth="true" Spacing="4">
-      <BevelBorder />
-      <Label text="Steps">
-        <font name="Arial" size="14" />
-      </Label>
-      <Button Name="AddStepButton" PrefWidth="22" PrefHeight="22" Padding="2" LeanX="RIGHT" text="+" />
-      <Button Name="RemoveStepButton" PrefWidth="22" PrefHeight="22" Padding="2" LeanX="RIGHT" text="-" />
+    <RowView Padding="4" GrowWidth="true" Spacing="4">
+      <Button Name="PlayButton" PrefWidth="80" Padding="2" text="Play" />
     </RowView>
-    <ListView Name="StepList" PrefHeight="140">
-      <LineBorder Color="#c0c0c0" />
-    </ListView>
     <CheckBox Name="ShowMarkersCheckBox" text="Show Markers" />
   </ColView>
 </RowView>
