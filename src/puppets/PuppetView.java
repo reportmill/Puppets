@@ -183,17 +183,22 @@ public void setPose(PuppetPose aPose)
  */
 public void performAction(PuppetAction anAction, double aRatio)
 {
-    if(aRatio==1) { setPose(anAction.getPose(anAction.getPoseCount()-1)); return; }
-    int maxTimeAll = anAction.getMaxTime();
-    int timeGlobal = (int)Math.round(maxTimeAll*aRatio);
-    int poseIndex = (int)Math.floor((anAction.getPoseCount() - 1)*aRatio);
-    int maxTimePose = 500;
-    int timePose = timeGlobal - poseIndex*500;
-    double ratioPose = timePose/(double)maxTimePose;
+    // If at end or beginning, just set appropriate pose
+    if(aRatio==0) { setPose(anAction.getMovePose(0)); return; }
+    if(aRatio==1) { setPose(anAction.getMovePose(anAction.getMoveCount()-1)); return; }
     
-    PuppetPose pose0 = anAction.getPose(poseIndex);
-    PuppetPose pose1 = anAction.getPose(poseIndex+1);
-    PuppetPose pose2 = pose0.getBlendPose(getPuppet(), pose1, ratioPose);
+    // Get action time for ratio
+    int maxTimeAll = anAction.getMaxTime();
+    int globalTime = (int)Math.round(maxTimeAll*aRatio);
+    int moveIndex = (int)Math.floor((anAction.getMoveCount() - 1)*aRatio);
+    int maxTimePose = 500;
+    int moveTime = globalTime - moveIndex*500;
+    double moveRatio = moveTime/(double)maxTimePose;
+    
+    // Get poses for surrounding moves, get blend pose and set
+    PuppetPose pose0 = anAction.getMovePose(moveIndex);
+    PuppetPose pose1 = anAction.getMovePose(moveIndex+1);
+    PuppetPose pose2 = pose0.getBlendPose(getPuppet(), pose1, moveRatio);
     setPose(pose2);
 }
 
@@ -210,11 +215,11 @@ public void performAction(PuppetAction anAction)
 /**
  * Called on every action frame: Calculates a blended pose for given frame and sets it.
  */
-void actionDidFrame(PuppetAction anAction, int aPoseIndex)
+void actionDidFrame(PuppetAction anAction, int aMoveIndex)
 {
     double time = getAnim(0).getTime(), maxTime = getAnim(0).getMaxTime(), ratio = time/maxTime;
-    PuppetPose pose0 = anAction.getPose(aPoseIndex-1);
-    PuppetPose pose1 = anAction.getPose(aPoseIndex);
+    PuppetPose pose0 = anAction.getMovePose(aMoveIndex-1);
+    PuppetPose pose1 = anAction.getMovePose(aMoveIndex);
     PuppetPose pose2 = pose0.getBlendPose(getPuppet(), pose1, ratio);
     setPose(pose2);
 }
@@ -222,17 +227,17 @@ void actionDidFrame(PuppetAction anAction, int aPoseIndex)
 /**
  * Called when pose is finished to queue up next pose.
  */
-void actionDidFinishPose(PuppetAction anAction, int aPoseIndex)
+void actionDidFinishPose(PuppetAction anAction, int aMoveIndex)
 {
     // If just finished last pose, just return
-    int poseIndex = aPoseIndex + 1;
-    if(poseIndex>=anAction.getPoseCount()) {
+    int moveIndex = aMoveIndex + 1;
+    if(moveIndex>=anAction.getMoveCount()) {
         getAnimCleared(0); return; }
     
     // Queue up next pose
     ViewAnim anim = getAnimCleared(500);
-    anim.setOnFrame(a -> actionDidFrame(anAction, poseIndex));
-    anim.setOnFinish(a -> actionDidFinishPose(anAction, poseIndex)).play();
+    anim.setOnFrame(a -> actionDidFrame(anAction, moveIndex));
+    anim.setOnFinish(a -> actionDidFinishPose(anAction, moveIndex)).play();
 }
 
 /**

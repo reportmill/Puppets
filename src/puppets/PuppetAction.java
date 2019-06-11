@@ -95,6 +95,11 @@ public int getMoveCount()  { return getMoves().size(); }
 public PuppetMove getMove(int anIndex)  { return getMoves().get(anIndex); }
 
 /**
+ * Returns the individual move pose at given index.
+ */
+public PuppetPose getMovePose(int anIndex)  { return getMove(anIndex).getPose(); }
+
+/**
  * Adds a move for pose and time.
  */
 public void addMoveForPoseAndTime(PuppetPose aPose, int aTime)
@@ -135,7 +140,7 @@ public PuppetMove removeMove(int anIndex)
  */
 public int getMaxTime()
 {
-    return getPoseCount()*500 - 500;
+    return getMoveCount()*500 - 500;
 }
 
 /**
