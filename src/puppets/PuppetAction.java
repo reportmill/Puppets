@@ -54,10 +54,12 @@ public PuppetPose getPose(int anIndex)  { return getPoses().get(anIndex); }
 /**
  * Adds a pose.
  */
-public void addPose(PuppetPose aPose)
-{
-    getPoses().add(aPose);
-}
+public void addPose(PuppetPose aPose)  { addPose(aPose, getPoseCount()); }
+
+/**
+ * Adds a pose.
+ */
+public void addPose(PuppetPose aPose, int anIndex)  { getPoses().add(anIndex, aPose); }
 
 /**
  * Removes a pose.
@@ -141,6 +143,22 @@ public PuppetMove removeMove(int anIndex)
 public int getMaxTime()
 {
     return getMoveCount()*500 - 500;
+}
+
+/**
+ * Replaces first pose with second pose.
+ */
+public void replacePose(String aName, PuppetPose aPose)
+{
+    PuppetPose pose = getPoseForName(aName);
+    PuppetPose pose2 = aPose.clone(); pose2.setName(aName);
+    int ind = getPoses().indexOf(pose); if(ind<0) return;
+    removePose(ind);
+    addPose(pose2, ind);
+    
+    // Reset Move poses
+    for(PuppetMove move : getMoves())
+        move._pose = getPoseForName(move.getPoseName());
 }
 
 /**

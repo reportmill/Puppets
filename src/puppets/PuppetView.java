@@ -205,11 +205,11 @@ public void performAction(PuppetAction anAction, double aRatio)
 /**
  * Performs a given action.
  */
-public void performAction(PuppetAction anAction)
+public void performAction(PuppetAction anAction, boolean doLoop)
 {
     ViewAnim anim = getAnimCleared(500);
     anim.setOnFrame(a -> actionDidFrame(anAction, 1));
-    anim.setOnFinish(a -> actionDidFinishPose(anAction, 1)).play();
+    anim.setOnFinish(a -> actionDidFinishPose(anAction, 1, doLoop)).play();
 }
 
 /**
@@ -227,18 +227,25 @@ void actionDidFrame(PuppetAction anAction, int aMoveIndex)
 /**
  * Called when pose is finished to queue up next pose.
  */
-void actionDidFinishPose(PuppetAction anAction, int aMoveIndex)
+void actionDidFinishPose(PuppetAction anAction, int aMoveIndex, boolean doLoop)
 {
     // If just finished last pose, just return
     int moveIndex = aMoveIndex + 1;
     if(moveIndex>=anAction.getMoveCount()) {
-        getAnimCleared(0); return; }
+        if(doLoop) { actionDidFinishPose(anAction, 0, doLoop); return; }
+        else { getAnimCleared(0); return; }
+    }
     
     // Queue up next pose
     ViewAnim anim = getAnimCleared(500);
     anim.setOnFrame(a -> actionDidFrame(anAction, moveIndex));
-    anim.setOnFinish(a -> actionDidFinishPose(anAction, moveIndex)).play();
+    anim.setOnFinish(a -> actionDidFinishPose(anAction, moveIndex, doLoop)).play();
 }
+
+/**
+ * Stops the currently running action.
+ */
+public void stopAction()  { getAnimCleared(0); }
 
 /**
  * Returns whether puppet is posable via user interaction.

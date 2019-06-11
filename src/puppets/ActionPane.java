@@ -125,6 +125,13 @@ protected void resetUI()
  */
 protected void respondUI(ViewEvent anEvent)
 {
+    // Handle PlayLoopButton
+    ToggleButton playLoopButton = getView("PlayLoopButton", ToggleButton.class);
+    if(!anEvent.equals("PlayLoopButton") && playLoopButton.isSelected()) {
+        _actView.stopAction();
+        playLoopButton.setSelected(false);
+    }
+
     // Handle ShowMarkersCheckBox
     if(anEvent.equals("ShowMarkersCheckBox"))
         setShowMarkers(anEvent.getBoolValue());
@@ -160,8 +167,8 @@ protected void respondUI(ViewEvent anEvent)
         PuppetAction action = _actionList.getSelItem(); if(action==null) return;
         String name = DialogBox.showInputDialog(_docPane.getUI(), "Add Move", "Enter Pose Name:", "Untitled");
         if(name==null || name.length()==0) return;
-        PuppetPose pose = _actView.getPose();
-        pose.setName(name);
+        PuppetPose pose = action.getPoseForName(name);
+        if(pose==null) { pose = _actView.getPose(); pose.setName(name); }
         action.addMoveForPoseAndTime(pose, 500);
         _moveTable.setItems(action.getMoves());
         _moveTable.setSelIndex(action.getMoveCount()-1);
@@ -170,7 +177,8 @@ protected void respondUI(ViewEvent anEvent)
     
     // Handle CopyMoveMenu
     if(anEvent.equals("CopyMoveMenu")) {
-        PuppetMove move = _moveTable.getSelItem(); if(move==null) { beep(); return; }
+        PuppetMove move = _moveTable.getSelItem();
+        if(move==null) { move = new PuppetMove(_actView.getPose(), 500); move.getPose().setName("Untitled"); }
         _copyMove = move.clone();
     }
     
@@ -183,6 +191,16 @@ protected void respondUI(ViewEvent anEvent)
         _moveTable.setItems(action.getMoves());
         _moveTable.setSelIndex(ind);
         _actions.saveActions();
+    }
+    
+    // Handle PastePoseMenu
+    if(anEvent.equals("PastePoseMenu")) {
+        PuppetAction action = _actionList.getSelItem(); if(action==null) return;
+        PuppetMove srcMove = _copyMove!=null? _copyMove.clone() : null; if(srcMove==null) { beep(); return; }
+        PuppetMove dstMove = _moveTable.getSelItem(); if(dstMove==null) { beep(); return; }
+        action.replacePose(dstMove.getPoseName(), srcMove.getPose());
+        _actions.saveActions();
+        _actView.setPose(dstMove.getPose());
     }
     
     // Handle DeleteMoveMenu
@@ -220,19 +238,18 @@ protected void respondUI(ViewEvent anEvent)
     // Handle PlayButton
     if(anEvent.equals("PlayButton")) {
         PuppetAction action = _actionList.getSelItem(); if(action==null) return;
-        _actView.performAction(action);
+        _actView.performAction(action, false);
     }
     
-    // Handle AddMoveButton
-    if(anEvent.equals("AddMoveButton")) {
+    // Handle PlayLoopButton
+    if(anEvent.equals("PlayLoopButton")) {
         PuppetAction action = _actionList.getSelItem(); if(action==null) return;
-        String name = DialogBox.showInputDialog(_docPane.getUI(), "Add Move", "Enter Move Name:", null);
-        if(name==null || name.length()==0) return;
-        PuppetPose pose = action.getPoseForName(name); if(pose==null) return;
-        action.addMoveForPoseAndTime(pose, 500);
-        _moveTable.setItems(action.getMoves());
-        _moveTable.setSelIndex(action.getMoveCount()-1);
-        _actions.saveActions();
+        if(anEvent.getBoolValue()) _actView.performAction(action, true);
+        else {
+            _actView.stopAction();
+            if(_moveTable.getSelItem()!=null)
+                _actView.setPose(_moveTable.getSelItem().getPose());
+        }
     }
     
     // Handle RenamePoseButton
