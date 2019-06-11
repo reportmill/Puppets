@@ -90,6 +90,8 @@ protected List <PuppetAction> loadActions()
  */
 protected void saveActions()
 {
+    if(SnapUtils.isTeaVM) return;
+    
     // Create element for actions and iterate over actions and add each
     XMLElement actionsXML = new XMLElement("Actions");
     for(PuppetAction action : getActions()) {

@@ -137,6 +137,14 @@ public String[] getJointNames()
 }
 
 /**
+ * Returns the puppet joint names.
+ */
+public String[] getRootJointNames()
+{
+    return new String[] { Head_Joint, RArm_Joint, RLeg_Joint, LArm_Joint, LLeg_Joint };
+}
+
+/**
  * Returns the puppet marker names.
  */
 public String[] getMarkerNames()
@@ -204,6 +212,29 @@ public String[] getOuterJointNamesForPartName(String aName)
         case LLegTop: return new String[] { LLegMid_Joint, LFoot_Joint };
         case LLegBtm: return new String[] { LFoot_Joint };
         default: return new String[0];
+    }
+}
+
+/**
+ * Returns names of parts linked to given joint/marker name.
+ */
+public String getNextJointNameForName(String aName)
+{
+    switch(aName) {
+        case Head_Joint: case Head: return HeadTop_Marker;
+        case RArm_Joint: case RArm: case RArmTop: return RArmMid_Joint;
+        case RArmMid_Joint: case RArmBtm: return RHand_Joint;
+        case RHand_Joint: case RHand: return RHandEnd_Marker;
+        case RLeg_Joint: case RLeg: case RLegTop: return RLegMid_Joint;
+        case RLegMid_Joint: case RLegBtm: return RFoot_Joint;
+        case RFoot_Joint: case RFoot: return RFootEnd_Marker;
+        case LArm_Joint: case LArm: case LArmTop: return LArmMid_Joint;
+        case LArmMid_Joint: case LArmBtm: return LHand_Joint;
+        case LHand_Joint: case LHand: return LHandEnd_Marker;
+        case LLeg_Joint: case LLeg: case LLegTop: return LLegMid_Joint;
+        case LLegMid_Joint: case LLegBtm: return LFoot_Joint;
+        case LFoot_Joint: case LFoot: return LFootEnd_Marker;
+        default: return null;
     }
 }
 

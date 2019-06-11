@@ -181,6 +181,25 @@ public void setPose(PuppetPose aPose)
 /**
  * Performs a given action.
  */
+public void performAction(PuppetAction anAction, double aRatio)
+{
+    if(aRatio==1) { setPose(anAction.getPose(anAction.getPoseCount()-1)); return; }
+    int maxTimeAll = anAction.getMaxTime();
+    int timeGlobal = (int)Math.round(maxTimeAll*aRatio);
+    int poseIndex = (int)Math.floor((anAction.getPoseCount() - 1)*aRatio);
+    int maxTimePose = 500;
+    int timePose = timeGlobal - poseIndex*500;
+    double ratioPose = timePose/(double)maxTimePose;
+    
+    PuppetPose pose0 = anAction.getPose(poseIndex);
+    PuppetPose pose1 = anAction.getPose(poseIndex+1);
+    PuppetPose pose2 = pose0.getBlendPose(getPuppet(), pose1, ratioPose);
+    setPose(pose2);
+}
+
+/**
+ * Performs a given action.
+ */
 public void performAction(PuppetAction anAction)
 {
     ViewAnim anim = getAnimCleared(500);
@@ -188,21 +207,29 @@ public void performAction(PuppetAction anAction)
     anim.setOnFinish(a -> actionDidFinishPose(anAction, 1)).play();
 }
 
+/**
+ * Called on every action frame: Calculates a blended pose for given frame and sets it.
+ */
 void actionDidFrame(PuppetAction anAction, int aPoseIndex)
 {
     double time = getAnim(0).getTime(), maxTime = getAnim(0).getMaxTime(), ratio = time/maxTime;
     PuppetPose pose0 = anAction.getPose(aPoseIndex-1);
     PuppetPose pose1 = anAction.getPose(aPoseIndex);
-    PuppetPose pose2 = pose0.getBlendPose(pose1, ratio);
+    PuppetPose pose2 = pose0.getBlendPose(getPuppet(), pose1, ratio);
     setPose(pose2);
 }
 
+/**
+ * Called when pose is finished to queue up next pose.
+ */
 void actionDidFinishPose(PuppetAction anAction, int aPoseIndex)
 {
+    // If just finished last pose, just return
     int poseIndex = aPoseIndex + 1;
     if(poseIndex>=anAction.getPoseCount()) {
         getAnimCleared(0); return; }
     
+    // Queue up next pose
     ViewAnim anim = getAnimCleared(500);
     anim.setOnFrame(a -> actionDidFrame(anAction, poseIndex));
     anim.setOnFinish(a -> actionDidFinishPose(anAction, poseIndex)).play();

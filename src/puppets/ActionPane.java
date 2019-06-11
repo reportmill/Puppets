@@ -97,6 +97,8 @@ protected void initUI()
     
     // Make PuppetView interactive
     _actView.setPosable(true);
+    
+    getView("TimeSlider", Slider.class).setMax(1000);
 }
 
 /**
@@ -188,6 +190,13 @@ protected void respondUI(ViewEvent anEvent)
     // Handle DeletePoseButton
     if(anEvent.equals("DeletePoseButton")) {
         //_poses.removePose(_poseList.getSelIndex());
+    }
+    
+    // Handle TimeSlider
+    if(anEvent.equals("TimeSlider")) {
+        PuppetAction action = _actionList.getSelItem(); if(action==null) return;
+        double val = anEvent.getFloatValue();
+        _actView.performAction(action, val/1000);
     }
 }
 

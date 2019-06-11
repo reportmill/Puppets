@@ -31,5 +31,6 @@
       <Button Name="PlayButton" PrefWidth="80" Padding="2" text="Play" />
     </RowView>
     <CheckBox Name="ShowMarkersCheckBox" text="Show Markers" />
+    <Slider Name="TimeSlider" Max="1" Value="0" />
   </ColView>
 </RowView>

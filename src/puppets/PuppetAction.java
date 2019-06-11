@@ -120,6 +120,14 @@ public PoseStep removeStep(int anIndex)
 }
 
 /**
+ * Returns the max time for action.
+ */
+public int getMaxTime()
+{
+    return getPoseCount()*500 - 500;
+}
+
+/**
  * XML Archival.
  */
 public XMLElement toXML(XMLArchiver anArchiver)
@@ -208,7 +216,7 @@ public class PoseStep {
     /** XML unarchival. */
     public PoseStep fromXML(XMLArchiver anArchiver, XMLElement anElement)
     {
-        String name = anElement.getAttributeValue("Name");
+        String name = anElement.getAttributeValue("Pose");
         _pose = getPoseForName(name);
         _time = anElement.getAttributeIntValue("Time");
         return this;

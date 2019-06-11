@@ -479,7 +479,7 @@ void handleDrag(ViewEvent anEvent)
     if(anEvent.isMousePress()) {
         setRunning(true);
         MouseJointDef jdef = new MouseJointDef(); jdef.bodyA = _groundBody; jdef.bodyB = body;
-        jdef.collideConnected = true; jdef.maxForce = 1000f*body.getMass();
+        jdef.collideConnected = true; jdef.maxForce = 100f*body.getMass();
         jdef.target.set(viewToWorld(pnt.x, pnt.y));
         _dragJoint = (MouseJoint)_world.createJoint(jdef);
         body.setAwake(true);
@@ -506,15 +506,17 @@ void handleDrag(ViewEvent anEvent)
 void setOuterJointLimitsEnabledForBodyName(String aName, boolean isEnabled)
 {
     // Get outer joint names
-    String names[] = getPuppet().getOuterJointNamesForPartName(aName);
+    String jname = getPuppet().getNextJointNameForName(aName);
+    String jnameNext = jname!=null? getPuppet().getNextJointNameForName(jname) : null;
     
     // Iterate over joint names and set limit enabled/disabled
-    for(String name : names) { View view = getView(name);
+    while(jnameNext!=null) { View view = getView(jname);
         ViewPhysics <Joint> phys = view.getPhysics();
         RevoluteJoint joint = (RevoluteJoint)phys.getNative();
         joint.enableLimit(isEnabled);
         if(isEnabled) joint.setLimits(joint.getJointAngle(), joint.getJointAngle());
         else joint.setLimits(0, 0);
+        jname = jnameNext; jnameNext = getPuppet().getNextJointNameForName(jnameNext);
     }
 }
 
