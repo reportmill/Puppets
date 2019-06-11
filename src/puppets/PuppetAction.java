@@ -142,7 +142,32 @@ public PuppetMove removeMove(int anIndex)
  */
 public int getMaxTime()
 {
-    return getMoveCount()*500 - 500;
+    int t = 0;
+    for(int i=0, iMax=getMoveCount()-1; i<iMax; i++) t += getMove(i).getTime();
+    return t;
+}
+
+/**
+ * Returns the move index for given time.
+ */
+public int getMoveIndexAtTime(int aTime)
+{
+    int time = 0;
+    for(int i=0, iMax=getMoveCount(); i<iMax; i++) { PuppetMove move = getMove(i);
+        time += move.getTime();
+        if(aTime<time)
+            return i;
+    }
+    return getMoveCount()-1;
+}
+
+/**
+ * Returns the move index for given time.
+ */
+public int getMoveStartTime(int anIndex)
+{
+    int time = 0; for(int i=0; i<anIndex; i++) time += getMove(i).getTime();
+    return time;
 }
 
 /**

@@ -187,17 +187,20 @@ public void performAction(PuppetAction anAction, double aRatio)
     if(aRatio==0) { setPose(anAction.getMovePose(0)); return; }
     if(aRatio==1) { setPose(anAction.getMovePose(anAction.getMoveCount()-1)); return; }
     
-    // Get action time for ratio
+    // Get move for ratio
     int maxTimeAll = anAction.getMaxTime();
     int globalTime = (int)Math.round(maxTimeAll*aRatio);
-    int moveIndex = (int)Math.floor((anAction.getMoveCount() - 1)*aRatio);
-    int maxTimePose = 500;
-    int moveTime = globalTime - moveIndex*500;
-    double moveRatio = moveTime/(double)maxTimePose;
+    int moveIndex = anAction.getMoveIndexAtTime(globalTime);
     
-    // Get poses for surrounding moves, get blend pose and set
-    PuppetPose pose0 = anAction.getMovePose(moveIndex);
-    PuppetPose pose1 = anAction.getMovePose(moveIndex+1);
+    // Get surrounding moves, get blend pose and set
+    PuppetMove move0 = anAction.getMove(moveIndex);
+    PuppetMove move1 = anAction.getMove(moveIndex+1);
+    double moveTime = globalTime - anAction.getMoveStartTime(moveIndex);
+    double moveRatio = moveTime/move0.getTime();
+    
+    // Get surrounding poses, get blend pose and set
+    PuppetPose pose0 = move0.getPose();
+    PuppetPose pose1 = move1.getPose();
     PuppetPose pose2 = pose0.getBlendPose(getPuppet(), pose1, moveRatio);
     setPose(pose2);
 }
@@ -209,7 +212,7 @@ public void performAction(PuppetAction anAction, boolean doLoop)
 {
     ViewAnim anim = getAnimCleared(500);
     anim.setOnFrame(a -> actionDidFrame(anAction, 1));
-    anim.setOnFinish(a -> actionDidFinishPose(anAction, 1, doLoop)).play();
+    anim.setOnFinish(a -> ViewUtils.runLater(() -> actionDidFinishPose(anAction, 1, doLoop))).play();
 }
 
 /**
@@ -239,7 +242,7 @@ void actionDidFinishPose(PuppetAction anAction, int aMoveIndex, boolean doLoop)
     // Queue up next pose
     ViewAnim anim = getAnimCleared(500);
     anim.setOnFrame(a -> actionDidFrame(anAction, moveIndex));
-    anim.setOnFinish(a -> actionDidFinishPose(anAction, moveIndex, doLoop)).play();
+    anim.setOnFinish(a -> ViewUtils.runLater(() -> actionDidFinishPose(anAction, moveIndex, doLoop))).play();
 }
 
 /**
