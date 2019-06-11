@@ -4,7 +4,7 @@
     <LineBorder />
     <color value="#ffffff" />
   </BoxView>
-  <ColView Name="ToolBox" PrefWidth="300" Padding="8" Spacing="5" FillWidth="true">
+  <ColView Name="ToolBox" PrefWidth="300" PrefHeight="454" Padding="8" Spacing="5" FillWidth="true">
     <RowView Padding="2,4,2,4" GrowWidth="true" Spacing="4">
       <BevelBorder />
       <Label text="Actions">
@@ -18,19 +18,37 @@
     </ListView>
     <RowView Padding="2,4,2,4" GrowWidth="true" Spacing="4">
       <BevelBorder />
-      <Label text="Poses">
+      <Label text="Moves">
         <font name="Arial" size="14" />
       </Label>
-      <Button Name="AddPoseButton" PrefWidth="22" PrefHeight="22" Padding="2" LeanX="RIGHT" text="+" />
-      <Button Name="RemovePoseButton" PrefWidth="22" PrefHeight="22" Padding="2" LeanX="RIGHT" text="-" />
+      <Button Name="AddMoveButton" PrefWidth="22" PrefHeight="22" Padding="2" LeanX="RIGHT" text="+" />
+      <MenuButton Name="MoveMenuButton" PrefWidth="22" PrefHeight="22" Padding="2" LeanX="RIGHT">
+        <MenuItem Name="CopyMoveMenu" text="Copy Move" />
+        <MenuItem Name="PasteMoveMenu" text="Paste Move" />
+        <MenuItem Name="DeleteMoveMenu" text="Delete Move" />
+        <MenuItem Name="MoveUpMoveMenu" text="Move Up" />
+        <MenuItem Name="MoveDownMoveMenu" text="Move Down" />
+      </MenuButton>
     </RowView>
-    <ListView Name="PoseList" PrefHeight="140">
+    <TableView Name="MoveTable" MinWidth="100" MinHeight="60" PrefHeight="140" ShowHeader="false">
       <LineBorder Color="#c0c0c0" />
-    </ListView>
+      <TableCol PrefWidth="120" GrowWidth="true" ItemKey="Name" Header="Name" />
+      <TableCol PrefWidth="60" ItemKey="Time" Header="Time" />
+    </TableView>
     <RowView Padding="4" GrowWidth="true" Spacing="4">
       <Button Name="PlayButton" PrefWidth="80" Padding="2" text="Play" />
     </RowView>
     <CheckBox Name="ShowMarkersCheckBox" text="Show Markers" />
     <Slider Name="TimeSlider" Max="1" Value="0" />
+    <RowView Padding="2,4,2,4" GrowWidth="true" LeanY="BOTTOM" Spacing="4">
+      <BevelBorder />
+      <Label text="Poses">
+        <font name="Arial" size="14" />
+      </Label>
+      <Button Name="AddPoseButton" PrefWidth="22" PrefHeight="22" Padding="2" LeanX="RIGHT" text="+" />
+    </RowView>
+    <ListView Name="PoseList" PrefHeight="100">
+      <LineBorder Color="#c0c0c0" />
+    </ListView>
   </ColView>
 </RowView>

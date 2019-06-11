@@ -24,6 +24,12 @@ public class ActionPane extends ViewOwner {
 
     // A ListView to show poses
     ListView <PuppetPose>    _poseList;
+    
+    // A TableView to show moves
+    TableView <PuppetMove>   _moveTable;
+    
+    // The last copied move
+    PuppetMove               _copyMove;
 
 /**
  * Creates ActionPane.
@@ -62,6 +68,7 @@ public void setShowMarkers(boolean aValue)
  */
 void actViewDidMouseRelease()
 {
+    _moveTable.setSelIndex(-1);
     _poseList.setSelIndex(-1);
     resetLater();
 }
@@ -90,10 +97,15 @@ protected void initUI()
     _poseList = getView("PoseList", ListView.class);
     _poseList.setItemTextFunction(pose -> { return pose.getName(); });
     
-    // Intialize PoseList/StepList
+    // Intialize PoseList
     PuppetAction action = _actionList.getSelItem();
-    if(action!=null)
-        _poseList.setItems(action.getPoses());
+    if(action!=null) _poseList.setItems(action.getPoses());
+    
+    // Set MoveTable
+    _moveTable = getView("MoveTable", TableView.class);
+    _moveTable.getCol(0).setItemTextFunction(move -> { return move.getPoseName(); });
+    _moveTable.getCol(1).setItemTextFunction(move -> { return String.valueOf(move.getTime()); });
+    if(action!=null) _moveTable.setItems(action.getMoves());
     
     // Make PuppetView interactive
     _actView.setPosable(true);
@@ -116,7 +128,7 @@ protected void resetUI()
     // Update RenamePoseButton, DeletePoseButton
     //setViewEnabled("RenamePoseButton", _poseList.getSelIndex()>=0);
     setViewEnabled("RemoveActionButton", _actionList.getSelIndex()>=0);
-    setViewEnabled("RemovePoseButton", _poseList.getSelIndex()>=0);
+    //setViewEnabled("RemovePoseButton", _poseList.getSelIndex()>=0);
 }
 
 /**
@@ -130,9 +142,13 @@ protected void respondUI(ViewEvent anEvent)
         
     // Handle ActionList
     if(anEvent.equals("ActionList")) {
-        PuppetAction action = _actionList.getSelItem();
-        if(action!=null)
-            _poseList.setItems(action.getPoses());
+        PuppetAction action = _actionList.getSelItem(); if(action==null) return;
+        _moveTable.setItems(action.getMoves());
+        if(action.getMoveCount()>0) {
+            _moveTable.setSelIndex(0);
+            _actView.setPose(action.getMove(0).getPose());
+        }
+        _poseList.setItems(action.getPoses());
     }
         
     // Handle AddActionButton
@@ -143,25 +159,44 @@ protected void respondUI(ViewEvent anEvent)
         _actions.addAction(action);
         _actionList.setItems(_actions.getActions());
         _actionList.setSelIndex(_actions.getActionCount()-1);
+        _moveTable.setItems(action.getMoves());
+        _moveTable.setSelIndex(-1);
         _poseList.setItems(action.getPoses());
         _poseList.setSelIndex(-1);
     }
     
-    // Handle PoseList
-    if(anEvent.equals("PoseList"))
-        _actView.setPose(_poseList.getSelItem());
+    // Handle MoveTable
+    if(anEvent.equals("MoveTable"))
+        _actView.setPose(_moveTable.getSelItem().getPose());
         
-    // Handle AddPoseButton
-    if(anEvent.equals("AddPoseButton")) {
+    // Handle AddMoveButton
+    if(anEvent.equals("AddMoveButton")) {
         PuppetAction action = _actionList.getSelItem(); if(action==null) return;
-        String name = DialogBox.showInputDialog(_docPane.getUI(), "Add Pose", "Enter Pose Name:", "Untitled");
+        String name = DialogBox.showInputDialog(_docPane.getUI(), "Add Move", "Enter Pose Name:", "Untitled");
         if(name==null || name.length()==0) return;
         PuppetPose pose = _actView.getPose();
         pose.setName(name);
-        action.addPose(pose);
+        action.addMoveForPoseAndTime(pose, 500);
+        _moveTable.setItems(action.getMoves());
+        _moveTable.setSelIndex(action.getMoveCount()-1);
         _poseList.setItems(action.getPoses());
         _poseList.setSelIndex(action.getPoseCount()-1);
         _actions.saveActions();
+    }
+    
+    // Handle CopyMoveMenu
+    if(anEvent.equals("CopyMoveMenu")) {
+        PuppetMove move = _moveTable.getSelItem(); if(move==null) { beep(); return; }
+        _copyMove = move.clone();
+    }
+    
+    // Handle PasteMoveMenu
+    if(anEvent.equals("PasteMoveMenu")) {
+        if(_copyMove==null) { beep(); return; }
+        PuppetAction action = _actionList.getSelItem(); if(action==null) return;
+        PuppetMove move = _copyMove.clone();
+        int ind = _moveTable.getSelIndex() + 1;
+        action.addMove(move, ind);
     }
     
     // Handle PlayButton
@@ -170,13 +205,13 @@ protected void respondUI(ViewEvent anEvent)
         _actView.performAction(action);
     }
     
-    // Handle AddStepButton
-    if(anEvent.equals("AddStepButton")) {
+    // Handle AddMoveButton
+    if(anEvent.equals("AddMoveButton")) {
         PuppetAction action = _actionList.getSelItem(); if(action==null) return;
-        String name = DialogBox.showInputDialog(_docPane.getUI(), "Add Step", "Enter Step Name:", null);
+        String name = DialogBox.showInputDialog(_docPane.getUI(), "Add Move", "Enter Move Name:", null);
         if(name==null || name.length()==0) return;
         PuppetPose pose = action.getPoseForName(name); if(pose==null) return;
-        action.addStep(pose, 500);
+        action.addMoveForPoseAndTime(pose, 500);
         _actions.saveActions();
     }
     
@@ -197,6 +232,22 @@ protected void respondUI(ViewEvent anEvent)
         PuppetAction action = _actionList.getSelItem(); if(action==null) return;
         double val = anEvent.getFloatValue();
         _actView.performAction(action, val/1000);
+    }
+    
+    // Handle PoseList
+    if(anEvent.equals("PoseList"))
+        _actView.setPose(_poseList.getSelItem());
+        
+    // Handle AddPoseButton
+    if(anEvent.equals("AddPoseButton")) {
+        PuppetAction action = _actionList.getSelItem(); if(action==null) return;
+        String name = DialogBox.showInputDialog(_docPane.getUI(), "Add Pose", "Enter Pose Name:", "Untitled");
+        if(name==null || name.length()==0) return;
+        PuppetPose pose = _actView.getPose(); pose.setName(name);
+        action.addPose(pose);
+        _poseList.setItems(action.getPoses());
+        _poseList.setSelIndex(action.getPoseCount()-1);
+        _actions.saveActions();
     }
 }
 
