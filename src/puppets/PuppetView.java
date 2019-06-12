@@ -179,9 +179,9 @@ public void setPose(PuppetPose aPose)
 }
 
 /**
- * Performs a given action.
+ * Sets the puppet pose for given action and ratio.
  */
-public void performAction(PuppetAction anAction, double aRatio)
+public void setPoseForActionAtRatio(PuppetAction anAction, double aRatio)
 {
     // If at end or beginning, just set appropriate pose
     if(aRatio==0) { setPose(anAction.getMovePose(0)); return; }
@@ -210,9 +210,22 @@ public void performAction(PuppetAction anAction, double aRatio)
  */
 public void performAction(PuppetAction anAction, boolean doLoop)
 {
-    ViewAnim anim = getAnimCleared(500);
-    anim.setOnFrame(a -> actionDidFrame(anAction, 1));
-    anim.setOnFinish(a -> ViewUtils.runLater(() -> actionDidFinishPose(anAction, 1, doLoop))).play();
+    // Get first move, set its pose and performAction for first move
+    if(anAction.getMoveCount()<2) return;
+    PuppetMove move = anAction.getMove(0);
+    setPose(move.getPose());
+    performAction(anAction, 0, doLoop);
+}
+
+/**
+ * Performs a given action starting with move at given index.
+ */
+protected void performAction(PuppetAction anAction, int aMoveIndex, boolean doLoop)
+{
+    PuppetMove move = anAction.getMove(aMoveIndex);
+    ViewAnim anim = getAnimCleared(move.getTime());
+    anim.setOnFrame(a -> actionDidFrame(anAction, aMoveIndex));
+    anim.setOnFinish(a -> ViewUtils.runLater(() -> actionDidFinishMove(anAction, aMoveIndex, doLoop))).play();
 }
 
 /**
@@ -220,29 +233,30 @@ public void performAction(PuppetAction anAction, boolean doLoop)
  */
 void actionDidFrame(PuppetAction anAction, int aMoveIndex)
 {
-    double time = getAnim(0).getTime(), maxTime = getAnim(0).getMaxTime(), ratio = time/maxTime;
-    PuppetPose pose0 = anAction.getMovePose(aMoveIndex-1);
-    PuppetPose pose1 = anAction.getMovePose(aMoveIndex);
+    // Get ratio for current anim time
+    double time = getAnim(0).getTime(), maxTime = getAnim(0).getMaxTime();
+    double ratio = Math.min(time/maxTime, 1);
+    
+    // Get pose for ratio and set
+    PuppetPose pose0 = anAction.getMovePose(aMoveIndex);
+    PuppetPose pose1 = anAction.getMovePose(aMoveIndex+1);
     PuppetPose pose2 = pose0.getBlendPose(getPuppet(), pose1, ratio);
     setPose(pose2);
 }
 
 /**
- * Called when pose is finished to queue up next pose.
+ * Called when move is finished to queue up next move.
  */
-void actionDidFinishPose(PuppetAction anAction, int aMoveIndex, boolean doLoop)
+void actionDidFinishMove(PuppetAction anAction, int aMoveIndex, boolean doLoop)
 {
-    // If just finished last pose, just return
-    int moveIndex = aMoveIndex + 1;
-    if(moveIndex>=anAction.getMoveCount()) {
-        if(doLoop) { actionDidFinishPose(anAction, 0, doLoop); return; }
+    // If just finished last move, just return
+    if(aMoveIndex+2 >= anAction.getMoveCount()) {
+        if(doLoop) { performAction(anAction, 0, doLoop); return; }
         else { getAnimCleared(0); return; }
     }
     
-    // Queue up next pose
-    ViewAnim anim = getAnimCleared(500);
-    anim.setOnFrame(a -> actionDidFrame(anAction, moveIndex));
-    anim.setOnFinish(a -> ViewUtils.runLater(() -> actionDidFinishPose(anAction, moveIndex, doLoop))).play();
+    // Queue up next move
+    performAction(anAction, aMoveIndex+1, doLoop);
 }
 
 /**
@@ -260,19 +274,14 @@ public boolean isPosable()  { return _physRunner!=null; }
  */
 public void setPosable(boolean aValue)
 {
+    // If already set, just return
     if(aValue==isPosable()) return;
     
     // Create/start PhysRunner
-    if(aValue) {
-        _physRunner = new PhysicsRunner(this);
-        //_physRunner.setRunning(true);
-    }
+    if(aValue) _physRunner = new PhysicsRunner(this); //_physRunner.setRunning(true);
     
-    // Stop PhysRunner
-    else {
-        //_physRunner.setRunning(false);
-        _physRunner = null;
-    }
+    // Stop/clear PhysRunner
+    else _physRunner = null; //_physRunner.setRunning(false);
 }
 
 }

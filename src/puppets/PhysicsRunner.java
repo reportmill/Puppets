@@ -427,7 +427,7 @@ public void setJointOrMarkerToViewXY(String aName, double aX, double aY)
 public void resolveMouseJoints()
 {
     if(_poseMouseTime==0) return;
-    for(int i=0;i<50;i++) timerFired();
+    for(int i=0;i<40 && _poseMouseTime!=0;i++) timerFired();
     clearMouseJoints();
 }
 

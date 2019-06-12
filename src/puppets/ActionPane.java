@@ -94,11 +94,18 @@ protected void initUI()
     _moveTable.getCol(0).setItemTextFunction(move -> { return move.getPoseName(); });
     _moveTable.getCol(1).setItemTextFunction(move -> { return String.valueOf(move.getTime()); });
     PuppetAction action = _actionList.getSelItem();
-    if(action!=null) _moveTable.setItems(action.getMoves());
+    if(action!=null) {
+        _moveTable.setItems(action.getMoves());
+        if(action.getMoveCount()>0) {
+            _moveTable.setSelIndex(0);
+            runLater(() -> _actView.setPose(action.getMove(0).getPose()));
+        }
+    }
     
     // Make PuppetView interactive
     _actView.setPosable(true);
     
+    // Configure TimeSlider
     getView("TimeSlider", Slider.class).setMax(1000);
 }
 
@@ -263,7 +270,7 @@ protected void respondUI(ViewEvent anEvent)
     if(anEvent.equals("TimeSlider")) {
         PuppetAction action = _actionList.getSelItem(); if(action==null) return;
         double val = anEvent.getFloatValue();
-        _actView.performAction(action, val/1000);
+        _actView.setPoseForActionAtRatio(action, val/1000);
     }
 }
 
