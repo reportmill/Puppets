@@ -38,6 +38,11 @@ public String getPoseName()  { return _pose.getName(); }
 public int getTime()  { return _time; }
 
 /**
+ * Sets the time interval.
+ */
+public void setTime(int aValue)  { _time = aValue; }
+
+/**
  * Standard clone implementation.
  */
 public PuppetMove clone()

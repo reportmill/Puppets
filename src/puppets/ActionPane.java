@@ -93,6 +93,8 @@ protected void initUI()
     _moveTable = getView("MoveTable", TableView.class);
     _moveTable.getCol(0).setItemTextFunction(move -> { return move.getPoseName(); });
     _moveTable.getCol(1).setItemTextFunction(move -> { return String.valueOf(move.getTime()); });
+    _moveTable.setEditable(true);
+    _moveTable.setCellEditEnd(c -> moveTableCellEditEnd(c));
     PuppetAction action = _actionList.getSelItem();
     if(action!=null) {
         _moveTable.setItems(action.getMoves());
@@ -271,6 +273,23 @@ protected void respondUI(ViewEvent anEvent)
         PuppetAction action = _actionList.getSelItem(); if(action==null) return;
         double val = anEvent.getFloatValue();
         _actView.setPoseForActionAtRatio(action, val/1000);
+    }
+}
+
+/**
+ * Called when cell stops editing.
+ */
+void moveTableCellEditEnd(ListCell <PuppetMove> aCell)
+{
+    // Get row/col and make sure there are series/points to cover it
+    PuppetMove move = aCell.getItem();
+    String text = aCell.getText();
+    int col = aCell.getCol();
+    
+    // If Time column, set time
+    if(col==1) {
+        move.setTime(Integer.valueOf(text));
+        _moveTable.updateItems(move);
     }
 }
 
