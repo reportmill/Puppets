@@ -479,7 +479,7 @@ void handleDrag(ViewEvent anEvent)
     if(anEvent.isMousePress()) {
         setRunning(true);
         MouseJointDef jdef = new MouseJointDef(); jdef.bodyA = _groundBody; jdef.bodyB = body;
-        jdef.collideConnected = true; jdef.maxForce = 100f*body.getMass();
+        jdef.collideConnected = true; jdef.maxForce = 1000f*body.getMass();
         jdef.target.set(viewToWorld(pnt.x, pnt.y));
         _dragJoint = (MouseJoint)_world.createJoint(jdef);
         body.setAwake(true);
