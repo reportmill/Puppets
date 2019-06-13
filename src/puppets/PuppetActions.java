@@ -47,9 +47,14 @@ public PuppetAction getAction(String aName)
 /**
  * Adds an action.
  */
-public void addAction(PuppetAction anAction)
+public void addAction(PuppetAction anAction)  { addAction(anAction, getActionCount()); }
+
+/**
+ * Adds an action.
+ */
+public void addAction(PuppetAction anAction, int anIndex)
 {
-    getActions().add(anAction);
+    getActions().add(anIndex, anAction);
     saveActions();
 }
 
