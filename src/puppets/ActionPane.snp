@@ -37,7 +37,7 @@
         <MenuItem Name="MoveDownMoveMenu" text="Move Down" />
       </MenuButton>
     </RowView>
-    <TableView Name="MoveTable" MinWidth="100" MinHeight="60" PrefHeight="180" ShowHeader="false">
+    <TableView Name="MoveTable" MinWidth="100" MinHeight="60" PrefHeight="200" ShowHeader="false">
       <LineBorder Color="#c0c0c0" />
       <TableCol PrefWidth="120" GrowWidth="true" ItemKey="Name" Header="Name" />
       <TableCol PrefWidth="60" ItemKey="Time" Header="Time" />

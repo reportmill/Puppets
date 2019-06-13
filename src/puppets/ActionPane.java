@@ -101,6 +101,7 @@ protected void initUI()
         if(action.getMoveCount()>0) {
             _moveTable.setSelIndex(0);
             runLater(() -> _actView.setPose(action.getMove(0).getPose()));
+            runLater(() -> _actView.performAction(action, false));
         }
     }
     
@@ -143,6 +144,7 @@ protected void respondUI(ViewEvent anEvent)
         if(action.getMoveCount()>0) {
             _moveTable.setSelIndex(0);
             _actView.setPose(action.getMove(0).getPose());
+            runLater(() -> _actView.performAction(action, false));
         }
     }
         
@@ -200,7 +202,7 @@ protected void respondUI(ViewEvent anEvent)
         if(name==null || name.length()==0) return;
         PuppetPose pose = action.getPoseForName(name);
         if(pose==null) { pose = _actView.getPose(); pose.setName(name); }
-        action.addMoveForPoseAndTime(pose, 500);
+        action.addMoveForPoseAndTime(pose, 200);
         _moveTable.setItems(action.getMoves());
         _moveTable.setSelIndex(action.getMoveCount()-1);
         _actions.saveActions();
@@ -209,7 +211,7 @@ protected void respondUI(ViewEvent anEvent)
     // Handle CopyMoveMenu
     if(anEvent.equals("CopyMoveMenu")) {
         PuppetMove move = _moveTable.getSelItem();
-        if(move==null) { move = new PuppetMove(_actView.getPose(), 500); move.getPose().setName("Untitled"); }
+        if(move==null) { move = new PuppetMove(_actView.getPose(), 200); move.getPose().setName("Untitled"); }
         _copyMove = move.clone();
     }
     
