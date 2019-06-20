@@ -111,7 +111,7 @@ public void setActionTime(int aTime)
 {
     // Clear Timeless and just return if value already set
     setTimeless(false);
-    if(aTime==_actTime) return;
+    //if(aTime==_actTime) return; Can't really do this until setTimeless(true) sets action time to -1 or something
 
     // Cache old, set new time (constrained to Action.MaxTime)
     int oldVal = _actTime; _actTime = Math.min(aTime, _action.getMaxTime());
@@ -163,7 +163,7 @@ public boolean isTimeless()  { return _timeless; }
 public void setTimeless(boolean aValue)
 {
     _timeless = aValue;
-    setMoveIndex(-1);
+    if(aValue) setMoveIndex(-1);
 }
 
 /**

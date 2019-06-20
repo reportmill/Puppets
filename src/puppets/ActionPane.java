@@ -102,7 +102,7 @@ protected void initUI()
 protected void resetUI()
 {
     // Update MoveTable.SelIndex
-    int ind = _actView.isTimeless()? -1 : _actView.getMoveIndex();
+    int ind = _actView.getMoveIndex();
     _moveTable.setSelIndex(ind);
 
     // Update TimeSlider
@@ -165,8 +165,10 @@ protected void respondUI(ViewEvent anEvent)
     }
     
     // Handle MoveTable
-    if(anEvent.equals("MoveTable"))
+    if(anEvent.equals("MoveTable")) {
         setActionAndMove(_actionList.getSelItem(), _moveTable.getSelItem());
+        System.out.println("MoveTable clicked");
+    }
         
     // Handle AddMoveButton
     if(anEvent.equals("AddMoveButton")) {

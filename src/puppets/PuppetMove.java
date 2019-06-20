@@ -53,6 +53,11 @@ public PuppetMove clone()
 }
 
 /**
+ * Standard toString implementation.
+ */
+public String toString()  { return "PuppetMove:" + getPoseName(); }
+
+/**
  * XML Archival.
  */
 public XMLElement toXML(XMLArchiver anArchiver)

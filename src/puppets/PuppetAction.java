@@ -213,6 +213,11 @@ public void replacePose(String aName, PuppetPose aPose)
 }
 
 /**
+ * Standard toString implementation.
+ */
+public String toString()  { return "PuppetAction:" + getName(); }
+
+/**
  * XML Archival.
  */
 public XMLElement toXML(XMLArchiver anArchiver)
