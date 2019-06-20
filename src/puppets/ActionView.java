@@ -11,21 +11,27 @@ public class ActionView extends PuppetView {
     PuppetAction    _action;
     
     // The currently configured move index
-    int             _moveIndex;
-    
-    // Whether timer loops
-    boolean         _loops;
-    
-    // The ViewTimer
-    ViewTimer       _timer;
+    int             _moveIndex = -1;
     
     // The current action time
     int             _actTime;
 
+    // Whether timer loops
+    boolean         _loops;
+    
+    // Whether ActionView is showing pose not assoicated with action/move
+    boolean         _timeless;
+    
+    // The ViewTimer
+    ViewTimer       _timer;
+    
+    // The action time when play last started
+    int             _startTime;
+
     // Constants for properties
     public static final String Action_Prop = "Action";
     public static final String ActionTime_Prop = "ActionTime";
-    public static final String Move_Prop = "Move";
+    public static final String MoveIndex_Prop = "MoveIndex";
     
     // Constants
     static int   FRAME_DELAY_MILLIS = 20;
@@ -41,10 +47,7 @@ public ActionView(Puppet aPuppet)
     setBorder(Color.GRAY, 1);
     
     // Make markers not visible
-    for(String name : _puppet.getMarkerNames()) {
-        View child = getChild(name);
-        child.setVisible(false);
-    }
+    setShowMarkers(false);
 }
 
 /**
@@ -63,23 +66,18 @@ public void setAction(PuppetAction anAction)
     // Cache old, set new
     PuppetAction oldVal = _action; _action = anAction;
     
-    // Fire proop change
+    // Fire prop change
     firePropChange(Action_Prop, oldVal, _action);
+    
+    // Clear MoveIndex, ActionTime and initialize
+    _moveIndex = _actTime = -1; 
+    setActionTime(0);
 }
 
 /**
  * Returns the current puppet move.
  */
 public PuppetMove getMove()  { return _moveIndex>=0? _action.getMove(_moveIndex) : null; }
-
-/**
- * Sets the current puppet move.
- */
-public void setMove(PuppetMove aMove)
-{
-    int ind = _action.getMoves().indexOf(aMove);
-    setMoveIndex(ind);
-}
 
 /**
  * Returns the move index.
@@ -98,7 +96,7 @@ protected void setMoveIndex(int anIndex)
     int oldVal = _moveIndex; _moveIndex = anIndex;
     
     // Fire prop change
-    firePropChange(Move_Prop, oldVal, _moveIndex);
+    firePropChange(MoveIndex_Prop, oldVal, _moveIndex);
 }
 
 /**
@@ -111,6 +109,10 @@ public int getActionTime()  { return _actTime; }
  */
 public void setActionTime(int aTime)
 {
+    // Clear Timeless and just return if value already set
+    setTimeless(false);
+    if(aTime==_actTime) return;
+
     // Cache old, set new time (constrained to Action.MaxTime)
     int oldVal = _actTime; _actTime = Math.min(aTime, _action.getMaxTime());
     
@@ -123,11 +125,12 @@ public void setActionTime(int aTime)
 }
 
 /**
- * Sets the action time for given time ratio.
+ * Sets the action time for given move.
  */
-public void setActionTimeForTimeRatio(double aRatio)
+public void setActionTimeForMove(PuppetMove aMove)
 {
-    int time = _action.getTimeForTimeRatio(aRatio);
+    int moveIndex = _action.getMoves().indexOf(aMove);
+    int time = _action.getMoveStartTime(moveIndex);
     setActionTime(time);
 }
 
@@ -145,8 +148,22 @@ protected void setMoveForTime(int aTime)
  */
 protected void setPoseForTime(int aTime)
 {
-    PuppetPose pose = _action.getPoseForTime(getPuppet(), aTime);
+    PuppetPose pose = _action.getPoseForTime(getPuppet(), aTime); if(pose==null) return;
     setPose(pose);
+}
+
+/**
+ * Returns whether ActionView is showing pose not associated with current Action/Move.
+ */
+public boolean isTimeless()  { return _timeless; }
+
+/**
+ * Sets whether ActionView is showing pose not associated with current Action/Move.
+ */
+public void setTimeless(boolean aValue)
+{
+    _timeless = aValue;
+    setMoveIndex(-1);
 }
 
 /**
@@ -163,7 +180,7 @@ public void playAction(boolean doLoop)
     if(isPlaying() || _action.getMoveCount()<2) return;
     
     // Create timer and start
-    _loops = doLoop;
+    _loops = doLoop; _startTime = getActionTime();
     _timer = new ViewTimer(FRAME_DELAY_MILLIS, t -> timerFired());
     _timer.start();
 }
@@ -173,8 +190,12 @@ public void playAction(boolean doLoop)
  */
 public void stopAction()
 {
+    // Stop/clear timer
     if(_timer!=null) _timer.stop();
     _timer = null;
+    
+    // Reset time
+    setActionTime(_startTime);
 }
 
 /**
@@ -189,7 +210,7 @@ void timerFired()
     
     // If beyond Action.MaxTime, stop anim
     if(!_loops && time>_action.getMaxTime())
-        stopAction();
+        getEnv().runLater(() -> stopAction());
 }
 
 }

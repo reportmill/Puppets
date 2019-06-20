@@ -21,6 +21,9 @@ public class PuppetView extends ParentView {
     // The PhysicsRunner
     PhysicsRunner  _physRunner;
     
+    // Whether to show markers
+    boolean        _showMarkers = true;
+    
 /**
  * Creates a PuppetView.
  */
@@ -175,6 +178,28 @@ public void setPose(PuppetPose aPose)
         Point pnt = aPose.getMarkerPoint(pkey);
         double px = pnt.x + anchor.x, py = anchor.y - pnt.y;
         _physRunner.setJointOrMarkerToViewXY(pkey, px, py);
+    }
+}
+
+/**
+ * Returns whether to show markers.
+ */
+public boolean isShowMarkers()  { return _showMarkers; }
+
+/**
+ * Sets whether to show markers.
+ */
+public void setShowMarkers(boolean aValue)
+{
+    // If already set, just return, otherwise set
+    if(aValue==_showMarkers) return;
+    _showMarkers = aValue;
+    
+    // Iterate over children and toggle visible if Joint Or Marker
+    Puppet puppet = getPuppet();
+    for(View child : getChildren()) {
+        if(puppet.isJointOrMarkerName(child.getName()))
+            child.setVisible(aValue);
     }
 }
 

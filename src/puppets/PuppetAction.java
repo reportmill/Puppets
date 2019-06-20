@@ -104,9 +104,11 @@ public PuppetPose getMovePose(int anIndex)  { return getMove(anIndex).getPose();
 /**
  * Adds a move for pose and time.
  */
-public void addMoveForPoseAndTime(PuppetPose aPose, int aTime)
+public PuppetMove addMoveForPoseAndTime(PuppetPose aPose, int aTime)
 {
-    addMove(new PuppetMove(aPose, aTime));
+    PuppetMove move = new PuppetMove(aPose, aTime);
+    addMove(move);
+    return move;
 }
 
 /**
@@ -176,6 +178,7 @@ public int getMoveStartTime(int anIndex)
 public PuppetPose getPoseForTime(Puppet aPuppet, int aTime)
 {
     // If at start or end, just return appropriate pose
+    if(getMoveCount()==0) return null;
     if(aTime==0) return getMovePose(0);
     if(aTime>=getMaxTime()) return getMovePose(getMoveCount()-1);
     
@@ -191,24 +194,6 @@ public PuppetPose getPoseForTime(Puppet aPuppet, int aTime)
     PuppetPose pose1 = move1.getPose();
     PuppetPose pose2 = pose0.getBlendPose(aPuppet, pose1, moveRatio);
     return pose2;
-}
-
-/**
- * Returns the puppet pose for given time ratio (0-1).
- */
-public PuppetPose getPoseForTimeRatio(Puppet aPuppet, double aRatio)
-{
-    int time = getTimeForTimeRatio(aRatio);
-    return getPoseForTime(aPuppet, time);
-}
-
-/**
- * Returns the action time for given time ratio (0-1).
- */
-public int getTimeForTimeRatio(double aRatio)
-{
-    int maxTime = getMaxTime();
-    return (int)Math.round(maxTime*aRatio);
 }
 
 /**
