@@ -97,11 +97,12 @@ protected void initUI()
     _moveTable.setCellEditEnd(c -> moveTableCellEditEnd(c));
     PuppetAction action = _actionList.getSelItem();
     if(action!=null) {
+        _actView.setAction(action);
         _moveTable.setItems(action.getMoves());
         if(action.getMoveCount()>0) {
             _moveTable.setSelIndex(0);
             runLater(() -> _actView.setPose(action.getMove(0).getPose()));
-            runLater(() -> _actView.performAction(action, false));
+            runLater(() -> _actView.playAction(false));
         }
     }
     
@@ -140,11 +141,12 @@ protected void respondUI(ViewEvent anEvent)
     // Handle ActionList
     if(anEvent.equals("ActionList")) {
         PuppetAction action = _actionList.getSelItem(); if(action==null) return;
+        _actView.setAction(action);
         _moveTable.setItems(action.getMoves());
         if(action.getMoveCount()>0) {
             _moveTable.setSelIndex(0);
             _actView.setPose(action.getMove(0).getPose());
-            runLater(() -> _actView.performAction(action, false));
+            runLater(() -> _actView.playAction(false));
         }
     }
         
@@ -267,13 +269,13 @@ protected void respondUI(ViewEvent anEvent)
     // Handle PlayButton
     if(anEvent.equals("PlayButton")) {
         PuppetAction action = _actionList.getSelItem(); if(action==null) return;
-        _actView.performAction(action, false);
+        _actView.playAction(false);
     }
     
     // Handle PlayLoopButton
     if(anEvent.equals("PlayLoopButton")) {
         PuppetAction action = _actionList.getSelItem(); if(action==null) return;
-        if(anEvent.getBoolValue()) _actView.performAction(action, true);
+        if(anEvent.getBoolValue()) _actView.playAction(true);
         else {
             _actView.stopAction();
             if(_moveTable.getSelItem()!=null)
@@ -285,7 +287,7 @@ protected void respondUI(ViewEvent anEvent)
     if(anEvent.equals("TimeSlider")) {
         PuppetAction action = _actionList.getSelItem(); if(action==null) return;
         double val = anEvent.getFloatValue();
-        _actView.setPoseForActionAtRatio(action, val/1000);
+        _actView.setActionTimeForTimeRatio(val/1000);
     }
 }
 

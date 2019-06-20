@@ -42,6 +42,9 @@ public void setSelName(String aName)
     if(getSelView()!=null) getSelView().setEffect(null);
     _selName = aName;
     if(getSelView()!=null) getSelView().setEffect(SELECT_EFFECT);
+    
+    // Update PartsList selection
+    _partsList.setSelItem(aName);
 }
 
 /**
@@ -82,12 +85,18 @@ protected View createUI()
     BoxView pupBox = new BoxView(_pupView); pupBox.setGrowWidth(true);
     pupBox.setFill(Color.WHITE); pupBox.setBorder(Color.BLACK, 1);
     
+    // Create Parts Label
+    Label partsLabel = new Label("Puppet Parts:"); partsLabel.setPadding(4,4,4,4);
+    partsLabel.setBorder(Border.createLoweredBevelBorder());
+    partsLabel.setFont(new Font("Arial Bold", 20));
+    
     // Create/configure PartsList ListView
     _partsList = new ListView(); _partsList.setName("PartsList"); _partsList.setGrowHeight(true);
     
     // Create ToolsColView to hold puppet inspector UI
-    ColView toolsColView = new ColView(); toolsColView.setPadding(20,8,8,8);
+    ColView toolsColView = new ColView(); toolsColView.setPadding(0,8,8,8);
     toolsColView.setSpacing(5); toolsColView.setFillWidth(true); toolsColView.setPrefWidth(300);
+    toolsColView.addChild(partsLabel);
     toolsColView.addChild(_partsList);
     
     RowView mainRowView = new RowView(); mainRowView.setGrowWidth(true); mainRowView.setFillHeight(true);

@@ -171,6 +171,47 @@ public int getMoveStartTime(int anIndex)
 }
 
 /**
+ * Returns the puppet pose for given global time.
+ */
+public PuppetPose getPoseForTime(Puppet aPuppet, int aTime)
+{
+    // If at start or end, just return appropriate pose
+    if(aTime==0) return getMovePose(0);
+    if(aTime>=getMaxTime()) return getMovePose(getMoveCount()-1);
+    
+    // Get surrounding moves, get blend pose and set
+    int moveIndex = getMoveIndexAtTime(aTime);
+    PuppetMove move0 = getMove(moveIndex);
+    PuppetMove move1 = getMove(moveIndex+1);
+    double moveTime = aTime - getMoveStartTime(moveIndex);
+    double moveRatio = moveTime/move0.getTime();
+    
+    // Get surrounding poses, get blend pose and set
+    PuppetPose pose0 = move0.getPose();
+    PuppetPose pose1 = move1.getPose();
+    PuppetPose pose2 = pose0.getBlendPose(aPuppet, pose1, moveRatio);
+    return pose2;
+}
+
+/**
+ * Returns the puppet pose for given time ratio (0-1).
+ */
+public PuppetPose getPoseForTimeRatio(Puppet aPuppet, double aRatio)
+{
+    int time = getTimeForTimeRatio(aRatio);
+    return getPoseForTime(aPuppet, time);
+}
+
+/**
+ * Returns the action time for given time ratio (0-1).
+ */
+public int getTimeForTimeRatio(double aRatio)
+{
+    int maxTime = getMaxTime();
+    return (int)Math.round(maxTime*aRatio);
+}
+
+/**
  * Replaces first pose with second pose.
  */
 public void replacePose(String aName, PuppetPose aPose)
