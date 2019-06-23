@@ -176,7 +176,7 @@ public void setPose(PuppetPose aPose)
     for(String pkey : getPuppet().getPoseKeys()) {
         View pview = getChild(pkey);
         Point pnt = aPose.getMarkerPoint(pkey);
-        double px = pnt.x + anchor.x, py = anchor.y - pnt.y;
+        double px = pnt.x*_pupHeight/500 + anchor.x, py = anchor.y - pnt.y*_pupHeight/500;
         _physRunner.setJointOrMarkerToViewXY(pkey, px, py);
     }
 }

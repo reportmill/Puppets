@@ -19,6 +19,9 @@ public class DocPane extends ViewOwner {
     // The ActionPane
     ActionPane         _actionPane;
     
+    // The SpritePane
+    SpritePane         _spritePane;
+    
     // Constants
     static String ROOT = "/Temp/ComicLib/";
     
@@ -65,6 +68,18 @@ public void showActionPane()
 }
 
 /**
+ * Shows the SpritePane.
+ */
+public void showSpritePane()
+{
+    _docBox.removeChildren();
+    
+    _spritePane = new SpritePane(this);
+    _docBox.setContent(_spritePane.getUI());
+    setViewValue("SpriteButton", true);
+}
+
+/**
  * Initialize UI.
  */
 protected void initUI()
@@ -80,9 +95,10 @@ protected void initUI()
  */
 protected void respondUI(ViewEvent anEvent)
 {
-    // Handle DisplayButton, ActionButton
+    // Handle DisplayButton, ActionButton, SpriteButton
     if(anEvent.equals("DisplayButton")) showDisplayPane();
     if(anEvent.equals("ActionButton")) showActionPane();
+    if(anEvent.equals("SpriteButton")) showSpritePane();
         
     // Handle LadyButton
     if(anEvent.equals("LadyButton")) open(ROOT + "chars/CTLady");

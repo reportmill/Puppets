@@ -100,8 +100,8 @@ protected View createUI()
     toolsColView.addChild(_partsList);
     
     RowView mainRowView = new RowView(); mainRowView.setGrowWidth(true); mainRowView.setFillHeight(true);
-    mainRowView.addChild(pupBox);
     mainRowView.addChild(toolsColView);
+    mainRowView.addChild(pupBox);
     return mainRowView;
 }
 

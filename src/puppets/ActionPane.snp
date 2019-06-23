@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <RowView PrefWidth="540" PrefHeight="600" Align="CENTER" GrowWidth="true" FillHeight="true">
-  <BoxView Name="PuppetBox" GrowWidth="true">
-    <LineBorder />
-    <color value="#ffffff" />
-  </BoxView>
   <ColView Name="ToolBox" PrefWidth="300" PrefHeight="454" Padding="8" Spacing="5" FillWidth="true">
     <RowView Padding="2,4,2,4" GrowWidth="true" Spacing="4">
       <BevelBorder />
@@ -53,4 +49,8 @@
     </RowView>
     <CheckBox Name="ShowMarkersCheckBox" text="Show Markers" />
   </ColView>
+  <BoxView Name="PuppetBox" GrowWidth="true">
+    <LineBorder />
+    <color value="#ffffff" />
+  </BoxView>
 </RowView>
