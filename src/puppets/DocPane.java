@@ -14,7 +14,7 @@ public class DocPane extends ViewOwner {
     BoxView            _docBox;
     
     // The PuppetView
-    PuppetPane         _pupPane;
+    DesignPane         _designPane;
     
     // The ActionPane
     ActionPane         _actionPane;
@@ -50,8 +50,8 @@ public void showDisplayPane()
 {
     _docBox.removeChildren();
     
-    _pupPane = new PuppetPane(this);
-    _docBox.setContent(_pupPane.getUI());
+    _designPane = new DesignPane(this);
+    _docBox.setContent(_designPane.getUI());
     setViewValue("DisplayButton", true);
 }
 

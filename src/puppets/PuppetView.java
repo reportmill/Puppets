@@ -2,7 +2,6 @@ package puppets;
 import java.util.*;
 import snap.gfx.*;
 import snap.view.*;
-import puppets.Puppet.Part;
 
 /**
  * A View to display a puppet.
@@ -69,27 +68,27 @@ protected void setPuppet(Puppet aPuppet)
  */
 protected void rebuildChildren()
 {
-    Part arm = _puppet.getPart(Puppet.RArm);
-    Part armTop = _puppet.getPart(Puppet.RArmTop);
+    PuppetPart arm = _puppet.getPart(Puppet.RArm);
+    PuppetPart armTop = _puppet.getPart(Puppet.RArmTop);
     
     // Remove children
     removeChildren();
     
     // Iterate over parts
     for(String pname : _puppet.getPartNames()) {
-        Part part = _puppet.getPart(pname);
+        PuppetPart part = _puppet.getPart(pname);
         addImageViewForBodyPart(part);
     }
     
     // Iterate over joints
     for(String jname : _puppet.getJointNames()) {
-        Part joint = _puppet.getJoint(jname);
+        PuppetPart joint = _puppet.getJoint(jname);
         addImageViewForJoint(joint);
     }
     
     // Iterate over markers
     for(String pname : _puppet.getMarkerNames()) {
-        Part part = _puppet.getJoint(pname);
+        PuppetPart part = _puppet.getJoint(pname);
         addImageViewForBodyPart(part);
     }
     
@@ -114,10 +113,10 @@ protected void rebuildChildren()
 /**
  * Adds an image shape for given layer.
  */
-ImageView addImageViewForPart(Part aPart)
+ImageView addImageViewForPart(PuppetPart aPart)
 {
-    ImageView iview = new ImageView(aPart.getImage()); iview.setName(aPart.name);
-    iview.setXY(aPart.x, aPart.y);
+    ImageView iview = new ImageView(aPart.getImage()); iview.setName(aPart.getName());
+    iview.setXY(aPart.getX(), aPart.getY());
     iview.setSize(iview.getPrefSize());
     addChild(iview);
     return iview;
@@ -126,7 +125,7 @@ ImageView addImageViewForPart(Part aPart)
 /**
  * Adds an image shape for body part.
  */
-ImageView addImageViewForBodyPart(Part aPart)
+ImageView addImageViewForBodyPart(PuppetPart aPart)
 {
     ImageView iview = addImageViewForPart(aPart);
     iview.getPhysics(true).setGroupIndex(-1);
@@ -136,7 +135,7 @@ ImageView addImageViewForBodyPart(Part aPart)
 /**
  * Adds an image shape for given joint.
  */
-ImageView addImageViewForJoint(Part aPart)
+ImageView addImageViewForJoint(PuppetPart aPart)
 {
     ImageView iview = addImageViewForPart(aPart);
     iview.getPhysics(true).setJoint(true);

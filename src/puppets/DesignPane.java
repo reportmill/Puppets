@@ -6,7 +6,7 @@ import snap.view.*;
 /**
  * A class to manage display of Puppet.
  */
-public class PuppetPane extends ViewOwner {
+public class DesignPane extends ViewOwner {
 
     // The DocPane
     DocPane            _docPane;
@@ -25,9 +25,9 @@ public class PuppetPane extends ViewOwner {
     static Effect SELECT_EFFECT = new ShadowEffect(8, SELECT_COLOR, 0, 0);
 
 /**
- * Creates a PuppetPane.
+ * Creates a DesignPane.
  */
-public PuppetPane(DocPane aDP)  { _docPane = aDP; }
+public DesignPane(DocPane aDP)  { _docPane = aDP; }
 
 /**
  * Returns the selected part.
@@ -139,6 +139,11 @@ public void respondUI(ViewEvent anEvent)
     // Handle PartsList
     if(anEvent.equals("PartsList"))
         setSelName(_partsList.getSelItem());
+        
+    // Handle drop
+    if(anEvent.isDragDrop()) {
+        
+    }
 }
 
 }

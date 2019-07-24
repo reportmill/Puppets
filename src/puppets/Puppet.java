@@ -10,25 +10,25 @@ import snap.view.ViewUtils;
 public class Puppet {
     
     // The source of puppet
-    Object              _source;
+    Object                   _source;
     
     // Cached parts
-    Map <String,Part>   _parts = new HashMap();
+    Map <String,PuppetPart>  _parts = new HashMap();
     
     // Cached joints
-    Map <String,Part>   _joints = new HashMap();
+    Map <String,PuppetPart>  _joints = new HashMap();
     
     // The bounds
-    Rect                _bounds;
+    Rect                     _bounds;
     
     // Whether the image is loaded
-    Boolean             _loaded;
+    Boolean                  _loaded;
      
     // PropertyChangeSupport
-    PropChangeSupport   _loadLsnrs;
+    PropChangeSupport        _loadLsnrs;
     
     // The marker image
-    static Image        _markerImg, _anchorImage;
+    static Image             _markerImg, _anchorImage;
 
     // Constants for human parts
     public static final String Torso = "Torso";
@@ -89,9 +89,9 @@ public void setSource(Object aSource)  { _source = aSource; }
 /**
  * Returns the part for given name.
  */
-public Part getPart(String aName)
+public PuppetPart getPart(String aName)
 {
-    Part part = _parts.get(aName);
+    PuppetPart part = _parts.get(aName);
     if(part==null) _parts.put(aName, part = createPart(aName));
     return part;
 }
@@ -99,14 +99,14 @@ public Part getPart(String aName)
 /**
  * Returns the part for given name.
  */
-protected Part createPart(String aName)  { return null; }
+protected PuppetPart createPart(String aName)  { return null; }
 
 /**
  * Returns the joint for given name.
  */
-public Part getJoint(String aName)
+public PuppetPart getJoint(String aName)
 {
-    Part joint = _joints.get(aName);
+    PuppetPart joint = _joints.get(aName);
     if(joint==null) _joints.put(aName, joint = createJoint(aName));
     return joint;
 }
@@ -114,7 +114,7 @@ public Part getJoint(String aName)
 /**
  * Returns the joint for given name.
  */
-protected Part createJoint(String aName)  { return null; }
+protected PuppetPart createJoint(String aName)  { return null; }
 
 /**
  * Returns the puppet part names in paint order.
@@ -264,11 +264,11 @@ public Rect getBounds()
     // Iterate over parts and expand bounds
     double x = Float.MAX_VALUE, y = x, mx = -Float.MAX_VALUE, my = mx;
     for(String pname : getPartNames()) {
-        Part part = getPart(pname);
-        x = Math.min(x, part.x);
-        y = Math.min(y, part.y);
-        mx = Math.max(mx, part.x + part.getImage().getWidth());
-        my = Math.max(my, part.y + part.getImage().getHeight());
+        PuppetPart part = getPart(pname);
+        x = Math.min(x, part.getX());
+        y = Math.min(y, part.getY());
+        mx = Math.max(mx, part.getX() + part.getImage().getWidth());
+        my = Math.max(my, part.getY() + part.getImage().getHeight());
     }
     
     // Return rect
@@ -356,36 +356,6 @@ public static Image getAnchorImage()
     pntr.setColor(red); pntr.drawLine(5,s/2,s-5,s/2);
     pntr.setColor(blue); pntr.drawLine(s/2,5,s/2,s-5);
     return _anchorImage = img;
-}
-
-/**
- * A class representing a part of the puppet.
- */
-public static class Part {
-    
-    // The name of the part
-    public String     name;
-    
-    // The location of the part
-    public double     x, y;
-    
-    // The image
-    Image      _img;
-    
-    /** Returns the image. */
-    public Image getImage()  { return _img!=null? _img : (_img=getImageImpl()); }
-    
-    /** Returns the image. */
-    protected Image getImageImpl()  { return null; }
-    
-    /** Returns the bounds. */
-    public Rect getBounds()  { return new Rect(x, y, getImage().getWidth(), getImage().getHeight()); }
-    
-    /** Returns the images that need to be loaded for this part. */
-    public Image[] getLoadImages()  { return new Image[0]; }
-    
-    /** Standard toString implementation. */
-    public String toString()  { return "Part: name=" + name + ", x=" + x + ", y=" + y; }
 }
 
 }

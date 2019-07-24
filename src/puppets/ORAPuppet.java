@@ -1,6 +1,5 @@
 package puppets;
 import java.util.*;
-import puppets.Puppet.Part;
 import snap.gfx.*;
 import puppets.ORAReader.Layer;
 import puppets.ORAReader.Stack;
@@ -44,7 +43,7 @@ public void setSource(String aPath)
 /**
  * Returns the part for given name.
  */
-protected Part createPart(String aName)
+protected PuppetPart createPart(String aName)
 {
     // Get layer for part name
     String lname = getLayerNameForPuppetName(aName);
@@ -64,14 +63,14 @@ protected Part createPart(String aName)
     }
     
     // Create part
-    Part part = new ORAPart(aName, layer);
+    PuppetPart part = new ORAPart(aName, layer);
     return part;
 }
 
 /**
  * Returns the joint for given name.
  */
-protected Part createJoint(String aName)
+protected PuppetPart createJoint(String aName)
 {
     // Get layer for part name
     String lname = getLayerNameForPuppetName(aName);
@@ -79,7 +78,7 @@ protected Part createJoint(String aName)
     if(layer==null) { System.out.println("ORAPuppet.createJoint: Layer not found for joint " + aName); return null; }
     
     // Create part
-    Part part = new ORAPart(aName, layer); part._img = aName==Anchor_Marker? getAnchorImage() : getMarkerImage();
+    PuppetPart part = new ORAPart(aName, layer); part._img = aName==Anchor_Marker? getAnchorImage() : getMarkerImage();
     return part;
 }
 
@@ -176,29 +175,29 @@ public Layer getLayerForJointName(String aName)  { return _jointStack.getLayer(a
 /**
  * Splits a part around joint - for when given arm/leg as one piece instead of top/bottom.
  */
-Part splitPartAroundJoint(String aPartName, String aJointName, String aName2)
+PuppetPart splitPartAroundJoint(String aPartName, String aJointName, String aName2)
 {
     boolean isTop = aName2.contains("Top");
-    Part part = getPart(aPartName);
+    PuppetPart part = getPart(aPartName);
     if(part==null) { System.err.println("ORAPuppet.splitPart: Part not found " + aPartName); return null; }
-    Part joint = getJoint(aJointName);
+    PuppetPart joint = getJoint(aJointName);
     if(joint==null) { System.err.println("ORAPuppet.splitView: Joint not found " + aJointName); return null; }
     
     Rect pbnds = getSplitBoundsForView(part, joint, isTop);
-    Rect ibnds = new Rect(pbnds.x - part.x, pbnds.y - part.y, pbnds.width, pbnds.height);
+    Rect ibnds = new Rect(pbnds.x - part.getX(), pbnds.y - part.getY(), pbnds.width, pbnds.height);
     
     Image img = part.getImage();
     Image img1 = img.getSubimage(ibnds.x, ibnds.y, ibnds.width, ibnds.height);
     
     // Create/add new parts
-    Part np = new ORAPart(aName2, null); np.x = pbnds.x; np.y = pbnds.y; np._img = img1;
+    PuppetPart np = new ORAPart(aName2, null); np._x = pbnds.x; np._y = pbnds.y; np._img = img1;
     return np;
 }
 
 /**
  * Returns the partial rect when splitting an arm/leg joint in two around joint for above method.
  */
-Rect getSplitBoundsForView(Part aPart, Part aJoint, boolean doTop)
+Rect getSplitBoundsForView(PuppetPart aPart, PuppetPart aJoint, boolean doTop)
 {
     // Get part and joint bounds
     Rect pbnds = aPart.getBounds(), jbnds = aJoint.getBounds();
@@ -214,7 +213,7 @@ Rect getSplitBoundsForView(Part aPart, Part aJoint, boolean doTop)
     else if(asp<3) {
         
         // Handle Right arm/leg
-        if(aPart.name.startsWith("R")) {
+        if(aPart.getName().startsWith("R")) {
             if(doTop) { x = jbnds.x; w = pbnds.getMaxX() - x; h = jbnds.getMaxY() - y; }
             else { y = jbnds.y; w = jbnds.getMaxX() - x; h = pbnds.getMaxY() - y; }
         }
@@ -239,15 +238,15 @@ Rect getSplitBoundsForView(Part aPart, Part aJoint, boolean doTop)
 /**
  * A Puppet.Part subclass for ORAPuppet.
  */
-private class ORAPart extends Puppet.Part {
+private class ORAPart extends PuppetPart {
     
     Layer  _lyr;
     
     /** Creates an ORAPart for given layer. */
     public ORAPart(String aName, Layer aLayer)
     {
-        name = aName; _lyr = aLayer; if(aLayer==null) return;
-        x = aLayer.x; y = aLayer.y;
+        _name = aName; _lyr = aLayer; if(aLayer==null) return;
+        _x = aLayer.x; _y = aLayer.y;
     }
         
     /** Returns the image. */
