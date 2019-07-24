@@ -14,6 +14,7 @@
       <Button Name="PlayButton" PrefWidth="80" Padding="2" text="Play" />
       <ToggleButton Name="PlayLoopButton" PrefWidth="80" Padding="2" LeanX="RIGHT" text="Play Loop" />
     </RowView>
+    <CheckBox Name="FlipImageSwitch" text="Flip Image" />
   </ColView>
   <BoxView Name="PuppetBox" GrowWidth="true">
     <LineBorder />
