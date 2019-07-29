@@ -27,7 +27,15 @@ public class DesignPane extends ViewOwner {
 /**
  * Creates a DesignPane.
  */
-public DesignPane(DocPane aDP)  { _docPane = aDP; }
+public DesignPane(DocPane aDP)
+{
+    _docPane = aDP;
+}
+
+/**
+ * Returns the puppet.
+ */
+public Puppet getPuppet()  { return _pupView.getPuppet(); }
 
 /**
  * Returns the selected part.
@@ -55,11 +63,10 @@ public void setSelPart(String aName)
     setSelName(aName);
 }
 
-View getSelView()
-{
-    if(_selName==null) return null;
-    return _pupView.getChild(_selName);
-}
+/**
+ * Returns the selected view.
+ */
+View getSelView()  { return _selName!=null? _pupView.getChild(_selName) : null; }
 
 /**
  * Event handling from select tool for super selected shapes.
@@ -120,6 +127,9 @@ protected void initUI()
     Collections.addAll(partNames, puppet.getJointNames());
     Collections.addAll(partNames, puppet.getMarkerNames());
     _partsList.setItems(partNames);
+    
+    // Enable PupView drag events
+    enableEvents(_pupView, DragEvents);
 }
 
 /**
@@ -142,8 +152,46 @@ public void respondUI(ViewEvent anEvent)
         
     // Handle drop
     if(anEvent.isDragDrop()) {
-        
+        Clipboard cb = anEvent.getClipboard();
+        if(!cb.hasFiles()) return;
+        anEvent.acceptDrag();
+        ClipboardData cdata = cb.getFiles().get(0);
+        dropFile(cdata);
     }
+}
+
+/**
+ * Called to handle a file drop on the editor.
+ */
+private void dropFile(ClipboardData aFile)
+{
+    // If file not loaded, come back when it is
+    if(!aFile.isLoaded()) { aFile.addLoadListener(f -> dropFile(aFile)); return; }
+
+    // Get path and extension (set to empty string if null)
+    String ext = aFile.getExtension(); if(ext==null) return; ext = ext.toLowerCase();
+    if(!Image.canRead(ext)) return;
+
+    // Get image
+    Object imgSrc = aFile.getSourceURL()!=null? aFile.getSourceURL() : aFile.getBytes();
+    Image img = Image.get(imgSrc);
+    
+    // Set new image for puppet part
+    setPuppetPartImage(getSelName(), img);
+}
+        
+/**
+ * Sets a puppet part image.
+ */
+void setPuppetPartImage(String aName, Image anImage)
+{
+    PuppetPart part = getPuppet().getPart(aName);
+    int w = part.getImage().getPixWidth(), h = part.getImage().getPixHeight();
+    Image img2 = Image.get(w, h, true);
+    Painter pntr = img2.getPainter();
+    pntr.drawImage(anImage, 0, 0, w, h);
+    part._img = img2;
+    _pupView.rebuildChildren();
 }
 
 }
