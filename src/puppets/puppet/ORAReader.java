@@ -1,4 +1,4 @@
-package puppets;
+package puppets.puppet;
 import java.util.*;
 import snap.gfx.*;
 import snap.util.XMLElement;

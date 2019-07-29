@@ -1,4 +1,4 @@
-package puppets;
+package puppets.app;
 
 /**
  * A custom class.
@@ -12,8 +12,8 @@ public static void main(String args[])
 {
     snaptea.TV.set();
     
-    DocPane docPane = new DocPane();
-    docPane.setWindowVisible(true);
+    AppPane appPane = new AppPane();
+    appPane.setWindowVisible(true);
 }
 
 }

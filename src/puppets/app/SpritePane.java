@@ -1,4 +1,5 @@
-package puppets;
+package puppets.app;
+import puppets.puppet.*;
 import java.util.*;
 import snap.view.*;
 import snap.gfx.*;
@@ -8,8 +9,8 @@ import snap.gfx.*;
  */
 public class SpritePane extends ViewOwner {
 
-    // The DocPane
-    DocPane                  _docPane;
+    // The AppPane
+    AppPane                  _appPane;
     
     // A List of Puppet Actions
     PuppetActions            _actions;
@@ -29,9 +30,9 @@ public class SpritePane extends ViewOwner {
 /**
  * Creates SpritePane.
  */
-public SpritePane(DocPane aDP)
+public SpritePane(AppPane aAP)
 {
-    _docPane = aDP;
+    _appPane = aAP;
     _actions = new PuppetActions();
 }
 
@@ -88,7 +89,7 @@ protected void respondUI(ViewEvent anEvent)
  */
 protected void setSpriteImage()
 {
-    Puppet puppet = _docPane._puppet;
+    Puppet puppet = _appPane._puppet;
     PuppetAction action = _actionList.getSelItem();
     Image img = getImage(puppet, action);
     if(_flipImage)
@@ -141,7 +142,7 @@ void animFinished()
 public Image getImage(Puppet aPuppet, PuppetAction anAction)
 {
     ActionView actView = new ActionView(aPuppet);
-    actView._pupHeight = 200;
+    actView.setPuppetHeight(200);
     actView.setPuppet(aPuppet);
     actView.setPosable(true);
     actView.setAction(anAction);
@@ -152,7 +153,7 @@ public Image getImage(Puppet aPuppet, PuppetAction anAction)
     List <Image> images = new ArrayList();
     for(int i=0; i<frameCount; i++) {
         actView.setActionTime(i*25);
-        actView._physRunner.resolveMouseJoints();
+        actView.finishPose();
         Image img = ViewUtils.getImage(actView);
         images.add(img);
     }

@@ -1,4 +1,4 @@
-package puppets;
+package puppets.puppet;
 import snap.gfx.*;
 import snap.view.*;
 
@@ -211,6 +211,14 @@ void timerFired()
     // If beyond Action.MaxTime, stop anim
     if(!_loops && time>_action.getMaxTime())
         getEnv().runLater(() -> stopAction());
+}
+
+/**
+ * Finishes posing.
+ */
+public void finishPose()
+{
+    _physRunner.resolveMouseJoints();
 }
 
 }

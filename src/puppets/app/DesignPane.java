@@ -1,5 +1,6 @@
-package puppets;
+package puppets.app;
 import java.util.*;
+import puppets.puppet.*;
 import snap.gfx.*;
 import snap.view.*;
 
@@ -8,8 +9,8 @@ import snap.view.*;
  */
 public class DesignPane extends ViewOwner {
 
-    // The DocPane
-    DocPane            _docPane;
+    // The AppPane
+    AppPane            _appPane;
 
     // The PuppetView
     PuppetView         _pupView;
@@ -27,9 +28,9 @@ public class DesignPane extends ViewOwner {
 /**
  * Creates a DesignPane.
  */
-public DesignPane(DocPane aDP)
+public DesignPane(AppPane aAP)
 {
-    _docPane = aDP;
+    _appPane = aAP;
 }
 
 /**
@@ -85,7 +86,7 @@ public void puppetViewMousePressed(ViewEvent anEvent)
 protected View createUI()
 {
     // Create PuppetView
-    _pupView = new PuppetView(_docPane._puppet);
+    _pupView = new PuppetView(_appPane._puppet);
     _pupView.setBorder(Color.LIGHTGRAY, 1);
     
     // Create PuppetBox
@@ -190,7 +191,7 @@ void setPuppetPartImage(String aName, Image anImage)
     Image img2 = Image.get(w, h, true);
     Painter pntr = img2.getPainter();
     pntr.drawImage(anImage, 0, 0, w, h);
-    part._img = img2;
+    part.setImage(img2);
     _pupView.rebuildChildren();
 }
 

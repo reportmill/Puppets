@@ -1,4 +1,4 @@
-package puppets;
+package puppets.puppet;
 import snap.util.*;
 
 /**

@@ -1,4 +1,4 @@
-package puppets;
+package puppets.puppet;
 import java.util.*;
 import snap.util.*;
 import snap.web.WebURL;
@@ -12,7 +12,7 @@ public class PuppetActions {
     List <PuppetAction>  _actions;
     
     // The file path
-    String               _filePath = DocPane.ROOT + "chars/HumanActions.xml";
+    String               _filePath = puppets.app.DocPane.ROOT + "chars/HumanActions.xml";
     
 /**
  * Returns the list of actions.
@@ -93,7 +93,7 @@ protected List <PuppetAction> loadActions()
 /**
  * Saves actions to file.
  */
-protected void saveActions()
+public void saveActions()
 {
     if(SnapUtils.isTeaVM) return;
     

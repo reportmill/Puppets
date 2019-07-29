@@ -1,15 +1,16 @@
-package puppets;
+package puppets.app;
 import java.util.List;
 import snap.view.*;
 import snap.viewx.DialogBox;
+import puppets.puppet.*;
 
 /**
  * A class to manage UI to create and edit puppet animations.
  */
 public class ActionPane extends ViewOwner {
 
-    // The DocPane
-    DocPane                  _docPane;
+    // The AppPane
+    AppPane                 _appPane;
     
     // The puppet action view
     ActionView               _actView;
@@ -29,7 +30,7 @@ public class ActionPane extends ViewOwner {
 /**
  * Creates ActionPane.
  */
-public ActionPane(DocPane aDP)  { _docPane = aDP; }
+public ActionPane(AppPane aAP)  { _appPane = aAP; }
 
 /**
  * Returns the puppet.
@@ -67,7 +68,7 @@ void setActionAndMove(PuppetAction anAction, PuppetMove aMove)
 protected void initUI()
 {
     // Create ActionView
-    _actView = new ActionView(_docPane._puppet);
+    _actView = new ActionView(_appPane._puppet);
     _actView.addEventFilter(e -> _actView.setTimeless(true), MouseRelease);
     _actView.addPropChangeListener(pc -> resetLater(), ActionView.MoveIndex_Prop);
     
@@ -138,7 +139,7 @@ protected void respondUI(ViewEvent anEvent)
         
     // Handle AddActionButton
     if(anEvent.equals("AddActionButton")) {
-        String name = DialogBox.showInputDialog(_docPane.getUI(), "Add Action", "Enter Action Name:", "Untitled");
+        String name = DialogBox.showInputDialog(_appPane.getUI(), "Add Action", "Enter Action Name:", "Untitled");
         if(name==null || name.length()==0) return;
         PuppetAction action = new PuppetAction(name);
         _actions.addAction(action);
@@ -173,7 +174,7 @@ protected void respondUI(ViewEvent anEvent)
     // Handle AddMoveButton
     if(anEvent.equals("AddMoveButton")) {
         PuppetAction action = _actionList.getSelItem(); if(action==null) return;
-        String name = DialogBox.showInputDialog(_docPane.getUI(), "Add Move", "Enter Pose Name:", "Untitled");
+        String name = DialogBox.showInputDialog(_appPane.getUI(), "Add Move", "Enter Pose Name:", "Untitled");
         if(name==null || name.length()==0) return;
         PuppetPose pose = action.getPoseForName(name);
         if(pose==null) { pose = _actView.getPose(); pose.setName(name); }

@@ -1,4 +1,4 @@
-package puppets;
+package puppets.puppet;
 import java.util.*;
 import snap.gfx.*;
 import snap.view.*;
@@ -53,7 +53,7 @@ public Puppet getPuppet()  { return _puppet; }
 /**
  * Sets the puppet.
  */
-protected void setPuppet(Puppet aPuppet)
+public void setPuppet(Puppet aPuppet)
 {
     // Set puppet
     _puppet = aPuppet;
@@ -64,9 +64,14 @@ protected void setPuppet(Puppet aPuppet)
 }
 
 /**
+ * Sets the puppet height.
+ */
+public void setPuppetHeight(double aHeight)  { _pupHeight = aHeight; }
+
+/**
  * Rebuilds children.
  */
-protected void rebuildChildren()
+public void rebuildChildren()
 {
     PuppetPart arm = _puppet.getPart(Puppet.RArm);
     PuppetPart armTop = _puppet.getPart(Puppet.RArmTop);

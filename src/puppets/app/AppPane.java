@@ -1,11 +1,12 @@
-package puppets;
+package puppets.app;
+import puppets.puppet.*;
 import snap.util.SnapUtils;
 import snap.view.*;
 
 /**
  * The top level document UI management class for displaying and editing puppets and actions.
  */
-public class DocPane extends ViewOwner {
+public class AppPane extends ViewOwner {
     
     // The Puppet
     Puppet             _puppet;
@@ -23,12 +24,12 @@ public class DocPane extends ViewOwner {
     SpritePane         _spritePane;
     
     // Constants
-    static String ROOT = "/Temp/ComicLib/";
+    public static String ROOT = "/Temp/ComicLib/";
     
 /**
- * Creates a new DocPane.
+ * Creates a new AppPane.
  */
-public DocPane()
+public AppPane()
 {
     if(SnapUtils.isTeaVM) ROOT = "http://reportmill.com/ComicLib/";
 }

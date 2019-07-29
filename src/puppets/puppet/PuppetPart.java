@@ -1,4 +1,4 @@
-package puppets;
+package puppets.puppet;
 import snap.gfx.*;
 
 /**
@@ -29,6 +29,11 @@ public void setName(String aName)  { _name = aName; }
  * Returns the image.
  */
 public Image getImage()  { return _img!=null? _img : (_img=getImageImpl()); }
+
+/**
+ * Sets the image.
+ */
+public void setImage(Image anImage)  { _img = anImage; }
 
 /**
  * Returns the image.

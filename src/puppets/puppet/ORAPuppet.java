@@ -1,8 +1,8 @@
-package puppets;
+package puppets.puppet;
 import java.util.*;
 import snap.gfx.*;
-import puppets.ORAReader.Layer;
-import puppets.ORAReader.Stack;
+import puppets.puppet.ORAReader.Layer;
+import puppets.puppet.ORAReader.Stack;
 
 /**
  * A Puppet subclass that reads from ORA (OpenRaster) file.
