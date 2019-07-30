@@ -5,9 +5,9 @@ import snap.gfx.*;
 import snap.view.*;
 
 /**
- * A class to manage display of Puppet.
+ * A class to manage editing of Puppet.
  */
-public class DesignPane extends ViewOwner {
+public class EditorPane extends ViewOwner {
 
     // The AppPane
     AppPane            _appPane;
@@ -26,9 +26,9 @@ public class DesignPane extends ViewOwner {
     static Effect SELECT_EFFECT = new ShadowEffect(8, SELECT_COLOR, 0, 0);
 
 /**
- * Creates a DesignPane.
+ * Creates a EditorPane.
  */
-public DesignPane(AppPane aAP)
+public EditorPane(AppPane aAP)
 {
     _appPane = aAP;
 }
@@ -81,45 +81,18 @@ public void puppetViewMousePressed(ViewEvent anEvent)
 }
 
 /**
- * Creates the UI.
- */
-protected View createUI()
-{
-    // Create PuppetView
-    _pupView = new PuppetView(_appPane._puppet);
-    _pupView.setBorder(Color.LIGHTGRAY, 1);
-    
-    // Create PuppetBox
-    BoxView pupBox = new BoxView(_pupView); pupBox.setGrowWidth(true);
-    pupBox.setFill(Color.WHITE); pupBox.setBorder(Color.BLACK, 1);
-    
-    // Create Parts Label
-    Label partsLabel = new Label("Puppet Parts:"); partsLabel.setPadding(4,4,4,4);
-    partsLabel.setBorder(Border.createLoweredBevelBorder());
-    partsLabel.setFont(new Font("Arial Bold", 20));
-    
-    // Create/configure PartsList ListView
-    _partsList = new ListView(); _partsList.setName("PartsList"); _partsList.setGrowHeight(true);
-    
-    // Create ToolsColView to hold puppet inspector UI
-    ColView toolsColView = new ColView(); toolsColView.setPadding(0,8,8,8);
-    toolsColView.setSpacing(5); toolsColView.setFillWidth(true); toolsColView.setPrefWidth(300);
-    toolsColView.addChild(partsLabel);
-    toolsColView.addChild(_partsList);
-    
-    RowView mainRowView = new RowView(); mainRowView.setGrowWidth(true); mainRowView.setFillHeight(true);
-    mainRowView.addChild(toolsColView);
-    mainRowView.addChild(pupBox);
-    return mainRowView;
-}
-
-/**
  * Initialize UI.
  */
 protected void initUI()
 {
     // Configure PupView
+    _pupView = new PuppetView(_appPane._puppet);
+    _pupView.setBorder(Color.LIGHTGRAY, 1);
     _pupView.addEventHandler(e -> puppetViewMousePressed(e), MousePress);
+    
+    // Get PuppetBox and add PupView
+    BoxView pupBox = getView("PuppetBox", BoxView.class);
+    pupBox.setContent(_pupView);
     
     // Sets PartsList Items
     Puppet puppet = _pupView.getPuppet();
@@ -127,6 +100,7 @@ protected void initUI()
     Collections.addAll(partNames, puppet.getPartNames());
     Collections.addAll(partNames, puppet.getJointNames());
     Collections.addAll(partNames, puppet.getMarkerNames());
+    _partsList = getView("PartsList", ListView.class);
     _partsList.setItems(partNames);
     
     // Enable PupView drag events

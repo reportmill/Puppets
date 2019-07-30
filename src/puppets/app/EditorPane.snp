@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RowView GrowWidth="true" FillHeight="true">
+  <ColView PrefWidth="300" Padding="0,8,8,8" Spacing="5" FillWidth="true">
+    <Label Padding="4" text="Puppet Parts:">
+      <BevelBorder />
+      <font name="Arial Bold" size="20" />
+    </Label>
+    <ListView Name="PartsList" GrowHeight="true">
+      <LineBorder Color="#c0c0c0" />
+    </ListView>
+  </ColView>
+  <BoxView Name="PuppetBox" GrowWidth="true">
+    <LineBorder />
+    <color value="#ffffff" />
+    <View PrefWidth="428.864" PrefHeight="600.307">
+      <LineBorder Color="#c0c0c0" />
+    </View>
+  </BoxView>
+</RowView>

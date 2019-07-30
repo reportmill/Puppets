@@ -14,8 +14,8 @@ public class AppPane extends ViewOwner {
     // The view that holds the document
     BoxView            _docBox;
     
-    // The PuppetView
-    DesignPane         _designPane;
+    // The EditorPane
+    EditorPane         _editorPane;
     
     // The ActionPane
     ActionPane         _actionPane;
@@ -41,19 +41,19 @@ public void open(String aSource)
 {
     _puppet = new ORAPuppet(aSource);
     
-    showDisplayPane();
+    showEditorPane();
 }
 
 /**
- * Shows the DisplayPane.
+ * Shows the EditorPane.
  */
-public void showDisplayPane()
+public void showEditorPane()
 {
     _docBox.removeChildren();
     
-    _designPane = new DesignPane(this);
-    _docBox.setContent(_designPane.getUI());
-    setViewValue("DisplayButton", true);
+    _editorPane = new EditorPane(this);
+    _docBox.setContent(_editorPane.getUI());
+    setViewValue("PuppetButton", true);
 }
 
 /**
@@ -96,8 +96,8 @@ protected void initUI()
  */
 protected void respondUI(ViewEvent anEvent)
 {
-    // Handle DisplayButton, ActionButton, SpriteButton
-    if(anEvent.equals("DisplayButton")) showDisplayPane();
+    // Handle PuppetButton, ActionButton, SpriteButton
+    if(anEvent.equals("PuppetButton")) showEditorPane();
     if(anEvent.equals("ActionButton")) showActionPane();
     if(anEvent.equals("SpriteButton")) showSpritePane();
         
