@@ -51,20 +51,7 @@ protected PuppetPart createPart(String aName)
 {
     // Get layer for part name
     String lname = getLayerNameForPuppetName(aName);
-    Layer layer = getLayerForPartName(lname);
-    if(layer==null) {
-    
-        if(aName==Puppet.RArmTop || aName==Puppet.RArmBtm)
-            return splitPartAroundJoint(Puppet.RArm, Puppet.RArmMid_Joint, aName);
-        if(aName==Puppet.RLegTop || aName==Puppet.RLegBtm)
-            return splitPartAroundJoint(Puppet.RLeg, Puppet.RLegMid_Joint, aName);
-        if(aName==Puppet.LArmTop || aName==Puppet.LArmBtm)
-            return splitPartAroundJoint(Puppet.LArm, Puppet.LArmMid_Joint, aName);
-        if(aName==Puppet.LLegTop || aName==Puppet.LLegBtm)
-            return splitPartAroundJoint(Puppet.LLeg, Puppet.LLegMid_Joint, aName);
-            
-        System.out.println("ORAPuppet.createPart: Layer not found for part " + aName); return null;
-    }
+    Layer layer = getLayerForPartName(lname); if(layer==null) return null;
     
     // Create part
     PuppetPart part = new ORAPart(aName, layer);
@@ -78,8 +65,7 @@ protected PuppetPart createJoint(String aName)
 {
     // Get layer for part name
     String lname = getLayerNameForPuppetName(aName);
-    Layer layer = getLayerForJointName(lname);
-    if(layer==null) { System.out.println("ORAPuppet.createJoint: Layer not found for joint " + aName); return null; }
+    Layer layer = getLayerForJointName(lname); if(layer==null) return null;
     
     // Create part
     PuppetPart part = new ORAPart(aName, layer); part._img = aName==Anchor_Marker? getAnchorImage() : getMarkerImage();
@@ -175,69 +161,6 @@ public Layer getLayerForPartName(String aName)
  * Returns the layer for given joint name.
  */
 public Layer getLayerForJointName(String aName)  { return _jointStack.getLayer(aName); }
-
-/**
- * Splits a part around joint - for when given arm/leg as one piece instead of top/bottom.
- */
-PuppetPart splitPartAroundJoint(String aPartName, String aJointName, String aName2)
-{
-    boolean isTop = aName2.contains("Top");
-    PuppetPart part = getPart(aPartName);
-    if(part==null) { System.err.println("ORAPuppet.splitPart: Part not found " + aPartName); return null; }
-    PuppetPart joint = getJoint(aJointName);
-    if(joint==null) { System.err.println("ORAPuppet.splitView: Joint not found " + aJointName); return null; }
-    
-    Rect pbnds = getSplitBoundsForView(part, joint, isTop);
-    Rect ibnds = new Rect(pbnds.x - part.getX(), pbnds.y - part.getY(), pbnds.width, pbnds.height);
-    
-    Image img = part.getImage();
-    Image img1 = img.getSubimage(ibnds.x, ibnds.y, ibnds.width, ibnds.height);
-    
-    // Create/add new parts
-    PuppetPart np = new ORAPart(aName2, null); np._x = pbnds.x; np._y = pbnds.y; np._img = img1;
-    return np;
-}
-
-/**
- * Returns the partial rect when splitting an arm/leg joint in two around joint for above method.
- */
-Rect getSplitBoundsForView(PuppetPart aPart, PuppetPart aJoint, boolean doTop)
-{
-    // Get part and joint bounds
-    Rect pbnds = aPart.getBounds(), jbnds = aJoint.getBounds();
-    double x = pbnds.x, y = pbnds.y, w = pbnds.width, h = pbnds.height, asp = w/h;
-    
-    // Handle horizontal arm/let
-    if(asp<.3333) {
-        if(doTop) h = jbnds.getMaxY() - y;
-        else { y = jbnds.y; h = pbnds.getMaxY() - y; }
-    }
-    
-    // Handle diagonal arm/leg
-    else if(asp<3) {
-        
-        // Handle Right arm/leg
-        if(aPart.getName().startsWith("R")) {
-            if(doTop) { x = jbnds.x; w = pbnds.getMaxX() - x; h = jbnds.getMaxY() - y; }
-            else { y = jbnds.y; w = jbnds.getMaxX() - x; h = pbnds.getMaxY() - y; }
-        }
-        
-        // Handle Left arm/leg
-        else {
-            if(doTop) { w = jbnds.getMaxX() - x; h = jbnds.getMaxY() - y; }
-            else { x = jbnds.x; y = jbnds.y; w = pbnds.getMaxX() - x; h = pbnds.getMaxY() - y; }
-        }
-    }
-    
-    // Handle vertial arm/leg
-    else {
-        if(doTop) w = jbnds.getMaxX() - x;
-        else { x = jbnds.x; w = pbnds.getMaxX() - x; }
-    }
-    
-    // Return rect
-    return new Rect(x, y, w, h);
-}
 
 /**
  * A Puppet.Part subclass for ORAPuppet.

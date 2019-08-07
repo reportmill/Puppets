@@ -61,6 +61,85 @@ public Rect getBounds()  { return new Rect(_x, _y, getImage().getWidth(), getIma
 public Image[] getLoadImages()  { return new Image[0]; }
 
 /**
+ * Tries to create a missing part from an existing/composite part.
+ */
+static PuppetPart createDerivedPart(Puppet aPuppet, String aName)
+{
+    if(aName==Puppet.RArmTop || aName==Puppet.RArmBtm)
+        return PuppetPart.splitPartAroundJoint(aPuppet, Puppet.RArm, Puppet.RArmMid_Joint, aName);
+    if(aName==Puppet.RLegTop || aName==Puppet.RLegBtm)
+        return PuppetPart.splitPartAroundJoint(aPuppet, Puppet.RLeg, Puppet.RLegMid_Joint, aName);
+    if(aName==Puppet.LArmTop || aName==Puppet.LArmBtm)
+        return PuppetPart.splitPartAroundJoint(aPuppet, Puppet.LArm, Puppet.LArmMid_Joint, aName);
+    if(aName==Puppet.LLegTop || aName==Puppet.LLegBtm)
+        return PuppetPart.splitPartAroundJoint(aPuppet, Puppet.LLeg, Puppet.LLegMid_Joint, aName);
+    return null;
+}
+
+/**
+ * Splits a part around joint - for when given arm/leg as one piece instead of top/bottom.
+ */
+static PuppetPart splitPartAroundJoint(Puppet aPuppet, String aPartName, String aJointName, String aName2)
+{
+    boolean isTop = aName2.contains("Top");
+    PuppetPart part = aPuppet.getPart(aPartName);
+    if(part==null) { System.err.println("ORAPuppet.splitPart: Part not found " + aPartName); return null; }
+    PuppetPart joint = aPuppet.getJoint(aJointName);
+    if(joint==null) { System.err.println("ORAPuppet.splitView: Joint not found " + aJointName); return null; }
+    
+    Rect pbnds = getSplitBoundsForView(part, joint, isTop);
+    Rect ibnds = new Rect(pbnds.x - part.getX(), pbnds.y - part.getY(), pbnds.width, pbnds.height);
+    
+    Image img = part.getImage();
+    Image img1 = img.getSubimage(ibnds.x, ibnds.y, ibnds.width, ibnds.height);
+    
+    // Create/add new parts
+    PuppetPart np = new PuppetPart(); np.setName(aName2); np._x = pbnds.x; np._y = pbnds.y; np._img = img1;
+    return np;
+}
+
+/**
+ * Returns the partial rect when splitting an arm/leg joint in two around joint for above method.
+ */
+static Rect getSplitBoundsForView(PuppetPart aPart, PuppetPart aJoint, boolean doTop)
+{
+    // Get part and joint bounds
+    Rect pbnds = aPart.getBounds(), jbnds = aJoint.getBounds();
+    double x = pbnds.x, y = pbnds.y, w = pbnds.width, h = pbnds.height, asp = w/h;
+    
+    // Handle horizontal arm/let
+    if(asp<.3333) {
+        if(doTop) h = jbnds.getMaxY() - y;
+        else { y = jbnds.y; h = pbnds.getMaxY() - y; }
+    }
+    
+    // Handle diagonal arm/leg
+    else if(asp<3) {
+        
+        // Handle Right arm/leg
+        if(aPart.getName().startsWith("R")) {
+            if(doTop) { x = jbnds.x; w = pbnds.getMaxX() - x; h = jbnds.getMaxY() - y; }
+            else { y = jbnds.y; w = jbnds.getMaxX() - x; h = pbnds.getMaxY() - y; }
+        }
+        
+        // Handle Left arm/leg
+        else {
+            if(doTop) { w = jbnds.getMaxX() - x; h = jbnds.getMaxY() - y; }
+            else { x = jbnds.x; y = jbnds.y; w = pbnds.getMaxX() - x; h = pbnds.getMaxY() - y; }
+        }
+    }
+    
+    // Handle vertial arm/leg
+    else {
+        if(doTop) w = jbnds.getMaxX() - x;
+        else { x = jbnds.x; w = pbnds.getMaxX() - x; }
+    }
+    
+    // Return rect
+    return new Rect(x, y, w, h);
+}
+
+/**
  * Standard toString implementation.
  */
 public String toString()  { return "Part: name=" + _name + ", x=" + _x + ", y=" + _y; }

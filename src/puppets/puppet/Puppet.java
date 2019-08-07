@@ -104,8 +104,18 @@ public void setName(String aName)  { _name = aName; }
  */
 public PuppetPart getPart(String aName)
 {
-    PuppetPart part = _parts.get(aName);
-    if(part==null) _parts.put(aName, part = createPart(aName));
+    // Get cached part (just return if found)
+    PuppetPart part = _parts.get(aName); if(part!=null) return part;
+    
+    // Try to create part
+    part = createPart(aName);
+    if(part==null)
+        part = createDerivedPart(aName);
+    if(part==null) {
+        System.out.println("Puppet.getPart: part not found " + aName); return null; }
+    
+    // Add part to cache and return
+    _parts.put(aName, part);
     return part;
 }
 
@@ -115,12 +125,25 @@ public PuppetPart getPart(String aName)
 protected PuppetPart createPart(String aName)  { return null; }
 
 /**
+ * Tries to create a missing part from an existing/composite part.
+ */
+protected PuppetPart createDerivedPart(String aName)  { return PuppetPart.createDerivedPart(this, aName); }
+
+/**
  * Returns the joint for given name.
  */
 public PuppetPart getJoint(String aName)
 {
-    PuppetPart joint = _joints.get(aName);
-    if(joint==null) _joints.put(aName, joint = createJoint(aName));
+    // Get cached joint (just return if found)
+    PuppetPart joint = _joints.get(aName); if(joint!=null) return joint;
+    
+    // Try to create joint
+    joint = createJoint(aName);
+    if(joint==null) {
+        System.out.println("Puppet.getJoint: part not found " + aName); return null; }
+    
+    // Add joint to cache and return
+    _joints.put(aName, joint);
     return joint;
 }
 
