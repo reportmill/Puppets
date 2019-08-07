@@ -1,8 +1,8 @@
 package puppets.puppet;
-import java.util.*;
 import snap.gfx.*;
 import puppets.puppet.ORAReader.Layer;
 import puppets.puppet.ORAReader.Stack;
+import snap.util.FilePathUtils;
 
 /**
  * A Puppet subclass that reads from ORA (OpenRaster) file.
@@ -33,6 +33,10 @@ public void setSource(String aPath)
 {
     super.setSource(aPath);
     ORAReader rdr = new ORAReader();
+    
+    // Get name
+    String name = FilePathUtils.getFileName(aPath); if(name.startsWith("CT")) name = name.substring(2);
+    setName(name);
     
     // Get stack, body stack and joint stack
     _stack = rdr.readFile(aPath);

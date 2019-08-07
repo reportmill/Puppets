@@ -12,6 +12,9 @@ public class Puppet {
     // The source of puppet
     Object                   _source;
     
+    // The puppet name
+    String                   _name;
+    
     // Cached parts
     Map <String,PuppetPart>  _parts = new HashMap();
     
@@ -85,6 +88,16 @@ public Object getSource()  { return _source; }
  * Sets the source.
  */
 public void setSource(Object aSource)  { _source = aSource; }
+
+/**
+ * Returns the puppet name.
+ */
+public String getName()  { return _name; }
+
+/**
+ * Sets the puppet name.
+ */
+public void setName(String aName)  { _name = aName; }
 
 /**
  * Returns the part for given name.

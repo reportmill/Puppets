@@ -39,7 +39,11 @@ public AppPane()
  */
 public void open(String aSource)
 {
-    _puppet = new ORAPuppet(aSource);
+    String src = aSource;
+    if(src.equals("Man")) src = ROOT + "chars/CTMan";
+    if(src.equals("Lady")) src = ROOT + "chars/CTLady";
+    
+    _puppet = new ORAPuppet(src);
     
     showEditorPane();
 }
@@ -100,10 +104,6 @@ protected void respondUI(ViewEvent anEvent)
     if(anEvent.equals("PuppetButton")) showEditorPane();
     if(anEvent.equals("ActionButton")) showActionPane();
     if(anEvent.equals("SpriteButton")) showSpritePane();
-        
-    // Handle LadyButton
-    if(anEvent.equals("LadyButton")) open(ROOT + "chars/CTLady");
-    if(anEvent.equals("ManButton")) open(ROOT + "chars/CTMan");
 }
 
 }
