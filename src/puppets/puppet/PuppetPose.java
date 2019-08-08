@@ -171,6 +171,7 @@ public XMLElement toXML(XMLArchiver anArchiver)
     // Iterate over markers and set
     for(String key : getMarkers().keySet()) { Point pnt = getMarkerPoint(key);
         String val = StringUtils.formatNum("#.##", pnt.x) + ' ' + StringUtils.formatNum("#.##", pnt.y);
+        key = key.substring(0, key.length() - "Joint".length());
         e.add(key,val);
     }
     
@@ -192,6 +193,7 @@ public PuppetPose fromXML(XMLArchiver anArchiver, XMLElement anElement)
     for(XMLAttribute attr : anElement.getAttributes()) {
         String key = attr.getName(), valStr = attr.getValue(); if(key.equals("Name")) continue;
         if(key.endsWith("Marker")) key = key.replace("Marker", "Joint"); // This can go soon
+        else if(!key.endsWith("Joint")) key += "Joint"; key = key.intern();
         String valStrs[] = valStr.split("\\s");
         Double val0 = Double.valueOf(valStrs[0]), val1 = Double.valueOf(valStrs[1]);
         Point pnt = new Point(val0, val1);
