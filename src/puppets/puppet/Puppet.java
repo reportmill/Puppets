@@ -15,11 +15,14 @@ public class Puppet {
     // The puppet name
     String                   _name;
     
+    // The description of puppet parts and joints
+    PuppetSchema             _schema = new PuppetSchema();
+    
     // Cached parts
     Map <String,PuppetPart>  _parts = new HashMap();
     
     // Cached joints
-    Map <String,PuppetPart>  _joints = new HashMap();
+    Map <String,PuppetJoint> _joints = new HashMap();
     
     // The bounds
     Rect                     _bounds;
@@ -97,6 +100,11 @@ public String getName()  { return _name; }
 public void setName(String aName)  { _name = aName; }
 
 /**
+ * Returns the schema.
+ */
+public PuppetSchema getSchema()  { return _schema; }
+
+/**
  * Returns the part for given name.
  */
 public PuppetPart getPart(String aName)
@@ -129,10 +137,10 @@ protected PuppetPart createDerivedPart(String aName)  { return PuppetPart.create
 /**
  * Returns the joint for given name.
  */
-public PuppetPart getJoint(String aName)
+public PuppetJoint getJoint(String aName)
 {
     // Get cached joint (just return if found)
-    PuppetPart joint = _joints.get(aName); if(joint!=null) return joint;
+    PuppetJoint joint = _joints.get(aName); if(joint!=null) return joint;
     
     // Try to create joint
     joint = createJoint(aName);
@@ -147,139 +155,52 @@ public PuppetPart getJoint(String aName)
 /**
  * Returns the joint for given name.
  */
-protected PuppetPart createJoint(String aName)  { return null; }
+protected PuppetJoint createJoint(String aName)  { return null; }
 
 /**
  * Returns the puppet part names in paint order.
  */
-public String[] getPartNames()
-{
-    return new String[] {
-        RArmTop, RArmBtm, RHand, RLegTop, RLegBtm, RFoot, Torso, Head,
-        LLegTop, LLegBtm, LFoot, LArmTop, LArmBtm, LHand };
-}
+public String[] getPartNames()  { return _schema.getPartNames(); }
 
 /**
  * Returns the puppet joint names.
  */
-public String[] getJointNames()
-{
-    return new String[] { Head_Joint,
-        RArm_Joint, RArmMid_Joint, RHand_Joint, RLeg_Joint, RLegMid_Joint, RFoot_Joint,
-        LArm_Joint, LArmMid_Joint, LHand_Joint, LLeg_Joint, LLegMid_Joint, LFoot_Joint };
-}
+public String[] getJointNames()  { return _schema.getJointNames(); }
 
 /**
  * Returns the puppet joint names.
  */
-public String[] getRootJointNames()
-{
-    return new String[] { Head_Joint, RArm_Joint, RLeg_Joint, LArm_Joint, LLeg_Joint };
-}
+public String[] getRootJointNames()  { return _schema.getRootJointNames(); }
 
 /**
  * Returns the puppet marker names.
  */
-public String[] getMarkerNames()
-{
-    return new String[] { Anchor_Marker, HeadTop_Marker,
-        RHandEnd_Marker, RFootEnd_Marker, LHandEnd_Marker, LFootEnd_Marker };
-}
+public String[] getMarkerNames()  { return _schema.getMarkerNames(); }
 
 /**
  * Returns the puppet joint and marker names that define a pose for puppet.
  */
-public String[] getPoseKeys()
-{
-    return new String[] { Puppet.HeadTop_Marker, Puppet.Head_Joint,
-        Puppet.RArm_Joint, Puppet.RArmMid_Joint, Puppet.RHand_Joint, Puppet.RHandEnd_Marker,
-        Puppet.RLeg_Joint, Puppet.RLegMid_Joint, Puppet.RFoot_Joint, Puppet.RFootEnd_Marker,
-        Puppet.LArm_Joint, Puppet.LArmMid_Joint, Puppet.LHand_Joint, Puppet.LHandEnd_Marker,
-        Puppet.LLeg_Joint, Puppet.LLegMid_Joint, Puppet.LFoot_Joint, Puppet.LFootEnd_Marker };
-}
+public String[] getPoseKeys()  { return _schema.getPoseKeys(); }
 
 /**
  * Returns names of parts linked to given joint/marker name.
  */
-public String[] getLinkNamesForJointOrMarker(String aName)
-{
-    switch(aName) {
-        
-        // Joints
-        case Head_Joint: return new String[] { Head, Torso };
-        case RArm_Joint: return new String[] { Torso, RArmTop };
-        case RArmMid_Joint: return new String[] { RArmTop, RArmBtm };
-        case RHand_Joint: return new String[] { RArmBtm, RHand };
-        case RLeg_Joint: return new String[] { Torso, RLegTop };
-        case RLegMid_Joint: return new String[] { RLegTop, RLegBtm };
-        case RFoot_Joint: return new String[] { RLegBtm, RFoot };
-        case LArm_Joint: return new String[] { Torso, LArmTop };
-        case LArmMid_Joint: return new String[] { LArmTop, LArmBtm };
-        case LHand_Joint: return new String[] { LArmBtm, LHand };
-        case LLeg_Joint: return new String[] { Torso, LLegTop };
-        case LLegMid_Joint: return new String[] { LLegTop, LLegBtm };
-        case LFoot_Joint: return new String[] { LLegBtm, LFoot };
-        
-        // Markers
-        case HeadTop_Marker: return new String[] { Head };
-        case RHandEnd_Marker: return new String[] { RHand };
-        case RFootEnd_Marker: return new String[] { RFoot };
-        case LHandEnd_Marker: return new String[] { LHand };
-        case LFootEnd_Marker: return new String[] { LFoot };
-        default: return new String[0];
-    }
-}
+public String[] getLinkNamesForJointOrMarker(String aName)  { return _schema.getLinkNamesForJointOrMarker(aName); }
 
 /**
  * Returns names of parts linked to given joint/marker name.
  */
-public String[] getOuterJointNamesForPartName(String aName)
-{
-    switch(aName) {
-        case RArmTop: return new String[] { RArmMid_Joint, RHand_Joint };
-        case RArmBtm: return new String[] { RHand_Joint };
-        case RLegTop: return new String[] { RLegMid_Joint, RFoot_Joint };
-        case RLegBtm: return new String[] { RFoot_Joint };
-        case LArmTop: return new String[] { LArmMid_Joint, LHand_Joint };
-        case LArmBtm: return new String[] { LHand_Joint };
-        case LLegTop: return new String[] { LLegMid_Joint, LFoot_Joint };
-        case LLegBtm: return new String[] { LFoot_Joint };
-        default: return new String[0];
-    }
-}
+public String[] getOuterJointNamesForPartName(String aName)  { return _schema.getOuterJointNamesForPartName(aName); }
 
 /**
  * Returns names of parts linked to given joint/marker name.
  */
-public String getNextJointNameForName(String aName)
-{
-    switch(aName) {
-        case Head_Joint: case Head: return HeadTop_Marker;
-        case RArm_Joint: case RArm: case RArmTop: return RArmMid_Joint;
-        case RArmMid_Joint: case RArmBtm: return RHand_Joint;
-        case RHand_Joint: case RHand: return RHandEnd_Marker;
-        case RLeg_Joint: case RLeg: case RLegTop: return RLegMid_Joint;
-        case RLegMid_Joint: case RLegBtm: return RFoot_Joint;
-        case RFoot_Joint: case RFoot: return RFootEnd_Marker;
-        case LArm_Joint: case LArm: case LArmTop: return LArmMid_Joint;
-        case LArmMid_Joint: case LArmBtm: return LHand_Joint;
-        case LHand_Joint: case LHand: return LHandEnd_Marker;
-        case LLeg_Joint: case LLeg: case LLegTop: return LLegMid_Joint;
-        case LLegMid_Joint: case LLegBtm: return LFoot_Joint;
-        case LFoot_Joint: case LFoot: return LFootEnd_Marker;
-        default: return null;
-    }
-}
-
-/**
- * Returns whether given name is joint name.
- */
-public boolean isJointName(String aName)  { return ArrayUtils.contains(getJointNames(), aName); }
+public String getNextJointNameForName(String aName)  { return _schema.getNextJointNameForName(aName); }
 
 /**
  * Returns whether given name is marker name.
  */
-public boolean isMarkerName(String aName)  { return ArrayUtils.contains(getMarkerNames(), aName); }
+public boolean isMarkerName(String aName)  { return _schema.isMarkerName(aName); }
 
 /**
  * Returns the bounds.

@@ -49,28 +49,19 @@ public void setSource(String aPath)
  */
 protected PuppetPart createPart(String aName)
 {
-    // Get layer for part name
     String lname = getLayerNameForPuppetName(aName);
     Layer layer = getLayerForPartName(lname); if(layer==null) return null;
-    
-    // Create part
-    PuppetPart part = new ORAPart(aName, layer);
-    return part;
+    return new ORAPart(aName, layer);
 }
 
 /**
  * Returns the joint for given name.
  */
-protected PuppetPart createJoint(String aName)
+protected PuppetJoint createJoint(String aName)
 {
-    // Get layer for part name
     String lname = getLayerNameForPuppetName(aName);
     Layer layer = getLayerForJointName(lname); if(layer==null) return null;
-    
-    // Create part
-    PuppetPart part = new ORAPart(aName, layer);
-    part._img = aName==Anchor_Marker? PuppetUtils.getAnchorImage() : PuppetUtils.getMarkerImage();
-    return part;
+    return new PuppetJoint(aName, layer.x, layer.y);
 }
 
 /**
@@ -164,18 +155,14 @@ public Layer getLayerForPartName(String aName)
 public Layer getLayerForJointName(String aName)  { return _jointStack.getLayer(aName); }
 
 /**
- * A Puppet.Part subclass for ORAPuppet.
+ * A PuppetPart subclass for ORAPuppet.
  */
 private class ORAPart extends PuppetPart {
     
     Layer  _lyr;
     
     /** Creates an ORAPart for given layer. */
-    public ORAPart(String aName, Layer aLayer)
-    {
-        _name = aName; _lyr = aLayer; if(aLayer==null) return;
-        _x = aLayer.x; _y = aLayer.y;
-    }
+    public ORAPart(String aName, Layer aLayer)  { _name = aName; _lyr = aLayer; _x = aLayer.x; _y = aLayer.y; }
         
     /** Returns the image. */
     protected Image getImageImpl()  { return _lyr.getImage(); }

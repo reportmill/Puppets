@@ -82,14 +82,14 @@ public void rebuildChildren()
     
     // Iterate over joints
     for(String jname : _puppet.getJointNames()) {
-        PuppetPart joint = _puppet.getJoint(jname);
+        PuppetJoint joint = _puppet.getJoint(jname);
         JointView jointView = new JointView(joint, false);
         addChild(jointView);
     }
     
     // Iterate over markers
     for(String pname : _puppet.getMarkerNames()) {
-        PuppetPart joint = _puppet.getJoint(pname);
+        PuppetJoint joint = _puppet.getJoint(pname);
         JointView jointView = new JointView(joint, true);
         addChild(jointView);
     }
@@ -215,10 +215,10 @@ protected static class PartView extends ImageView {
 protected static class JointView extends ImageView {
     
     // The PuppetJoint
-    PuppetPart     _joint;
+    PuppetJoint     _joint;
     
     /** Creates a JointView for given PuppetJoint. */
-    public JointView(PuppetPart aJoint, boolean isMarker)
+    public JointView(PuppetJoint aJoint, boolean isMarker)
     {
         _joint = aJoint; setImage(aJoint.getImage()); setName(aJoint.getName());
         setXY(aJoint.getX(), aJoint.getY()); setSize(getPrefSize());

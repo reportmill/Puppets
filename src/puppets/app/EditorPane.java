@@ -134,10 +134,7 @@ protected void initUI()
     
     // Get PartNames
     Puppet puppet = _pupView.getPuppet();
-    List <String> partNames = new ArrayList();
-    Collections.addAll(partNames, puppet.getPartNames());
-    Collections.addAll(partNames, puppet.getJointNames());
-    Collections.addAll(partNames, puppet.getMarkerNames());
+    String partNames[] = puppet.getSchema().getNodeNames();
     
     // Get/configure PartsList
     _partsList = getView("PartsList", ListView.class);

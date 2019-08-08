@@ -84,7 +84,7 @@ static PuppetPart splitPartAroundJoint(Puppet aPuppet, String aPartName, String 
     boolean isTop = aName2.contains("Top");
     PuppetPart part = aPuppet.getPart(aPartName);
     if(part==null) { System.err.println("ORAPuppet.splitPart: Part not found " + aPartName); return null; }
-    PuppetPart joint = aPuppet.getJoint(aJointName);
+    PuppetJoint joint = aPuppet.getJoint(aJointName);
     if(joint==null) { System.err.println("ORAPuppet.splitView: Joint not found " + aJointName); return null; }
     
     Rect pbnds = getSplitBoundsForView(part, joint, isTop);
@@ -101,7 +101,7 @@ static PuppetPart splitPartAroundJoint(Puppet aPuppet, String aPartName, String 
 /**
  * Returns the partial rect when splitting an arm/leg joint in two around joint for above method.
  */
-static Rect getSplitBoundsForView(PuppetPart aPart, PuppetPart aJoint, boolean doTop)
+static Rect getSplitBoundsForView(PuppetPart aPart, PuppetJoint aJoint, boolean doTop)
 {
     // Get part and joint bounds
     Rect pbnds = aPart.getBounds(), jbnds = aJoint.getBounds();
