@@ -40,10 +40,7 @@ public PuppetView(String aSource)
 /**
  * Creates a PuppetView.
  */
-public PuppetView(Puppet aPuppet)
-{
-    setPuppet(aPuppet);
-}
+public PuppetView(Puppet aPuppet)  { setPuppet(aPuppet); }
 
 /**
  * Returns the puppet.
@@ -73,28 +70,28 @@ public void setPuppetHeight(double aHeight)  { _pupHeight = aHeight; }
  */
 public void rebuildChildren()
 {
-    PuppetPart arm = _puppet.getPart(Puppet.RArm);
-    PuppetPart armTop = _puppet.getPart(Puppet.RArmTop);
-    
     // Remove children
     removeChildren();
     
     // Iterate over parts
     for(String pname : _puppet.getPartNames()) {
         PuppetPart part = _puppet.getPart(pname);
-        addImageViewForBodyPart(part);
+        ImageView partView = new PartView(part);
+        addChild(partView);
     }
     
     // Iterate over joints
     for(String jname : _puppet.getJointNames()) {
         PuppetPart joint = _puppet.getJoint(jname);
-        addImageViewForJoint(joint);
+        JointView jointView = new JointView(joint, false);
+        addChild(jointView);
     }
     
     // Iterate over markers
     for(String pname : _puppet.getMarkerNames()) {
-        PuppetPart part = _puppet.getJoint(pname);
-        addImageViewForBodyPart(part);
+        PuppetPart joint = _puppet.getJoint(pname);
+        JointView jointView = new JointView(joint, true);
+        addChild(jointView);
     }
     
     // Make Torso really dense
@@ -113,38 +110,6 @@ public void rebuildChildren()
     double ph = bnds.y*2 + bnds.height; ph *= _scale;
     setSize(pw, ph); setPrefSize(pw, ph);
     relayoutParent();
-}
-
-/**
- * Adds an image shape for given layer.
- */
-ImageView addImageViewForPart(PuppetPart aPart)
-{
-    ImageView iview = new ImageView(aPart.getImage()); iview.setName(aPart.getName());
-    iview.setXY(aPart.getX(), aPart.getY());
-    iview.setSize(iview.getPrefSize());
-    addChild(iview);
-    return iview;
-}
-
-/**
- * Adds an image shape for body part.
- */
-ImageView addImageViewForBodyPart(PuppetPart aPart)
-{
-    ImageView iview = addImageViewForPart(aPart);
-    iview.getPhysics(true).setGroupIndex(-1);
-    return iview;
-}
-
-/**
- * Adds an image shape for given joint.
- */
-ImageView addImageViewForJoint(PuppetPart aPart)
-{
-    ImageView iview = addImageViewForPart(aPart);
-    iview.getPhysics(true).setJoint(true);
-    return iview;
 }
 
 /**
@@ -202,7 +167,7 @@ public void setShowMarkers(boolean aValue)
     // Iterate over children and toggle visible if Joint Or Marker
     Puppet puppet = getPuppet();
     for(View child : getChildren()) {
-        if(puppet.isJointOrMarkerName(child.getName()))
+        if(child instanceof JointView)
             child.setVisible(aValue);
     }
 }
@@ -225,6 +190,41 @@ public void setPosable(boolean aValue)
     
     // Stop/clear PhysRunner
     else _physRunner = null; //_physRunner.setRunning(false);
+}
+
+/**
+ * A view to display puppet parts.
+ */
+protected static class PartView extends ImageView {
+    
+    // The PuppetPart
+    PuppetPart     _part;
+    
+    /** Creates a PartView for given PuppetPart. */
+    public PartView(PuppetPart aPart)
+    {
+        _part = aPart; setImage(aPart.getImage()); setName(aPart.getName());
+        setXY(aPart.getX(), aPart.getY()); setSize(getPrefSize());
+        getPhysics(true).setGroupIndex(-1);
+    }
+}
+
+/**
+ * A view to display puppet joints/markers.
+ */
+protected static class JointView extends ImageView {
+    
+    // The PuppetJoint
+    PuppetPart     _joint;
+    
+    /** Creates a JointView for given PuppetJoint. */
+    public JointView(PuppetPart aJoint, boolean isMarker)
+    {
+        _joint = aJoint; setImage(aJoint.getImage()); setName(aJoint.getName());
+        setXY(aJoint.getX(), aJoint.getY()); setSize(getPrefSize());
+        if(!isMarker) getPhysics(true).setJoint(true);
+        else getPhysics(true).setGroupIndex(-1);
+    }
 }
 
 }

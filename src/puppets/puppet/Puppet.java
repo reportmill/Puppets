@@ -282,11 +282,6 @@ public boolean isJointName(String aName)  { return ArrayUtils.contains(getJointN
 public boolean isMarkerName(String aName)  { return ArrayUtils.contains(getMarkerNames(), aName); }
 
 /**
- * Returns whether given name is marker name.
- */
-public boolean isJointOrMarkerName(String aName)  { return isJointName(aName) || isMarkerName(aName); }
-
-/**
  * Returns the bounds.
  */
 public Rect getBounds()
