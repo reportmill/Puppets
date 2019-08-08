@@ -72,47 +72,45 @@ String getLayerNameForPuppetName(String aName)
     switch(aName) {
         
         // Parts
-        case Puppet.Torso: return "Hip";
-        case Puppet.Head: return "RL_TalkingHead";
-        case Puppet.RArm: return "RArm";
-        case Puppet.RArmTop: return "RArmTop";
-        case Puppet.RArmBtm: return "RArmBtm";
-        case Puppet.RHand: return "RHand";
-        case Puppet.RLeg: return "RThigh";
-        case Puppet.RLegTop: return "RLegTop";
-        case Puppet.RLegBtm: return "RLegBtm";
-        case Puppet.RFoot: return "RFoot";
-        case Puppet.LArm: return "LArm";
-        case Puppet.LArmTop: return "LArmTop";
-        case Puppet.LArmBtm: return "LArmBtm";
-        case Puppet.LHand: return "LHand";
-        case Puppet.LLeg: return "LThigh";
-        case Puppet.LLegTop: return "LLegTop";
-        case Puppet.LLegBtm: return "LLegBtm";
-        case Puppet.LFoot: return "LFoot";
+        case PuppetSchema.Torso: return "Hip";
+        case PuppetSchema.Head: return "RL_TalkingHead";
+        case PuppetSchema.RArm: return "RArm";
+        case PuppetSchema.RArmTop: return "RArmTop";
+        case PuppetSchema.RArmBtm: return "RArmBtm";
+        case PuppetSchema.RHand: return "RHand";
+        case PuppetSchema.RLeg: return "RThigh";
+        case PuppetSchema.RLegTop: return "RLegTop";
+        case PuppetSchema.RLegBtm: return "RLegBtm";
+        case PuppetSchema.RFoot: return "RFoot";
+        case PuppetSchema.LArm: return "LArm";
+        case PuppetSchema.LArmTop: return "LArmTop";
+        case PuppetSchema.LArmBtm: return "LArmBtm";
+        case PuppetSchema.LHand: return "LHand";
+        case PuppetSchema.LLeg: return "LThigh";
+        case PuppetSchema.LLegTop: return "LLegTop";
+        case PuppetSchema.LLegBtm: return "LLegBtm";
+        case PuppetSchema.LFoot: return "LFoot";
         
         // Joints
-        case Puppet.Head_Joint: return "Head";
-        case Puppet.RArm_Joint: return "RArm";
-        case Puppet.RArmMid_Joint: return "RForearm";
-        case Puppet.RHand_Joint: return "RHand";
-        case Puppet.RLeg_Joint: return "RThigh";
-        case Puppet.RLegMid_Joint: return "RShank";
-        case Puppet.RFoot_Joint: return "RFoot";
-        case Puppet.LArm_Joint: return "LArm";
-        case Puppet.LArmMid_Joint: return "LForearm";
-        case Puppet.LHand_Joint: return "LHand";
-        case Puppet.LLeg_Joint: return "LThigh";
-        case Puppet.LLegMid_Joint: return "LShank";
-        case Puppet.LFoot_Joint: return "LFoot";
-        
-        // Landmarks
-        case Puppet.Anchor_Marker: return "ObjectPivot";
-        case Puppet.HeadTop_Marker: return "Head_Nub";
-        case Puppet.RHandEnd_Marker: return "RHand_Nub";
-        case Puppet.RFootEnd_Marker: return "RToe";
-        case Puppet.LHandEnd_Marker: return "LHand_Nub";
-        case Puppet.LFootEnd_Marker: return "LToe";
+        case PuppetSchema.Anchor_Joint: return "ObjectPivot";
+        case PuppetSchema.Head_Joint: return "Head";
+        case PuppetSchema.HeadTop_Joint: return "Head_Nub";
+        case PuppetSchema.RArm_Joint: return "RArm";
+        case PuppetSchema.RArmMid_Joint: return "RForearm";
+        case PuppetSchema.RHand_Joint: return "RHand";
+        case PuppetSchema.RHandEnd_Joint: return "RHand_Nub";
+        case PuppetSchema.RLeg_Joint: return "RThigh";
+        case PuppetSchema.RLegMid_Joint: return "RShank";
+        case PuppetSchema.RFoot_Joint: return "RFoot";
+        case PuppetSchema.RFootEnd_Joint: return "RToe";
+        case PuppetSchema.LArm_Joint: return "LArm";
+        case PuppetSchema.LArmMid_Joint: return "LForearm";
+        case PuppetSchema.LHand_Joint: return "LHand";
+        case PuppetSchema.LHandEnd_Joint: return "LHand_Nub";
+        case PuppetSchema.LLeg_Joint: return "LThigh";
+        case PuppetSchema.LLegMid_Joint: return "LShank";
+        case PuppetSchema.LFoot_Joint: return "LFoot";
+        case PuppetSchema.LFootEnd_Joint: return "LToe";
         
         // Failure
         default: System.err.println("ORAPuppet.getLayerNameForPuppetName: failed for " + aName); return null;

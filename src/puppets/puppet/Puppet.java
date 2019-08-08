@@ -33,49 +33,6 @@ public class Puppet {
     // PropertyChangeSupport
     PropChangeSupport        _loadLsnrs;
     
-    // Constants for human parts
-    public static final String Torso = "Torso";
-    public static final String Head = "Head";
-    public static final String RArm = "RArm";
-    public static final String RArmTop = "RArmTop";
-    public static final String RArmBtm = "RArmBtm";
-    public static final String RHand = "RHand";
-    public static final String RLeg = "RLeg";
-    public static final String RLegTop = "RLegTop";
-    public static final String RLegBtm = "RLegBtm";
-    public static final String RFoot = "RFoot";
-    public static final String LArm = "LArm";
-    public static final String LArmTop = "LArmTop";
-    public static final String LArmBtm = "LArmBtm";
-    public static final String LHand = "LHand";
-    public static final String LLeg = "LLeg";
-    public static final String LLegTop = "LLegTop";
-    public static final String LLegBtm = "LLegBtm";
-    public static final String LFoot = "LFoot";
-    
-    // Constants for human joints
-    public static final String Head_Joint = "HeadJoint";
-    public static final String RArm_Joint = "RArmJoint";
-    public static final String RArmMid_Joint = "RArmMidJoint";
-    public static final String RHand_Joint = "RHandJoint";
-    public static final String RLeg_Joint = "RLegJoint";
-    public static final String RLegMid_Joint = "RLegMidJoint";
-    public static final String RFoot_Joint = "RFoot_Joint";
-    public static final String LArm_Joint = "LArmJoint";
-    public static final String LArmMid_Joint = "LArmMidJoint";
-    public static final String LHand_Joint = "LHandJoint";
-    public static final String LLeg_Joint = "LLegJoint";
-    public static final String LLegMid_Joint = "LLegMidJoint";
-    public static final String LFoot_Joint = "LFoot_Joint";
-    
-    // Constants for markers
-    public static final String Anchor_Marker = "AnchorMarker";
-    public static final String HeadTop_Marker = "HeadTopMarker";
-    public static final String RHandEnd_Marker = "RHandEndMarker";
-    public static final String RFootEnd_Marker = "RFootEndMarker";
-    public static final String LHandEnd_Marker = "LHandEndMarker";
-    public static final String LFootEnd_Marker = "LFootEndMarker";
-
     // Constants for properties
     public static final String Loaded_Prop = "Loaded";
 
@@ -168,41 +125,6 @@ public String[] getPartNames()  { return _schema.getPartNames(); }
 public String[] getJointNames()  { return _schema.getJointNames(); }
 
 /**
- * Returns the puppet joint names.
- */
-public String[] getRootJointNames()  { return _schema.getRootJointNames(); }
-
-/**
- * Returns the puppet marker names.
- */
-public String[] getMarkerNames()  { return _schema.getMarkerNames(); }
-
-/**
- * Returns the puppet joint and marker names that define a pose for puppet.
- */
-public String[] getPoseKeys()  { return _schema.getPoseKeys(); }
-
-/**
- * Returns names of parts linked to given joint/marker name.
- */
-public String[] getLinkNamesForJointOrMarker(String aName)  { return _schema.getLinkNamesForJointOrMarker(aName); }
-
-/**
- * Returns names of parts linked to given joint/marker name.
- */
-public String[] getOuterJointNamesForPartName(String aName)  { return _schema.getOuterJointNamesForPartName(aName); }
-
-/**
- * Returns names of parts linked to given joint/marker name.
- */
-public String getNextJointNameForName(String aName)  { return _schema.getNextJointNameForName(aName); }
-
-/**
- * Returns whether given name is marker name.
- */
-public boolean isMarkerName(String aName)  { return _schema.isMarkerName(aName); }
-
-/**
  * Returns the bounds.
  */
 public Rect getBounds()
@@ -272,7 +194,8 @@ boolean isLoadedDefault()
 protected Image[] getLoadImages()
 {
     List <Image> images = new ArrayList();
-    String names[] = { RArm, RHand, RLeg, RFoot, Torso, Head, LLeg, LFoot, LArm, LHand };
+    String names[] = { PuppetSchema.RArm, PuppetSchema.RHand, PuppetSchema.RLeg, PuppetSchema.RFoot, PuppetSchema.Torso,
+        PuppetSchema.Head, PuppetSchema.LLeg, PuppetSchema.LFoot, PuppetSchema.LArm, PuppetSchema.LHand };
     for(String name : names) Collections.addAll(images, getPart(name).getLoadImages());
     return images.toArray(new Image[images.size()]);
 }

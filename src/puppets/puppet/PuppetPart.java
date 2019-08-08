@@ -65,14 +65,14 @@ public Image[] getLoadImages()  { return new Image[0]; }
  */
 static PuppetPart createDerivedPart(Puppet aPuppet, String aName)
 {
-    if(aName==Puppet.RArmTop || aName==Puppet.RArmBtm)
-        return PuppetPart.splitPartAroundJoint(aPuppet, Puppet.RArm, Puppet.RArmMid_Joint, aName);
-    if(aName==Puppet.RLegTop || aName==Puppet.RLegBtm)
-        return PuppetPart.splitPartAroundJoint(aPuppet, Puppet.RLeg, Puppet.RLegMid_Joint, aName);
-    if(aName==Puppet.LArmTop || aName==Puppet.LArmBtm)
-        return PuppetPart.splitPartAroundJoint(aPuppet, Puppet.LArm, Puppet.LArmMid_Joint, aName);
-    if(aName==Puppet.LLegTop || aName==Puppet.LLegBtm)
-        return PuppetPart.splitPartAroundJoint(aPuppet, Puppet.LLeg, Puppet.LLegMid_Joint, aName);
+    if(aName==PuppetSchema.RArmTop || aName==PuppetSchema.RArmBtm)
+        return PuppetPart.splitPartAroundJoint(aPuppet, PuppetSchema.RArm, PuppetSchema.RArmMid_Joint, aName);
+    if(aName==PuppetSchema.RLegTop || aName==PuppetSchema.RLegBtm)
+        return PuppetPart.splitPartAroundJoint(aPuppet, PuppetSchema.RLeg, PuppetSchema.RLegMid_Joint, aName);
+    if(aName==PuppetSchema.LArmTop || aName==PuppetSchema.LArmBtm)
+        return PuppetPart.splitPartAroundJoint(aPuppet, PuppetSchema.LArm, PuppetSchema.LArmMid_Joint, aName);
+    if(aName==PuppetSchema.LLegTop || aName==PuppetSchema.LLegBtm)
+        return PuppetPart.splitPartAroundJoint(aPuppet, PuppetSchema.LLeg, PuppetSchema.LLegMid_Joint, aName);
     return null;
 }
 

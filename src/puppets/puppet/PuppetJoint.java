@@ -60,7 +60,7 @@ public void setImage(Image anImage)  { _img = anImage; }
  */
 protected Image getImageImpl()
 {
-    if(_name==Puppet.Anchor_Marker) return PuppetUtils.getAnchorImage();
+    if(_name==PuppetSchema.Anchor_Joint) return PuppetUtils.getAnchorImage();
     return PuppetUtils.getMarkerImage();
 }
 

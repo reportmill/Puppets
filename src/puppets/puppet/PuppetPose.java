@@ -76,16 +76,17 @@ public PuppetPose getBlendPose(Puppet aPuppet, PuppetPose aPose, double aRatio)
     PuppetPose pose = clone();
     
     // Iterate over puppet root joint names
-    for(String name : aPuppet.getRootJointNames()) {
+    PuppetSchema schema = aPuppet.getSchema();
+    for(String name : schema.getRootJointNames()) {
         
         // Set blend marker point for root joint
         setBlendPoseMarker(pose, aPose, name, aRatio);
         
         // If next joint, set blend point for it
-        String jointThis = name, jointNext = aPuppet.getNextJointNameForName(name);
+        String jointThis = name, jointNext = schema.getNextJointNameForName(name);
         while(jointNext!=null) {
             pose.setBlendPoseMarker(this, aPose, jointThis, jointNext, aRatio);
-            jointThis = jointNext; jointNext = aPuppet.getNextJointNameForName(jointNext);
+            jointThis = jointNext; jointNext = schema.getNextJointNameForName(jointNext);
         }
     }
     
@@ -190,6 +191,7 @@ public PuppetPose fromXML(XMLArchiver anArchiver, XMLElement anElement)
     Map <String,Point> markers = new LinkedHashMap();
     for(XMLAttribute attr : anElement.getAttributes()) {
         String key = attr.getName(), valStr = attr.getValue(); if(key.equals("Name")) continue;
+        if(key.endsWith("Marker")) key = key.replace("Marker", "Joint"); // This can go soon
         String valStrs[] = valStr.split("\\s");
         Double val0 = Double.valueOf(valStrs[0]), val1 = Double.valueOf(valStrs[1]);
         Point pnt = new Point(val0, val1);

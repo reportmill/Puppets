@@ -61,6 +61,11 @@ public void setPuppet(Puppet aPuppet)
 }
 
 /**
+ * Returns the puppet schema.
+ */
+public PuppetSchema getSchema()  { return _puppet.getSchema(); }
+
+/**
  * Sets the puppet height.
  */
 public void setPuppetHeight(double aHeight)  { _pupHeight = aHeight; }
@@ -76,26 +81,19 @@ public void rebuildChildren()
     // Iterate over parts
     for(String pname : _puppet.getPartNames()) {
         PuppetPart part = _puppet.getPart(pname);
-        ImageView partView = new PartView(part);
+        PartView partView = new PartView(part);
         addChild(partView);
     }
     
     // Iterate over joints
     for(String jname : _puppet.getJointNames()) {
         PuppetJoint joint = _puppet.getJoint(jname);
-        JointView jointView = new JointView(joint, false);
-        addChild(jointView);
-    }
-    
-    // Iterate over markers
-    for(String pname : _puppet.getMarkerNames()) {
-        PuppetJoint joint = _puppet.getJoint(pname);
-        JointView jointView = new JointView(joint, true);
+        JointView jointView = new JointView(joint, getSchema().isMarkerName(jname));
         addChild(jointView);
     }
     
     // Make Torso really dense
-    getChild(Puppet.Torso).getPhysics().setDensity(1000);
+    getChild(PuppetSchema.Torso).getPhysics().setDensity(1000);
     
     // Calculate scale to make puppet 500 pnts tall
     Rect bnds = _puppet.getBounds();
@@ -117,12 +115,12 @@ public void rebuildChildren()
  */
 public PuppetPose getPose()
 {
-    View anchorView = getChild(Puppet.Anchor_Marker);
+    View anchorView = getChild(PuppetSchema.Anchor_Joint);
     Point anchor = anchorView.localToParent(anchorView.getWidth()/2, anchorView.getHeight()/2);
     Map <String,Point> map = new LinkedHashMap();
     
     // Iterate over pose keys and add pose marker and x/y location to map
-    for(String pkey : getPuppet().getPoseKeys()) { View pview = getChild(pkey);
+    for(String pkey : getSchema().getPoseKeys()) { View pview = getChild(pkey);
         Point pnt = pview.localToParent(pview.getWidth()/2, pview.getHeight()/2);
         pnt.x = pnt.x - anchor.x; pnt.y = anchor.y - pnt.y;
         map.put(pkey, pnt);
@@ -138,11 +136,11 @@ public PuppetPose getPose()
 public void setPose(PuppetPose aPose)
 {
     _physRunner.resolveMouseJoints();
-    View anchorView = getChild(Puppet.Anchor_Marker);
+    View anchorView = getChild(PuppetSchema.Anchor_Joint);
     Point anchor = anchorView.localToParent(anchorView.getWidth()/2, anchorView.getHeight()/2);
     
     // Iterate over pose keys and add pose marker and x/y location to map
-    for(String pkey : getPuppet().getPoseKeys()) {
+    for(String pkey : getSchema().getPoseKeys()) {
         View pview = getChild(pkey);
         Point pnt = aPose.getMarkerPoint(pkey);
         double px = pnt.x*_pupHeight/500 + anchor.x, py = anchor.y - pnt.y*_pupHeight/500;
@@ -164,8 +162,7 @@ public void setShowMarkers(boolean aValue)
     if(aValue==_showMarkers) return;
     _showMarkers = aValue;
     
-    // Iterate over children and toggle visible if Joint Or Marker
-    Puppet puppet = getPuppet();
+    // Iterate over children and toggle visible if Joint
     for(View child : getChildren()) {
         if(child instanceof JointView)
             child.setVisible(aValue);
@@ -210,7 +207,7 @@ protected static class PartView extends ImageView {
 }
 
 /**
- * A view to display puppet joints/markers.
+ * A view to display puppet joints.
  */
 protected static class JointView extends ImageView {
     

@@ -63,13 +63,14 @@ public PhysicsRunner(ParentView aView)
     // Get PuppetView, Puppet
     PuppetView pupView = (PuppetView)aView;
     Puppet puppet = pupView.getPuppet();
+    PuppetSchema pschema = puppet.getSchema();
     
     // Add bodies for view children
     List <View> joints = new ArrayList(), markers = new ArrayList();
     for(View child : _view.getChildren()) { ViewPhysics phys = child.getPhysics(true);
         if(phys.isJoint())
             joints.add(child);
-        else if(puppet.isMarkerName(child.getName()))
+        else if(pschema.isMarkerName(child.getName()))
             markers.add(child);
         else if(child.isVisible()) { 
             phys.setDynamic(true);
@@ -324,8 +325,8 @@ public org.jbox2d.collision.shapes.Shape createShape(Polygon aPoly)
 public void createJoint(View aView)
 {
     // Get shapes interesting joint view
-    Puppet puppet = getPuppet();
-    String name = aView.getName(), linkNames[] = puppet.getLinkNamesForJointOrMarker(name);
+    PuppetSchema pschema = getPuppet().getSchema();
+    String name = aView.getName(), linkNames[] = pschema.getLinkNamesForJoint(name);
     if(linkNames.length<2) {
         System.out.println("PhysicsRunner.createJoint: 2 Bodies not found for joint: " + name); return; }
 
@@ -338,6 +339,8 @@ public void createJoint(View aView)
     jointDef.bodyA = (Body)viewA.getPhysics().getNative();
     jointDef.bodyB = (Body)viewB.getPhysics().getNative();
     jointDef.collideConnected = false;
+    if(jointDef.bodyA==null || jointDef.bodyB==null)
+        System.out.println("Hey");
     
     // Set anchors
     Point jointPnt = aView.localToParent(aView.getWidth()/2, aView.getHeight()/2);
@@ -358,8 +361,8 @@ public void createJoint(View aView)
 public void createMarker(View aView)
 {
     // Get shapes interesting joint view
-    Puppet puppet = getPuppet();
-    String name = aView.getName(), linkNames[] = puppet.getLinkNamesForJointOrMarker(name);
+    PuppetSchema pschema = getPuppet().getSchema();
+    String name = aView.getName(), linkNames[] = pschema.getLinkNamesForJoint(name);
     if(linkNames.length<1)
         return;
 
@@ -394,8 +397,8 @@ public void createMarker(View aView)
 public void setJointOrMarkerToViewXY(String aName, double aX, double aY)
 {
     // Get joint or marker link name(s)
-    Puppet puppet = getPuppet();
-    String linkNames[] = puppet.getLinkNamesForJointOrMarker(aName); if(linkNames.length<1) return;
+    PuppetSchema pschema = getPuppet().getSchema();
+    String linkNames[] = pschema.getLinkNamesForJoint(aName); if(linkNames.length<1) return;
         
     // Get Joint view
     View jview = getView(aName);
@@ -506,8 +509,9 @@ void handleDrag(ViewEvent anEvent)
 void setOuterJointLimitsEnabledForBodyName(String aName, boolean isEnabled)
 {
     // Get outer joint names
-    String jname = getPuppet().getNextJointNameForName(aName);
-    String jnameNext = jname!=null? getPuppet().getNextJointNameForName(jname) : null;
+    PuppetSchema schema = getPuppet().getSchema();
+    String jname = schema.getNextJointNameForName(aName);
+    String jnameNext = jname!=null? schema.getNextJointNameForName(jname) : null;
     
     // Iterate over joint names and set limit enabled/disabled
     while(jnameNext!=null) { View view = getView(jname);
@@ -516,7 +520,7 @@ void setOuterJointLimitsEnabledForBodyName(String aName, boolean isEnabled)
         joint.enableLimit(isEnabled);
         if(isEnabled) joint.setLimits(joint.getJointAngle(), joint.getJointAngle());
         else joint.setLimits(0, 0);
-        jname = jnameNext; jnameNext = getPuppet().getNextJointNameForName(jnameNext);
+        jname = jnameNext; jnameNext = schema.getNextJointNameForName(jnameNext);
     }
 }
 
