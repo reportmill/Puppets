@@ -68,7 +68,8 @@ protected PuppetPart createJoint(String aName)
     Layer layer = getLayerForJointName(lname); if(layer==null) return null;
     
     // Create part
-    PuppetPart part = new ORAPart(aName, layer); part._img = aName==Anchor_Marker? getAnchorImage() : getMarkerImage();
+    PuppetPart part = new ORAPart(aName, layer);
+    part._img = aName==Anchor_Marker? PuppetUtils.getAnchorImage() : PuppetUtils.getMarkerImage();
     return part;
 }
 
