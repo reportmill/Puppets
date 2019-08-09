@@ -12,9 +12,6 @@ public class SpritePane extends ViewOwner {
     // The AppPane
     AppPane                  _appPane;
     
-    // A List of Puppet Actions
-    PuppetActions            _actions;
-    
     // The image view
     ImageView                _imgView;
     
@@ -33,7 +30,6 @@ public class SpritePane extends ViewOwner {
 public SpritePane(AppPane aAP)
 {
     _appPane = aAP;
-    _actions = new PuppetActions();
 }
 
 /**
@@ -51,7 +47,7 @@ protected void initUI()
     // Set ActionList
     _actionList = getView("ActionList", ListView.class);
     _actionList.setItemTextFunction(action -> { return action.getName(); });
-    _actionList.setItems(_actions.getActions());
+    _actionList.setItems(PuppetUtils.getActionFile().getActions());
     _actionList.setSelIndex(0);
     
     getUI().addPropChangeListener(pc -> setSpriteImage(), View.Showing_Prop);

@@ -16,7 +16,7 @@ public class ActionPane extends ViewOwner {
     ActionView               _actView;
     
     // A List of Puppet Actions
-    PuppetActions            _actions = new PuppetActions();
+    PuppetUtils.ActionFile   _actions = PuppetUtils.getActionFile();
     
     // A ListView to show actions
     ListView <PuppetAction>  _actionList;
