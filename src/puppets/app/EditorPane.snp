@@ -25,6 +25,12 @@
     <ListView Name="PartsList" PrefHeight="160">
       <LineBorder Color="#c0c0c0" />
     </ListView>
+    <RowView Padding="4" GrowWidth="true" Spacing="4">
+      <Label Margin="5,5,5,0" text="Scale:">
+        <font name="Arial" size="12" />
+      </Label>
+      <Spinner Name="ScaleSpinner" PrefWidth="80" PrefHeight="22" Align="CENTER" Margin="0" />
+    </RowView>
   </ColView>
   <BoxView Name="PuppetBox" GrowWidth="true">
     <LineBorder />

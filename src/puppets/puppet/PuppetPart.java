@@ -7,13 +7,29 @@ import snap.gfx.*;
 public class PuppetPart {
 
     // The name of the part
-    String     _name;
+    String        _name;
     
     // The location of the part
-    double     _x, _y;
+    double        _x, _y;
     
     // The image
-    Image      _img;
+    Image         _img;
+    
+    // The original part
+    PuppetPart    _origPart;
+    
+/**
+ * Creates a PuppetPart.
+ */
+public PuppetPart()  { }
+
+/**
+ * Creates a PuppetPart.
+ */
+public PuppetPart(String aName, Image anImage, double aX, double aY)
+{
+    setName(aName); setImage(anImage); _x = aX; _y = aY;
+}
 
 /**
  * Returns the name.
@@ -24,21 +40,6 @@ public String getName()  { return _name; }
  * Sets the name.
  */
 public void setName(String aName)  { _name = aName; }
-
-/**
- * Returns the image.
- */
-public Image getImage()  { return _img!=null? _img : (_img=getImageImpl()); }
-
-/**
- * Sets the image.
- */
-public void setImage(Image anImage)  { _img = anImage; }
-
-/**
- * Returns the image.
- */
-protected Image getImageImpl()  { return null; }
 
 /**
  * Returns the puppet X.
@@ -56,9 +57,68 @@ public double getY()  { return _y; }
 public Rect getBounds()  { return new Rect(_x, _y, getImage().getWidth(), getImage().getHeight()); }
 
 /**
+ * Returns the scale.
+ */
+public double getScale()  { return _origPart!=null? getBounds().width/_origPart.getBounds().width : 1; }
+
+/**
+ * Returns the image.
+ */
+public Image getImage()  { return _img!=null? _img : (_img=getImageImpl()); }
+
+/**
+ * Sets the image.
+ */
+public void setImage(Image anImage)  { _img = anImage; }
+
+/**
+ * Returns the image.
+ */
+protected Image getImageImpl()  { return null; }
+
+/**
  * Returns the images that need to be loaded for this part.
  */
 public Image[] getLoadImages()  { return new Image[0]; }
+
+/**
+ * Returns the original part.
+ */
+PuppetPart getOrigPart()  { PuppetPart p = _origPart; while(p!=null && p._origPart!=null) p = p._origPart; return p; }
+
+/**
+ * Creates a clone with given image.
+ */
+public PuppetPart cloneForImage(Image anImage)
+{
+    // Create new version of image for current size
+    int w = getImage().getPixWidth(), h = getImage().getPixHeight();
+    Image img2 = Image.get(w, h, true); Painter pntr = img2.getPainter(); pntr.drawImage(anImage, 0, 0, w, h);
+    
+    // Create new part for image and return
+    PuppetPart part2 = new PuppetPart(getName(), img2, getX(), getY());
+    //part2._origPart = _origPart!=null? _origPart : this;
+    return part2;
+}
+
+/**
+ * Creates a clone with given scale.
+ */
+public PuppetPart cloneForScale(double aScale)
+{
+    PuppetPart part1 = _origPart!=null? _origPart : this;
+    Image img = part1.getImage();
+    int w1 = img.getPixWidth(), h1 = img.getPixHeight();
+    int w2 = (int)Math.round(w1*aScale), h2 = (int)Math.round(h1*aScale);
+    Image img2 = Image.get(w2, h2, true); Painter pntr = img2.getPainter(); pntr.drawImage(img, 0, 0, w2, h2);
+    Rect bnds1 = part1.getBounds();
+    double x2 = Math.round(bnds1.x - (img2.getWidth() - bnds1.width)/2);
+    double y2 = Math.round(bnds1.y - (img2.getHeight() - bnds1.height)/2);
+    
+    PuppetPart part2 = new PuppetPart(getName(), img2, x2, y2);
+    part2._origPart = _origPart!=null? _origPart : this;
+    return part2;
+}
 
 /**
  * Tries to create a missing part from an existing/composite part.

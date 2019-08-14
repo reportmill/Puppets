@@ -82,6 +82,14 @@ public PuppetPart getPart(String aName)
 }
 
 /**
+ * Sets a part.
+ */
+public void setPart(PuppetPart aPart)
+{
+    _parts.put(aPart.getName(), aPart);
+}
+
+/**
  * Returns the part for given name.
  */
 protected PuppetPart createPart(String aName)  { return null; }

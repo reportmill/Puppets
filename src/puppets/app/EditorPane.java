@@ -72,6 +72,15 @@ public void setSelName(String aName)
 }
 
 /**
+ * Returns the selected part.
+ */
+public PuppetPart getSelPart()
+{
+    String name = getSelName(); if(name==null) return null;
+    return getPuppet().getPart(name);
+}
+
+/**
  * Sets the selected layer for given name.
  */
 public void setSelPart(String aName)
@@ -140,6 +149,10 @@ protected void initUI()
     _partsList = getView("PartsList", ListView.class);
     _partsList.setItems(partNames);
     
+    // Configure ScaleSpinner
+    Spinner scaleSpinner = getView("ScaleSpinner", Spinner.class);
+    scaleSpinner.setStep(.1);
+    
     // Enable PupView drag events
     enableEvents(_pupView, DragEvents);
 }
@@ -149,11 +162,14 @@ protected void initUI()
  */
 public void resetUI()
 {
-    // Update PupList selection
+    // Update PupList selection, PartsList selection
     _pupList.setSelItem(getPuppet().getName());
-    
-    // Update PartsList selection
     _partsList.setSelItem(getSelName());
+    
+    // Update ScaleSpinner
+    PuppetPart part = getSelPart();
+    setViewValue("ScaleSpinner", part!=null? part.getScale() : 1);
+    setViewEnabled("ScaleSpinner", part!=null);
 }
 
 /**
@@ -169,9 +185,18 @@ public void respondUI(ViewEvent anEvent)
     if(anEvent.equals("PartsList"))
         setSelName(_partsList.getSelItem());
         
+    // Handle ScaleSpinner
+    if(anEvent.equals("ScaleSpinner")) {
+        PuppetPart part = getSelPart(); if(part==null) return;
+        PuppetPart part2 = part.cloneForScale(anEvent.getFloatValue());
+        getPuppet().setPart(part2);
+        _pupView.rebuildChildren();
+    }
+        
     // Handle drag over
     if(anEvent.isDragOver()) {
         Clipboard cb = anEvent.getClipboard(); if(!cb.hasFiles()) return;
+        if(getPuppetPartAtPoint(anEvent.getX(), anEvent.getY())==null) return;
         anEvent.acceptDrag();
         PuppetPart part = getPuppetPartAtPoint(anEvent.getX(), anEvent.getY());
         setDragName(part!=null? part.getName() : null);
@@ -180,6 +205,7 @@ public void respondUI(ViewEvent anEvent)
     // Handle drop
     if(anEvent.isDragDrop()) {
         Clipboard cb = anEvent.getClipboard(); if(!cb.hasFiles()) return;
+        if(getPuppetPartAtPoint(anEvent.getX(), anEvent.getY())==null) return;
         anEvent.acceptDrag();
         ClipboardData cdata = cb.getFiles().get(0);
         dropFile(anEvent, cdata);
@@ -208,22 +234,11 @@ private void dropFile(ViewEvent anEvent, ClipboardData aFile)
     Image img = Image.get(imgSrc);
     
     // Set new image for puppet part
-    PuppetPart part = getPuppetPartAtPoint(anEvent.getX(), anEvent.getY());
-    if(part!=null)
-        setPuppetPartImage(part, img);
+    PuppetPart part = getPuppetPartAtPoint(anEvent.getX(), anEvent.getY()); if(part==null) return;
+    PuppetPart part2 = part.cloneForImage(img);
+    getPuppet().setPart(part2);
+    _pupView.rebuildChildren();
+    runLater(() -> setSelPart(part2.getName()));
 }
         
-/**
- * Sets a puppet part image.
- */
-void setPuppetPartImage(PuppetPart aPart, Image anImage)
-{
-    int w = aPart.getImage().getPixWidth(), h = aPart.getImage().getPixHeight();
-    Image img2 = Image.get(w, h, true);
-    Painter pntr = img2.getPainter();
-    pntr.drawImage(anImage, 0, 0, w, h);
-    aPart.setImage(img2);
-    _pupView.rebuildChildren();
-}
-
 }
