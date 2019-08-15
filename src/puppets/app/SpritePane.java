@@ -50,7 +50,7 @@ protected void initUI()
     _actionList.setItems(PuppetUtils.getActionFile().getActions());
     _actionList.setSelIndex(0);
     
-    getUI().addPropChangeListener(pc -> setSpriteImage(), View.Showing_Prop);
+    getUI().addPropChangeListener(pc -> runLater(() -> setSpriteImage()), View.Showing_Prop);
 }
 
 /**
@@ -60,7 +60,7 @@ protected void respondUI(ViewEvent anEvent)
 {
     // Handle ActionList
     if(anEvent.equals("ActionList"))
-        setSpriteImage();
+        runLater(() -> runLater(() -> setSpriteImage()));
         
     // Handle PlayButton
     if(anEvent.equals("PlayButton"))
@@ -76,7 +76,7 @@ protected void respondUI(ViewEvent anEvent)
     // Handle FlipImageSwitch
     if(anEvent.equals("FlipImageSwitch")) {
         _flipImage = anEvent.getBoolValue();
-        setSpriteImage();
+        runLater(() -> runLater(() -> setSpriteImage()));
     }
 }
 

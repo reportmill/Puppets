@@ -94,7 +94,9 @@ protected void initUI()
     // Configure
     PuppetAction action = _actions.getActionCount()>0? _actions.getAction(0) : null;
     setActionAndMove(action, null);
-    runLater(() -> _actView.playAction(false));
+    
+    // Kick off first action
+    getUI().addPropChangeListener(pc -> runLater(() -> _actView.playAction(false)), View.Showing_Prop);
 }
 
 /**
