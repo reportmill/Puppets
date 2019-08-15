@@ -57,7 +57,7 @@ public void setPuppet(Puppet aPuppet)
     
     // Rebuild children
     if(aPuppet.isLoaded()) rebuildChildren();
-    else aPuppet.addLoadListener(pc -> rebuildChildren());
+    else aPuppet.addLoadListener(() -> rebuildChildren());
 }
 
 /**

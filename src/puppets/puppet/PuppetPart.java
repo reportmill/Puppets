@@ -1,10 +1,11 @@
 package puppets.puppet;
 import snap.gfx.*;
+import snap.util.Loadable;
 
 /**
  * A class to represent a part of a puppet.
  */
-public class PuppetPart {
+public class PuppetPart implements Loadable {
 
     // The name of the part
     String        _name;
@@ -85,6 +86,21 @@ public Image[] getLoadImages()  { return new Image[0]; }
  * Returns the original part.
  */
 PuppetPart getOrigPart()  { PuppetPart p = _origPart; while(p!=null && p._origPart!=null) p = p._origPart; return p; }
+
+/**
+ * Returns whether resource is loaded.
+ */
+public boolean isLoaded()  { return getLoadable().isLoaded(); }
+
+/**
+ * Adds a callback to be triggered when resources loaded (cleared automatically when loaded).
+ */
+public void addLoadListener(Runnable aRun)  { getLoadable().addLoadListener(aRun); }
+
+/**
+ * Returns the default loadable (the image).
+ */
+protected Loadable getLoadable()  { return getImage(); }
 
 /**
  * Creates a clone with given image.

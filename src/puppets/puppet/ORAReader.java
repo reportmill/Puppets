@@ -1,7 +1,7 @@
 package puppets.puppet;
 import java.util.*;
 import snap.gfx.*;
-import snap.util.XMLElement;
+import snap.util.*;
 import snap.web.WebURL;
 
 /**
@@ -113,8 +113,8 @@ public static class Layer {
         return _img = Image.get(src);
     }
     
-    /** Returns the images that need to be loaded for this stack. */
-    public Image[] getLoadImages()  { return new Image[] { getImage() }; }
+    /** Returns the image(s) that need to be loaded for this layer. */
+    public Loadable getLoadable()  { return getImage(); }
     
     /** Standard toString implementation. */
     public String toString()  { return "Layer: name=" + name + ", src=" + src + ", x=" + x + ", y=" + y; }
@@ -198,13 +198,13 @@ public static class Stack extends Layer {
         return null;
     }
     
-    /** Returns the images that need to be loaded for this stack. */
-    public Image[] getLoadImages()
+    /** Returns the image(s) that need to be loaded for this stack. */
+    public Loadable getLoadable()
     {
-        List <Image> images = new ArrayList();
+        List <Loadable> list = new ArrayList();
         for(Layer entry : entries) { if(!entry.visible) continue;
-            Collections.addAll(images, entry.getLoadImages()); }
-        return images.toArray(new Image[images.size()]);
+            list.add(entry.getLoadable()); }
+        return Loadable.getAsLoadable(list);
     }
     
     /** Standard toString implementation. */
