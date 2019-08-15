@@ -232,13 +232,23 @@ private void dropFile(ViewEvent anEvent, ClipboardData aFile)
     // Get image
     Object imgSrc = aFile.getSourceURL()!=null? aFile.getSourceURL() : aFile.getBytes();
     Image img = Image.get(imgSrc);
-    
+    dropImage(anEvent, img);
+}
+        
+/**
+ * Called to handle a file drop on the editor.
+ */
+private void dropImage(ViewEvent anEvent, Image anImage)
+{
+    // If file not loaded, come back when it is
+    if(!anImage.isLoaded()) { anImage.addLoadListener(() -> dropImage(anEvent, anImage)); return; }
+
     // Set new image for puppet part
     PuppetPart part = getPuppetPartAtPoint(anEvent.getX(), anEvent.getY()); if(part==null) return;
-    PuppetPart part2 = part.cloneForImage(img);
+    PuppetPart part2 = part.cloneForImage(anImage);
     getPuppet().setPart(part2);
     _pupView.rebuildChildren();
     runLater(() -> setSelPart(part2.getName()));
 }
-        
+
 }

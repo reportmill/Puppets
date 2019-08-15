@@ -1,7 +1,7 @@
 package puppets.app;
 
 /**
- * A custom class.
+ * The main class for this app.
  */
 public class App {
 

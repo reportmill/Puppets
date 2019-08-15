@@ -168,7 +168,6 @@ protected void respondUI(ViewEvent anEvent)
     // Handle MoveTable
     if(anEvent.equals("MoveTable")) {
         setActionAndMove(_actionList.getSelItem(), _moveTable.getSelItem());
-        System.out.println("MoveTable clicked");
     }
         
     // Handle AddMoveButton

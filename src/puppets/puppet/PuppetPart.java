@@ -83,11 +83,6 @@ protected Image getImageImpl()  { return null; }
 public Image[] getLoadImages()  { return new Image[0]; }
 
 /**
- * Returns the original part.
- */
-PuppetPart getOrigPart()  { PuppetPart p = _origPart; while(p!=null && p._origPart!=null) p = p._origPart; return p; }
-
-/**
  * Returns whether resource is loaded.
  */
 public boolean isLoaded()  { return getLoadable().isLoaded(); }
@@ -108,12 +103,13 @@ protected Loadable getLoadable()  { return getImage(); }
 public PuppetPart cloneForImage(Image anImage)
 {
     // Create new version of image for current size
-    int w = getImage().getPixWidth(), h = getImage().getPixHeight();
-    Image img2 = Image.get(w, h, true); Painter pntr = img2.getPainter(); pntr.drawImage(anImage, 0, 0, w, h);
+    Image img = getImage();
+    int pw = (int)img.getWidth(), ph = (int)img.getHeight();
+    Image img2 = Image.get(pw, ph, true);
+    Painter pntr = img2.getPainter(); pntr.drawImage(anImage, 0, 0, img2.getWidth(), img2.getHeight());
     
     // Create new part for image and return
     PuppetPart part2 = new PuppetPart(getName(), img2, getX(), getY());
-    //part2._origPart = _origPart!=null? _origPart : this;
     return part2;
 }
 
@@ -124,9 +120,10 @@ public PuppetPart cloneForScale(double aScale)
 {
     PuppetPart part1 = _origPart!=null? _origPart : this;
     Image img = part1.getImage();
-    int w1 = img.getPixWidth(), h1 = img.getPixHeight();
+    int w1 = (int)img.getWidth(), h1 = (int)img.getHeight();
     int w2 = (int)Math.round(w1*aScale), h2 = (int)Math.round(h1*aScale);
-    Image img2 = Image.get(w2, h2, true); Painter pntr = img2.getPainter(); pntr.drawImage(img, 0, 0, w2, h2);
+    Image img2 = Image.get(w2, h2, true);
+    Painter pntr = img2.getPainter(); pntr.drawImage(img, 0, 0, img2.getWidth(), img2.getHeight());
     Rect bnds1 = part1.getBounds();
     double x2 = Math.round(bnds1.x - (img2.getWidth() - bnds1.width)/2);
     double y2 = Math.round(bnds1.y - (img2.getHeight() - bnds1.height)/2);
