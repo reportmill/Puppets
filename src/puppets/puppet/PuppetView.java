@@ -9,19 +9,19 @@ import snap.view.*;
 public class PuppetView extends ParentView {
     
     // The puppet
-    Puppet         _puppet;
+    Puppet          _puppet;
     
     // The scale
-    double         _scale = 1;
+    double          _scale = 1;
     
     // The puppet height in points
-    double         _pupHeight = 500;
+    double          _pupHeight = 500;
 
-    // The PhysicsRunner
-    PhysicsRunner  _physRunner;
+    // The Physics runner
+    PuppetViewPhys  _phys;
     
     // Whether to show markers
-    boolean        _showMarkers = true;
+    boolean         _showMarkers = true;
     
 /**
  * Creates a PuppetView.
@@ -135,7 +135,7 @@ public PuppetPose getPose()
  */
 public void setPose(PuppetPose aPose)
 {
-    _physRunner.resolveMouseJoints();
+    _phys.resolveMouseJoints();
     View anchorView = getChild(PuppetSchema.Anchor_Joint);
     Point anchor = anchorView.localToParent(anchorView.getWidth()/2, anchorView.getHeight()/2);
     
@@ -144,7 +144,7 @@ public void setPose(PuppetPose aPose)
         View pview = getChild(pkey);
         Point pnt = aPose.getMarkerPoint(pkey);
         double px = pnt.x*_pupHeight/500 + anchor.x, py = anchor.y - pnt.y*_pupHeight/500;
-        _physRunner.setJointOrMarkerToViewXY(pkey, px, py);
+        _phys.setJointOrMarkerToViewXY(pkey, px, py);
     }
 }
 
@@ -172,7 +172,7 @@ public void setShowMarkers(boolean aValue)
 /**
  * Returns whether puppet is posable via user interaction.
  */
-public boolean isPosable()  { return _physRunner!=null; }
+public boolean isPosable()  { return _phys!=null; }
 
 /**
  * Sets whether puppet is posable via user interaction.
@@ -183,11 +183,21 @@ public void setPosable(boolean aValue)
     if(aValue==isPosable()) return;
     
     // Create/start PhysRunner
-    if(aValue) _physRunner = new PhysicsRunner(this); //_physRunner.setRunning(true);
+    if(aValue) _phys = new PuppetViewPhys(this); //_physRunner.setRunning(true);
     
     // Stop/clear PhysRunner
-    else _physRunner = null; //_physRunner.setRunning(false);
+    else _phys = null; //_physRunner.setRunning(false);
 }
+
+/**
+ * Returns whether to Freeze outer joints on drag.
+ */
+public boolean isFreezeOuterJoints()  { return _phys!=null && _phys._freezeOuterJoints; }
+
+/**
+ * Sets whether to Freeze outer joints on drag.
+ */
+public void setFreezeOuterJoints(boolean aValue)  { if(_phys!=null) _phys._freezeOuterJoints = aValue; }
 
 /**
  * A view to display puppet parts.

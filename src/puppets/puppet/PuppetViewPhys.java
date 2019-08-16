@@ -6,23 +6,25 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.joints.*;
 import snap.gfx.*;
-import snap.util.MathUtils;
 import snap.view.*;
 import snap.view.EventListener;
 
 /**
- * A class to run Box2D physics for a view.
+ * A class to run Box2D physics for a PuppetView.
  */
-public class PhysicsRunner {
+public class PuppetViewPhys {
     
     // The Snap View
-    ParentView     _view;
+    PuppetView     _pupView;
 
     // The Box2D World
     World          _world;
     
     // The ratio of screen points to Box2D world meters.
     double         _scale = 720/10d;
+    
+    // Whether to freeze outer joints when moving a part
+    boolean        _freezeOuterJoints = true;
     
     // The Runner
     Runnable       _runner;
@@ -52,22 +54,21 @@ public class PhysicsRunner {
 /**
  * Create new PhysicsRunner.
  */
-public PhysicsRunner(ParentView aView)
+public PuppetViewPhys(PuppetView aView)
 {
     // Set View
-    _view = aView;
+    _pupView = aView;
     
     // Create world
     _world = new World(new Vec2(0, 0));//-9.8f));
     
     // Get PuppetView, Puppet
-    PuppetView pupView = (PuppetView)aView;
-    Puppet puppet = pupView.getPuppet();
+    Puppet puppet = _pupView.getPuppet();
     PuppetSchema pschema = puppet.getSchema();
     
     // Add bodies for view children
     List <View> joints = new ArrayList(), markers = new ArrayList();
-    for(View child : _view.getChildren()) { ViewPhysics phys = child.getPhysics(true);
+    for(View child : _pupView.getChildren()) { ViewPhysics phys = child.getPhysics(true);
         if(phys.isJoint())
             joints.add(child);
         else if(pschema.isMarkerName(child.getName()))
@@ -86,10 +87,8 @@ public PhysicsRunner(ParentView aView)
         createMarker(v);
     
     // Add sidewalls
-    double vw = _view.getWidth(), vh = _view.getHeight();
+    double vw = _pupView.getWidth(), vh = _pupView.getHeight();
     RectView r0 = new RectView(-1, -900, 1, vh+900); r0.getPhysics(true);  // Left
-    //RectView r1 = new RectView(0, vh+1, vw, 1); r1.getPhysics(true);       // Bottom
-    //RectView r2 = new RectView(vw, -900, 1, vh+900); r2.getPhysics(true);  // Right
     _groundBody = createBody(r0); //createBody(r1); createBody(r2);
 }
 
@@ -108,12 +107,12 @@ public void setScreenPointsToWorldMeters(double aScale)  { _scale = aScale; }
 /**
  * Returns a view for given name.
  */
-public View getView(String aName)  { return _view.getChild(aName); }
+public View getView(String aName)  { return _pupView.getChild(aName); }
 
 /**
  * Returns the puppet.
  */
-public Puppet getPuppet()  { return ((PuppetView)_view).getPuppet(); }
+public Puppet getPuppet()  { return _pupView.getPuppet(); }
 
 /**
  * Returns whether physics is running.
@@ -140,16 +139,12 @@ public void setRunning(boolean aValue)
  */
 void timerFired()
 {
-    // Update Statics
-    for(int i=0,iMax=_view.getChildCount();i<iMax;i++)
-        updateBody(_view.getChild(i));
-        
     // Update world  
     _world.step(FRAME_DELAY_SECS,20,20);
     
     // Update Dynamics
-    for(int i=0,iMax=_view.getChildCount();i<iMax;i++)
-        updateView(_view.getChild(i));
+    for(int i=0,iMax=_pupView.getChildCount();i<iMax;i++)
+        updateView(_pupView.getChild(i));
         
     // Clear PoseMouseJoints
     if(_poseMouseTime>0 && System.currentTimeMillis()>_poseMouseTime+800)
@@ -189,30 +184,6 @@ public void updateView(View aView)
         // Get set rotation
         //float angle = joint.getAngle(); aView.setRotate(-Math.toDegrees(angle));
     }
-}
-
-/**
- * Updates a body from a view.
- */
-public void updateBody(View aView)
-{
-    // Get ViewPhysics and body
-    ViewPhysics <Body> phys = aView.getPhysics(); if(phys==null || phys.isDynamic() || phys.isJoint()) return;
-    Body body = phys.getNative(); if(body==null) return;
-
-    // Get/set position
-    Vec2 pos0 = body.getPosition();
-    Vec2 pos1 = viewToWorld(aView.getMidX(), aView.getMidY());
-    double vx = (pos1.x - pos0.x)*25;
-    double vy = (pos1.y - pos0.y)*25;
-    body.setLinearVelocity(new Vec2((float)vx, (float)vy));
-    
-    // Get/set rotation
-    double rot0 = body.getAngle();
-    double rot1 = Math.toRadians(-aView.getRotate());
-    double dr = rot1 - rot0;
-    if(dr>Math.PI || dr<-Math.PI) dr = MathUtils.mod(dr + Math.PI, Math.PI*2) - Math.PI;
-    body.setAngularVelocity((float)dr*25);
 }
 
 /**
@@ -486,7 +457,8 @@ void handleDrag(ViewEvent anEvent)
         jdef.target.set(viewToWorld(pnt.x, pnt.y));
         _dragJoint = (MouseJoint)_world.createJoint(jdef);
         body.setAwake(true);
-        setOuterJointLimitsEnabledForBodyName(view.getName(), true);
+        if(_freezeOuterJoints)
+            setOuterJointLimitsEnabledForBodyName(view.getName(), true);
     }
     
     // Handle MouseDrag: Update drag MouseJoint
@@ -499,7 +471,8 @@ void handleDrag(ViewEvent anEvent)
     else if(anEvent.isMouseRelease()) {
         _world.destroyJoint(_dragJoint); _dragJoint = null;
         setRunning(false);
-        setOuterJointLimitsEnabledForBodyName(view.getName(), false);
+        if(_freezeOuterJoints)
+            setOuterJointLimitsEnabledForBodyName(view.getName(), false);
     }
 }
 
@@ -568,7 +541,7 @@ public Transform getViewToWorld()
     if(_localToBox!=null) return _localToBox;
     
     // Create transform from WorldView bounds to World bounds
-    Rect r0 = _view.getBoundsLocal();
+    Rect r0 = _pupView.getBoundsLocal();
     Rect r1 = new Rect(0, 0, r0.width/_scale, -r0.height/_scale);
     double bw = r0.width, bh = r0.height;
     double sx = bw!=0? r1.width/bw : 0, sy = bh!=0? r1.height/bh : 0;

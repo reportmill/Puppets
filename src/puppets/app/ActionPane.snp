@@ -48,6 +48,7 @@
       <Slider Name="TimeSlider" GrowWidth="true" Max="1" Value="0" />
     </RowView>
     <CheckBox Name="ShowMarkersCheckBox" text="Show Markers" />
+    <CheckBox Name="FreezeOuterJointsCheckBox" text="Freeze Outer Joints" />
   </ColView>
   <BoxView Name="PuppetBox" GrowWidth="true">
     <LineBorder />

@@ -112,8 +112,9 @@ protected void resetUI()
     getView("TimeSlider", Slider.class).setMax(getAction().getMaxTime());
     setViewValue("TimeSlider", _actView.isTimeless()? 0 : _actView.getActionTime());
     
-    // Update ShowMarkersCheckBox
+    // Update ShowMarkersCheckBox, FreezeOuterJointsCheckBox
     setViewValue("ShowMarkersCheckBox", _actView.isShowMarkers());
+    setViewValue("FreezeOuterJointsCheckBox", _actView.isFreezeOuterJoints());
 }
 
 /**
@@ -128,9 +129,11 @@ protected void respondUI(ViewEvent anEvent)
         playLoopButton.setSelected(false);
     }
 
-    // Handle ShowMarkersCheckBox
+    // Handle ShowMarkersCheckBox, FreezeOuterJointsCheckBox
     if(anEvent.equals("ShowMarkersCheckBox"))
         _actView.setShowMarkers(anEvent.getBoolValue());
+    if(anEvent.equals("FreezeOuterJointsCheckBox"))
+        _actView.setFreezeOuterJoints(anEvent.getBoolValue());
         
     // Handle ActionList
     if(anEvent.equals("ActionList")) {

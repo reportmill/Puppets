@@ -218,7 +218,7 @@ void timerFired()
  */
 public void finishPose()
 {
-    _physRunner.resolveMouseJoints();
+    _phys.resolveMouseJoints();
 }
 
 }

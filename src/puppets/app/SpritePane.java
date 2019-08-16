@@ -92,7 +92,7 @@ protected void setSpriteImage()
         img = getImagesFlipped(img);
     
     // Create/set new ImageView
-    _imgView = new ImageView(img);
+    _imgView = new ImageView(img); _imgView.setBorder(Color.BLACK, 1);
     BoxView pupBox = getView("PuppetBox", BoxView.class);
     pupBox.setContent(_imgView);
     
