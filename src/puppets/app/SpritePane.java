@@ -73,8 +73,8 @@ protected void respondUI(ViewEvent anEvent)
         else stopAnim();
     }
         
-    // Handle FlipImageSwitch
-    if(anEvent.equals("FlipImageSwitch")) {
+    // Handle FlipXSwitch
+    if(anEvent.equals("FlipXSwitch")) {
         _flipImage = anEvent.getBoolValue();
         runLater(() -> runLater(() -> setSpriteImage()));
     }
@@ -92,7 +92,7 @@ protected void setSpriteImage()
         img = getImagesFlipped(img);
     
     // Create/set new ImageView
-    _imgView = new ImageView(img); _imgView.setBorder(Color.BLACK, 1);
+    _imgView = new ImageView(img); _imgView.setBorder(Color.LIGHTGRAY, 1);
     BoxView pupBox = getView("PuppetBox", BoxView.class);
     pupBox.setContent(_imgView);
     
