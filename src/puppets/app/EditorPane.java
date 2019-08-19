@@ -18,6 +18,9 @@ public class EditorPane extends ViewOwner {
     // The ListView for parts/joints
     ListView <String>  _partsList;
     
+    // The ListView for joints
+    ListView <String>  _jointsList;
+    
     // The PuppetView
     PuppetView         _pupView;
     
@@ -49,7 +52,7 @@ public PuppetPart getPuppetPartAtPoint(double aX, double aY)
 {
     View hitView = ViewUtils.getChildAt(_pupView, aX, aY);
     String name = hitView!=null? hitView.getName() : null;
-    PuppetPart part = name!=null? getPuppet().getPart(name) : null;
+    PuppetPart part = isPartName(name)? getPuppet().getPart(name) : null;
     return part;
 }
 
@@ -59,45 +62,62 @@ public PuppetPart getPuppetPartAtPoint(double aX, double aY)
 public String getSelName()  { return _selName; }
 
 /**
- * Sets the selected layer.
+ * Sets the selected part name.
  */
 public void setSelName(String aName)
 {
+    // Set name and update view effect
     if(getSelView()!=null) getSelView().setEffect(null);
     _selName = aName;
     if(getSelView()!=null) getSelView().setEffect(SELECT_EFFECT);
     
-    // Update PartsList selection
+    // Update PartsList/JointsList selection
     _partsList.setSelItem(aName);
+    _jointsList.setSelItem(aName);
 }
+
+/**
+ * Returns the selected joint name.
+ */
+public String getSelPartName()  { return isPartName(_selName)? _selName : null; }
 
 /**
  * Returns the selected part.
  */
 public PuppetPart getSelPart()
 {
-    String name = getSelName(); if(name==null) return null;
-    return getPuppet().getPart(name);
+    String name = getSelPartName();
+    return name!=null? getPuppet().getPart(name) : null;
 }
 
 /**
- * Sets the selected layer for given name.
+ * Returns the selected joint name.
  */
-public void setSelPart(String aName)
+public String getSelJointName()  { return isJointName(_selName)? _selName : null; }
+
+/**
+ * Returns the selected joint.
+ */
+public PuppetJoint getSelJoint()
 {
-    setSelName(aName);
+    String name = getSelJointName();
+    return name!=null? getPuppet().getJoint(name) : null;
 }
+
+/** Returns whether name is joint. */
+private boolean isPartName(String aName)  { return aName!=null && !aName.endsWith("Joint"); }
+private boolean isJointName(String aName)  { return aName!=null && aName.endsWith("Joint"); }
 
 /**
  * Returns the selected view.
  */
-View getSelView()  { return _selName!=null? _pupView.getChild(_selName) : null; }
-View getDragView()  { return _dragName!=null? _pupView.getChild(_dragName) : null; }
+private View getSelView()  { return _selName!=null? _pupView.getChild(_selName) : null; }
+private View getDragView()  { return _dragName!=null? _pupView.getChild(_dragName) : null; }
 
 /**
  * Returns the drag part.
  */
-public String getDragName()  { return _selName; }
+public String getDragName()  { return _dragName; }
 
 /**
  * Sets the selected layer.
@@ -110,17 +130,6 @@ void setDragName(String aName)
     
     if(_dragName!=null && getSelView()!=null) getSelView().setEffect(null);
     else if(_dragName==null && getSelView()!=null) getSelView().setEffect(SELECT_EFFECT);
-}
-
-/**
- * Event handling from select tool for super selected shapes.
- */
-public void puppetViewMousePressed(ViewEvent anEvent)
-{
-    Point pnt = anEvent.getPoint();
-    View hitView = ViewUtils.getChildAt(_pupView, pnt.x, pnt.y);
-    if(hitView!=null)
-        setSelPart(hitView.getName());
 }
 
 /**
@@ -143,11 +152,24 @@ protected void initUI()
     
     // Get PartNames
     Puppet puppet = _pupView.getPuppet();
-    String partNames[] = puppet.getSchema().getNodeNames();
     
     // Get/configure PartsList
+    String partNames[] = puppet.getSchema().getPartNamesNaturalOrder();
     _partsList = getView("PartsList", ListView.class);
     _partsList.setItems(partNames);
+    
+    // Configure JointsLabel
+    Label label = getView("JointsLabel", Label.class);
+    Button jntsBtn = new Button("Show"); jntsBtn.setFont(Font.Arial10); jntsBtn.setLeanX(HPos.RIGHT);
+    jntsBtn.addEventHandler(e -> toggleShowJointsList(), View.Action);
+    label.setGraphicAfter(jntsBtn);
+    
+    // Get/configure JointsList
+    String jointNames[] = puppet.getSchema().getJointNamesNaturalOrder();
+    _jointsList = getView("JointsList", ListView.class);
+    _jointsList.setPrefHeight(1);
+    _jointsList.setVisible(false);
+    _jointsList.setItems(jointNames);
     
     // Configure ScaleSpinner
     Spinner scaleSpinner = getView("ScaleSpinner", Spinner.class);
@@ -165,6 +187,7 @@ public void resetUI()
     // Update PupList selection, PartsList selection
     _pupList.setSelItem(getPuppet().getName());
     _partsList.setSelItem(getSelName());
+    _jointsList.setSelItem(getSelName());
     
     // Update ScaleSpinner
     PuppetPart part = getSelPart();
@@ -184,6 +207,10 @@ public void respondUI(ViewEvent anEvent)
     // Handle PartsList
     if(anEvent.equals("PartsList"))
         setSelName(_partsList.getSelItem());
+        
+    // Handle JointsList
+    if(anEvent.equals("JointsList"))
+        setSelName(_jointsList.getSelItem());
         
     // Handle ScaleSpinner
     if(anEvent.equals("ScaleSpinner")) {
@@ -218,6 +245,42 @@ public void respondUI(ViewEvent anEvent)
 }
 
 /**
+ * Event handling from select tool for super selected shapes.
+ */
+public void puppetViewMousePressed(ViewEvent anEvent)
+{
+    Point pnt = anEvent.getPoint();
+    View hitView = ViewUtils.getChildAt(_pupView, pnt.x, pnt.y);
+    if(hitView!=null)
+        setSelName(hitView.getName());
+}
+
+/**
+ * Called when ShowJointsListButton pressed.
+ */
+private void toggleShowJointsList()
+{
+    // Update button label
+    boolean visible = _jointsList.isVisible();
+    getView("JointsLabel", Label.class).getGraphicAfter().setText(visible? "Show" : "Hide");
+    _jointsList.setClipToBounds(visible); // Shouldn't need this, but focus ring can leave artifacts
+    _jointsList.getParent().repaint(); // Or this
+    
+    // If visible, animate close
+    if(visible) {
+        if(_jointsList.isFocused()) _pupView.requestFocus();
+        _jointsList.getAnimCleared(500).setPrefHeight(1);
+        _jointsList.getAnim(500).setOnFinish(a -> _jointsList.setVisible(false)).play();
+    }
+    
+    // If hidden, animate open
+    else {
+        _jointsList.setVisible(true);
+        _jointsList.getAnimCleared(500).setPrefHeight(160).play();
+    }
+}
+
+/**
  * Called to handle a file drop on the editor.
  */
 private void dropFile(ViewEvent anEvent, ClipboardData aFile)
@@ -248,7 +311,7 @@ private void dropImage(ViewEvent anEvent, Image anImage)
     PuppetPart part2 = part.cloneForImage(anImage);
     getPuppet().setPart(part2);
     _pupView.rebuildChildren();
-    runLater(() -> setSelPart(part2.getName()));
+    runLater(() -> setSelName(part2.getName()));
 }
 
 }

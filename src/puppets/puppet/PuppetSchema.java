@@ -48,7 +48,7 @@ public class PuppetSchema {
     public static final String LFootEnd_Joint = "LFootEndJoint";
     
 /**
- * Returns the puppet part names in paint order.
+ * Returns the part names in paint order.
  */
 public String[] getNodeNames()
 {
@@ -59,7 +59,7 @@ public String[] getNodeNames()
 }
 
 /**
- * Returns the puppet part names in paint order.
+ * Returns the part names in paint order.
  */
 public String[] getPartNames()
 {
@@ -69,7 +69,7 @@ public String[] getPartNames()
 }
 
 /**
- * Returns the puppet joint names.
+ * Returns the joint names.
  */
 public String[] getJointNames()
 {
@@ -81,7 +81,28 @@ public String[] getJointNames()
 }
 
 /**
- * Returns the puppet joint names.
+ * Returns the part names in paint order.
+ */
+public String[] getPartNamesNaturalOrder()
+{
+    return new String[] { Head, Torso, RArmTop, RArmBtm, RHand, LArmTop, LArmBtm, LHand,
+        RLegTop, RLegBtm, RFoot, LLegTop, LLegBtm, LFoot };
+}
+
+/**
+ * Returns the joint names in paint order.
+ */
+public String[] getJointNamesNaturalOrder()
+{
+    return new String[] { Head_Joint, HeadTop_Joint,
+        RArm_Joint, RArmMid_Joint, RHand_Joint, RHandEnd_Joint,
+        LArm_Joint, LArmMid_Joint, LHand_Joint, LHandEnd_Joint,
+        RLeg_Joint, RLegMid_Joint, RFoot_Joint, RFootEnd_Joint,
+        LLeg_Joint, LLegMid_Joint, LFoot_Joint, LFootEnd_Joint, Anchor_Joint };
+}
+
+/**
+ * Returns the root joint names.
  */
 public String[] getRootJointNames()
 {
