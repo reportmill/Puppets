@@ -10,16 +10,28 @@ import snap.web.WebURL;
  */
 public class PuppetUtils {
     
+    // Constants
+    public static String ROOT = "/Temp/ComicLib/";
+
     // The ActionFile
-    static ActionFile        _actionFile = new ActionFile();
+    private static ActionFile  _actionFile;
 
     // The marker image
-    static Image             _markerImg, _anchorImage;
+    private static Image       _markerImg, _anchorImage;
 
+/**
+ * Initialization.
+ */
+static
+{
+    if(SnapUtils.isTeaVM) ROOT = "http://reportmill.com/ComicLib/";
+    System.out.println("Root: " + ROOT);
+}
+    
 /**
  * Returns the ActionFile.
  */
-public static ActionFile getActionFile()  { return _actionFile; }
+public static ActionFile getActionFile()  { return _actionFile!=null? _actionFile : (_actionFile = new ActionFile()); }
 
 /**
  * Returns the joint/marker image.
@@ -60,7 +72,7 @@ public static class ActionFile {
     List <PuppetAction>  _actions;
     
     // The file path
-    String               _filePath = puppets.app.AppPane.ROOT + "chars/HumanActions.xml";
+    String               _filePath = ROOT + "chars/HumanActions.xml";
     
     /** Returns the list of actions. */
     public List <PuppetAction> getActions()  { return _actions!=null? _actions : (_actions = loadActions()); }

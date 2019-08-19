@@ -68,7 +68,7 @@ void setActionAndMove(PuppetAction anAction, PuppetMove aMove)
 protected void initUI()
 {
     // Create ActionView
-    _actView = new ActionView(_appPane._puppet);
+    _actView = new ActionView(_appPane.getPuppet());
     _actView.addEventFilter(e -> _actView.setTimeless(true), MouseRelease);
     _actView.addPropChangeListener(pc -> resetLater(), ActionView.MoveIndex_Prop);
     

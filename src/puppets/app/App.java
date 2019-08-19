@@ -12,8 +12,7 @@ public static void main(String args[])
 {
     snaptea.TV.set();
     
-    AppPane appPane = new AppPane();
-    appPane.setWindowVisible(true);
+    AppPane.showAppPane();
 }
 
 }

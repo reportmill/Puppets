@@ -85,7 +85,7 @@ protected void respondUI(ViewEvent anEvent)
  */
 protected void setSpriteImage()
 {
-    Puppet puppet = _appPane._puppet;
+    Puppet puppet = _appPane.getPuppet();
     PuppetAction action = _actionList.getSelItem();
     Image img = getImage(puppet, action);
     if(_flipImage)

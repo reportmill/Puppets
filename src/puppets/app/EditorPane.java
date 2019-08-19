@@ -3,6 +3,7 @@ import java.util.*;
 import puppets.puppet.*;
 import snap.gfx.*;
 import snap.view.*;
+import snap.viewx.DialogBox;
 
 /**
  * A class to manage editing of Puppet.
@@ -11,6 +12,9 @@ public class EditorPane extends ViewOwner {
 
     // The AppPane
     AppPane            _appPane;
+    
+    // The Puppet
+    Puppet             _puppet;
     
     // The ListView for Puppets
     ListView <String>  _pupList;
@@ -41,9 +45,30 @@ public EditorPane(AppPane aAP)
 }
 
 /**
+ * Opens a puppet file.
+ */
+public void open(Object aSource)
+{
+    Puppet puppet = Puppet.getPuppetForSource(aSource);
+    setPuppet(puppet);
+}
+
+/**
  * Returns the puppet.
  */
-public Puppet getPuppet()  { return _pupView.getPuppet(); }
+public Puppet getPuppet()  { return _puppet; }
+
+/**
+ * Sets the puppet.
+ */
+public void setPuppet(Puppet aPuppet)
+{
+    _puppet = aPuppet;
+    
+    if(!isUISet()) return;
+    
+    _pupView.setPuppet(aPuppet);
+}
 
 /**
  * Returns the puppet part at X/Y.
@@ -142,16 +167,14 @@ protected void initUI()
     _pupList.setItems(PUPPET_NAMES);
     
     // Get/configure PupView
-    _pupView = new PuppetView(_appPane._puppet);
+    Puppet puppet = getPuppet();
+    _pupView = new PuppetView(puppet);
     _pupView.setBorder(Color.LIGHTGRAY, 1);
     _pupView.addEventHandler(e -> puppetViewMousePressed(e), MousePress);
     
     // Get PuppetBox and add PupView
     BoxView pupBox = getView("PuppetBox", BoxView.class);
     pupBox.setContent(_pupView);
-    
-    // Get PartNames
-    Puppet puppet = _pupView.getPuppet();
     
     // Get/configure PartsList
     String partNames[] = puppet.getSchema().getPartNamesNaturalOrder();
@@ -202,7 +225,16 @@ public void respondUI(ViewEvent anEvent)
 {
     // Handle PupList
     if(anEvent.equals("PuppetList"))
-        _appPane.open(anEvent.getStringValue());
+        open(anEvent.getStringValue());
+        
+    // Handle AddPuppetButton
+    if(anEvent.equals("AddPuppetButton")) {
+        String name = DialogBox.showInputDialog(getUI(), "Add Puppet", "Enter Puppet Name:", "Untitled");
+        if(name==null || name.length()==0) return;
+        Puppet newPup = Puppet.getPuppetForSource(getPuppet().getSource());
+        //PuppetUtils.getPuppetFile().addPuppet(newPup);
+        setPuppet(newPup);
+    }
         
     // Handle PartsList
     if(anEvent.equals("PartsList"))

@@ -166,4 +166,20 @@ protected Loadable getLoadable()
     return Loadable.getAsLoadable(parts);
 }
 
+/**
+ * Returns a puppet for given source.
+ */
+public static Puppet getPuppetForSource(Object aSource)
+{
+    if(aSource instanceof String) { String src = (String)aSource;
+        if(src.equals("Man")) src = PuppetUtils.ROOT + "chars/CTMan";
+        if(src.equals("Lady")) src = PuppetUtils.ROOT + "chars/CTLady";
+        return new ORAPuppet(src);
+    }
+    
+    // Handle unknown source
+    System.err.println("Puppet.getPuppetForSource: Unknown source " + aSource);
+    return null;
+}
+
 }

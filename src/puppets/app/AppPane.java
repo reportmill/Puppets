@@ -8,14 +8,11 @@ import snap.view.*;
  */
 public class AppPane extends ViewOwner {
     
-    // The Puppet
-    Puppet             _puppet;
-    
     // The view that holds the document
     BoxView            _docBox;
     
     // The EditorPane
-    EditorPane         _editorPane;
+    EditorPane         _editorPane = new EditorPane(this);
     
     // The ActionPane
     ActionPane         _actionPane;
@@ -23,30 +20,24 @@ public class AppPane extends ViewOwner {
     // The SpritePane
     SpritePane         _spritePane;
     
-    // Constants
-    public static String ROOT = "/Temp/ComicLib/";
-    
 /**
- * Creates a new AppPane.
+ * Creates AppPane.
  */
-public AppPane()
+public static void showAppPane()
 {
-    if(SnapUtils.isTeaVM) ROOT = "http://reportmill.com/ComicLib/";
+    AppPane apane = new AppPane();
+    if(SnapUtils.isTeaVM) apane.getWindow().setMaximized(true);
+    apane.setWindowVisible(true);
+    
+    // Initialize EditorPane
+    apane._editorPane.open("Man");
+    apane.showEditorPane();
 }
 
 /**
- * Opens the given source.
+ * Returns the puppet.
  */
-public void open(String aSource)
-{
-    String src = aSource;
-    if(src.equals("Man")) src = ROOT + "chars/CTMan";
-    if(src.equals("Lady")) src = ROOT + "chars/CTLady";
-    
-    _puppet = new ORAPuppet(src);
-    
-    showEditorPane();
-}
+public Puppet getPuppet()  { return _editorPane.getPuppet(); }
 
 /**
  * Shows the EditorPane.
@@ -54,8 +45,6 @@ public void open(String aSource)
 public void showEditorPane()
 {
     _docBox.removeChildren();
-    
-    _editorPane = new EditorPane(this);
     _docBox.setContent(_editorPane.getUI());
     setViewValue("PuppetButton", true);
 }
@@ -90,9 +79,6 @@ public void showSpritePane()
 protected void initUI()
 {
     _docBox = getView("DocBox", BoxView.class);
-    if(SnapUtils.isTeaVM) getWindow().setMaximized(true);
-    
-    runLater(() -> open(ROOT + "chars/CTMan"));
 }
 
 /**
