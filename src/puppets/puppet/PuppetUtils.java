@@ -2,6 +2,7 @@ package puppets.puppet;
 import java.util.*;
 import snap.gfx.*;
 import snap.util.SnapUtils;
+import snap.util.XMLArchiver;
 import snap.util.XMLElement;
 import snap.web.WebURL;
 
@@ -12,6 +13,9 @@ public class PuppetUtils {
     
     // Constants
     public static String ROOT = "/Temp/ComicLib/";
+
+    // The PuppetFile
+    private static PuppetFile  _puppetFile;
 
     // The ActionFile
     private static ActionFile  _actionFile;
@@ -28,6 +32,11 @@ static
     System.out.println("Root: " + ROOT);
 }
     
+/**
+ * Returns the PuppetFile.
+ */
+public static PuppetFile getPuppetFile()  { return _puppetFile!=null? _puppetFile : (_puppetFile = new PuppetFile()); }
+
 /**
  * Returns the ActionFile.
  */
@@ -64,15 +73,170 @@ public static Image getAnchorImage()
 }
 
 /**
+ * A class to manage list of Puppets.
+ */
+public static class PuppetFile {
+
+    // A List of Puppets
+    private List <PuppetEntry>  _pupEnts;
+    
+    // The puppet names
+    private String              _names[];
+    
+    // The file path
+    private String              _path = ROOT + "Puppets.xml";
+    
+    /** Returns the list of puppet entries. */
+    public List <PuppetEntry> getEntries()  { return _pupEnts!=null? _pupEnts : (_pupEnts=readPuppets()); }
+    
+    /** Returns the puppet names. */
+    public String[] getPuppetNames()
+    {
+        if(_names!=null) return _names;
+        _names = new String[getPuppetCount()];
+        for(int i=0;i<getPuppetCount();i++) _names[i] = getEntry(i).getName();
+        return _names;
+    }
+    
+    /** Returns the number of puppets. */
+    public int getPuppetCount()  { return getEntries().size(); }
+    
+    /** Returns the individual puppet at given index. */
+    public Puppet getPuppet(int anIndex)  { return getEntry(anIndex).getPuppet(); }
+    
+    /** Returns the individual PuppetEntry at given index. */
+    public PuppetEntry getEntry(int anIndex)  { return getEntries().get(anIndex); }
+    
+    /** Returns the puppet with given name. */
+    public Puppet getPuppet(String aName)
+    {
+        for(PuppetEntry pupEnt : getEntries())
+            if(pupEnt.getName().equals(aName))
+                return pupEnt.getPuppet();
+        return null;
+    }
+    
+    /** Adds an puppet. */
+    public void addPuppet(Puppet aPuppet)  { addPuppet(aPuppet, getPuppetCount()); }
+    
+    /** Adds an puppet at given index. */
+    public void addPuppet(Puppet aPuppet, int anIndex)
+    {
+        PuppetEntry pe = new PuppetEntry(aPuppet);
+        getEntries().add(anIndex, pe);
+        savePuppets();
+    }
+    
+    /** Removes an puppet. */
+    public Puppet removePuppet(int anIndex)
+    {
+        PuppetEntry pe = getEntries().remove(anIndex);
+        savePuppets();
+        return pe.getPuppet();
+    }
+    
+    /** Reads puppets from file. */
+    protected List <PuppetEntry> readPuppets()
+    {
+        // Get file string as XMLElement
+        WebURL url = WebURL.getURL(_path);
+        String fileStr = url.getText();
+        if(fileStr==null) return new ArrayList();
+        XMLElement puppetsXML = XMLElement.getElement(url);
+        
+        // Iterate over actions
+        List <PuppetEntry> puppets = new ArrayList();
+        for(XMLElement pupXML : puppetsXML.getElements()) {
+            PuppetEntry pe = new PuppetEntry().fromXML(null, pupXML);
+            puppets.add(pe);
+        }
+       
+        // Return puppets
+        return puppets;
+    }
+    
+    /** Saves actions to file. */
+    public void savePuppets()
+    {
+        if(SnapUtils.isTeaVM) return;
+        
+        // Create element for puppets and iterate over puppets and add each
+        XMLElement puppetsXML = new XMLElement("Puppets");
+        for(PuppetEntry pupEnt : getEntries()) {
+            XMLElement pupEntXML = pupEnt.toXML(null);
+            puppetsXML.add(pupEntXML);
+        }
+        
+        // Get as bytes and write to file
+        byte bytes[] = puppetsXML.getBytes();
+        SnapUtils.writeBytes(bytes, _path);
+    }
+}
+
+/**
+ * A class to manage a puppet entry in a puppet file.
+ */
+public static class PuppetEntry {
+
+    // The name
+    String     _name;
+    
+    // The path
+    String     _path;
+    
+    // The puppet
+    Puppet     _puppet;
+    
+    /** Creates PuppetEntry. */
+    public PuppetEntry()  { }
+    
+    /** Creates PuppetEntry for puppet. */
+    public PuppetEntry(Puppet aPuppet)  { _name = aPuppet.getName(); _puppet = aPuppet; }
+    
+    /** Return name. */
+    public String getName()  { return _name; }
+    
+    /** Return path. */
+    public String getPath()  { return _path; }
+    
+    /** The puppet. */
+    public Puppet getPuppet()
+    {
+        if(_puppet!=null) return _puppet;
+        
+        //if(_name.equals("Man") || _name.equals("Lady")) _puppet = Puppet.getPuppetForSource(_name); else
+        _puppet = Puppet.getPuppetForSource(ROOT + _path);
+        return _puppet;
+    }
+    
+    /** XML Archival. */
+    public XMLElement toXML(XMLArchiver anArchiver)
+    {
+        XMLElement e = new XMLElement("Puppet");
+        e.add("Name", getName());
+        e.add("Path", getPath());
+        return e;
+    }
+    
+    /** XML unarchival. */
+    public PuppetEntry fromXML(XMLArchiver anArchiver, XMLElement anElement)
+    {
+        _name = anElement.getAttributeValue("Name");
+        _path = anElement.getAttributeValue("Path");
+        return this;
+    }
+}
+
+/**
  * A class to manage list of Puppet Actions.
  */
 public static class ActionFile {
 
-    // A List of Poses
+    // A List of actions
     List <PuppetAction>  _actions;
     
     // The file path
-    String               _filePath = ROOT + "chars/HumanActions.xml";
+    String               _path = ROOT + "chars/HumanActions.xml";
     
     /** Returns the list of actions. */
     public List <PuppetAction> getActions()  { return _actions!=null? _actions : (_actions = loadActions()); }
@@ -114,7 +278,7 @@ public static class ActionFile {
     protected List <PuppetAction> loadActions()
     {
         // Get file string as XMLElement
-        WebURL url = WebURL.getURL(_filePath);
+        WebURL url = WebURL.getURL(_path);
         String fileStr = url.getText();
         if(fileStr==null) return new ArrayList();
         XMLElement actionsXML = XMLElement.getElement(url);
@@ -144,7 +308,7 @@ public static class ActionFile {
         
         // Get as bytes and write to file
         byte bytes[] = actionsXML.getBytes();
-        SnapUtils.writeBytes(bytes, _filePath);
+        SnapUtils.writeBytes(bytes, _path);
     }
 }
 

@@ -1,19 +1,23 @@
 package puppets.puppet;
 import snap.gfx.*;
+import snap.util.*;
 
 /**
  * A class to represent a location in a puppet that binds parts together or marks a location.
  */
 public class PuppetJoint {
 
+    // The Puppet
+    Puppet        _puppet;
+
     // The name of the part
-    String     _name;
+    String        _name;
     
     // The location of the part
-    double     _x, _y;
+    double        _x, _y;
     
     // The image
-    Image      _img;
+    Image         _img;
 
 /**
  * Creates a PuppetJoint.
@@ -68,6 +72,47 @@ protected Image getImageImpl()
  * Returns the bounds.
  */
 public Rect getBounds()  { return new Rect(_x, _y, getImage().getWidth(), getImage().getHeight()); }
+
+/**
+ * XML Archival.
+ */
+public XMLElement toXML(XMLArchiver anArchiver)
+{
+    // Get new element with part name
+    XMLElement e = new XMLElement("Part");
+    e.add("Name", getName());
+    
+    // Write bounds
+    Rect bnds = getBounds();
+    e.add("X", StringUtils.formatNum("#.##", bnds.getMidX()));
+    e.add("Y", StringUtils.formatNum("#.##", bnds.getMidY()));
+        
+    // Return element
+    return e;
+}
+
+/**
+ * XML unarchival.
+ */
+public PuppetJoint fromXML(XMLElement anElement)
+{
+    // Unarchive name
+    String name = anElement.getAttributeValue("Name");
+    setName(name);
+    
+    // Unarchive bounds
+    double x = anElement.getAttributeDoubleValue("X");
+    double y = anElement.getAttributeDoubleValue("Y");
+    
+    // Unarchive Image
+    _img = PuppetUtils.getMarkerImage();
+    if(name.equals(PuppetSchema.Anchor_Joint)) _img = PuppetUtils.getAnchorImage();
+    _x = x - _img.getWidth()/2;
+    _y = y - _img.getHeight()/2;
+        
+    // Return this
+    return this;
+}
 
 /**
  * Standard toString implementation.

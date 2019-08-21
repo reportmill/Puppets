@@ -30,7 +30,9 @@ public static void showAppPane()
     apane.setWindowVisible(true);
     
     // Initialize EditorPane
-    apane._editorPane.open("Man");
+    //apane._editorPane.open("Man");
+    Puppet puppet = PuppetUtils.getPuppetFile().getPuppet(0);
+    apane._editorPane.setPuppet(puppet);
     apane.showEditorPane();
 }
 

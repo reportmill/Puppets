@@ -34,7 +34,6 @@ public class EditorPane extends ViewOwner {
     // Constants
     static Color SELECT_COLOR = Color.get("#039ed3");
     static Effect SELECT_EFFECT = new ShadowEffect(8, SELECT_COLOR, 0, 0);
-    static String PUPPET_NAMES[] = { "Lady", "Man" };
 
 /**
  * Creates a EditorPane.
@@ -164,7 +163,7 @@ protected void initUI()
 {
     // Configure PuppetList
     _pupList = getView("PuppetList", ListView.class);
-    _pupList.setItems(PUPPET_NAMES);
+    _pupList.setItems(PuppetUtils.getPuppetFile().getPuppetNames());
     
     // Get/configure PupView
     Puppet puppet = getPuppet();
@@ -251,6 +250,10 @@ public void respondUI(ViewEvent anEvent)
         getPuppet().setPart(part2);
         _pupView.rebuildChildren();
     }
+    
+    // Handle SaveButton
+    if(anEvent.equals("SaveButton"))
+        getPuppet().save();
         
     // Handle drag over
     if(anEvent.isDragOver()) {

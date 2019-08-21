@@ -31,6 +31,9 @@
       </Label>
       <Spinner Name="ScaleSpinner" PrefWidth="80" PrefHeight="22" Align="CENTER" Margin="0" />
     </RowView>
+    <RowView Padding="4" GrowWidth="true" Spacing="4">
+      <Button Name="SaveButton" PrefWidth="80" PrefHeight="22" Padding="2" text="Save Puppet" />
+    </RowView>
     <Label Name="JointsLabel" Padding="4" LeanY="BOTTOM" text="Puppet Joints:">
       <BevelBorder />
       <font name="Arial" size="14" />

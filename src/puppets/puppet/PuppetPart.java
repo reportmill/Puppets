@@ -1,11 +1,15 @@
 package puppets.puppet;
 import snap.gfx.*;
-import snap.util.Loadable;
+import snap.util.*;
+import snap.web.WebURL;
 
 /**
  * A class to represent a part of a puppet.
  */
 public class PuppetPart implements Loadable {
+    
+    // The Puppet
+    Puppet        _puppet;
 
     // The name of the part
     String        _name;
@@ -16,8 +20,14 @@ public class PuppetPart implements Loadable {
     // The image
     Image         _img;
     
+    // The image source
+    Object        _isrc;
+    
     // The original part
     PuppetPart    _origPart;
+    
+    // The mother part, if part was derived from another part
+    PuppetPart    _motherPart;
     
 /**
  * Creates a PuppetPart.
@@ -75,12 +85,29 @@ public void setImage(Image anImage)  { _img = anImage; }
 /**
  * Returns the image.
  */
-protected Image getImageImpl()  { return null; }
+protected Image getImageImpl()
+{
+    // Get file string as XMLElement
+    WebURL url = WebURL.getURL(_isrc);
+    if(url==null) System.err.println("PuppetPart.getImage: Source not found: " + _isrc);
+    Image img = Image.get(_isrc);
+    return img;
+}
 
 /**
- * Returns the images that need to be loaded for this part.
+ * Returns the image name.
  */
-public Image[] getLoadImages()  { return new Image[0]; }
+public String getImageName()
+{
+    String name = getName();
+    String type = getImage().getType().toLowerCase();
+    return name + '.' + type;
+}
+
+/**
+ * Returns the mother part, if this part was derived from another.
+ */
+public PuppetPart getMotherPart()  { return _motherPart; }
 
 /**
  * Returns whether resource is loaded.
@@ -168,6 +195,7 @@ static PuppetPart splitPartAroundJoint(Puppet aPuppet, String aPartName, String 
     
     // Create/add new parts
     PuppetPart np = new PuppetPart(); np.setName(aName2); np._x = pbnds.x; np._y = pbnds.y; np._img = img1;
+    np._motherPart = part;
     return np;
 }
 
@@ -210,6 +238,54 @@ static Rect getSplitBoundsForView(PuppetPart aPart, PuppetJoint aJoint, boolean 
     
     // Return rect
     return new Rect(x, y, w, h);
+}
+
+/**
+ * XML Archival.
+ */
+public XMLElement toXML(XMLArchiver anArchiver)
+{
+    // Get new element with part name
+    XMLElement e = new XMLElement("Part");
+    e.add("Name", getName());
+    
+    // Write bounds
+    Rect bnds = getBounds();
+    e.add("X", StringUtils.formatNum("#.##", bnds.x));
+    e.add("Y", StringUtils.formatNum("#.##", bnds.y));
+    e.add("Width", StringUtils.formatNum("#.##", bnds.width));
+    e.add("Height", StringUtils.formatNum("#.##", bnds.height));
+    
+    // Write ImageName
+    String iname = getImageName();
+    e.add("Image", iname);
+        
+    // Return element
+    return e;
+}
+
+/**
+ * XML unarchival.
+ */
+public PuppetPart fromXML(XMLElement anElement)
+{
+    // Unarchive name
+    String name = anElement.getAttributeValue("Name");
+    setName(name);
+    
+    // Unarchive bounds
+    double x = anElement.getAttributeDoubleValue("X");
+    double y = anElement.getAttributeDoubleValue("Y");
+    double w = anElement.getAttributeDoubleValue("Width");
+    double h = anElement.getAttributeDoubleValue("Height");
+    _x = x;
+    _y = y;
+    
+    // Unarchive Image
+    String iname = anElement.getAttributeValue("Image");
+        
+    // Return this
+    return this;
 }
 
 /**
