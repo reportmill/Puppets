@@ -20,9 +20,6 @@ public class PuppetPart implements Loadable {
     // The image
     Image         _img;
     
-    // The image source
-    Object        _isrc;
-    
     // The original part
     PuppetPart    _origPart;
     
@@ -87,10 +84,9 @@ public void setImage(Image anImage)  { _img = anImage; }
  */
 protected Image getImageImpl()
 {
-    // Get file string as XMLElement
-    WebURL url = WebURL.getURL(_isrc);
-    if(url==null) System.err.println("PuppetPart.getImage: Source not found: " + _isrc);
-    Image img = Image.get(_isrc);
+    WebURL url = getImageURL();
+    Image img = url!=null? Image.get(url) : null;
+    if(img==null) System.out.println("PuppetPart.getImage: Image not found for " + getName() + " at " + url);
     return img;
 }
 
@@ -102,6 +98,32 @@ public String getImageName()
     String name = getName();
     String type = getImage().getType().toLowerCase();
     return name + '.' + type;
+}
+
+/**
+ * Returns the image URL.
+ */
+protected WebURL getImageURL()
+{
+    // Get puppet dir
+    Puppet pup = _puppet; if(pup==null) return null;
+    WebURL dirURL = pup.getSourceDirURL();
+    String iname = getName() + ".png";
+    WebURL url = dirURL.getChild(iname);
+    return url;
+}
+
+/**
+ * Saves the image.
+ */
+public void saveImage()
+{
+    Image img = getImage();
+    WebURL url = getImageURL();
+    byte ibytes[] = img.getBytesPNG();
+    byte ibytesOld[] = url.getBytes();
+    if(!SnapUtils.equals(ibytes, ibytesOld))
+        SnapUtils.writeBytes(ibytes, url.getJavaFile());
 }
 
 /**

@@ -2,7 +2,6 @@ package puppets.puppet;
 import java.util.*;
 import snap.gfx.*;
 import snap.util.*;
-import snap.web.PathUtils;
 import snap.web.WebURL;
 
 /**
@@ -11,7 +10,10 @@ import snap.web.WebURL;
 public class Puppet {
     
     // The source of puppet
-    Object                   _source;
+    Object                   _src;
+    
+    // The source as URL
+    WebURL                   _srcURL;
     
     // The puppet name
     String                   _name;
@@ -32,16 +34,6 @@ public class Puppet {
     Rect                     _bounds;
     
 /**
- * Returns the source.
- */
-public Object getSource()  { return _source; }
-
-/**
- * Sets the source.
- */
-public void setSource(Object aSource)  { _source = aSource; }
-
-/**
  * Returns the puppet name.
  */
 public String getName()  { return _name; }
@@ -52,19 +44,74 @@ public String getName()  { return _name; }
 public void setName(String aName)  { _name = aName; }
 
 /**
- * Returns the puppet path.
+ * Returns the source.
  */
-public String getPath()
+public Object getSource()  { return _src; }
+
+/**
+ * Sets the source.
+ */
+public void setSource(Object aSource)  { _src = aSource; }
+
+/**
+ * Returns the source as URL.
+ */
+public WebURL getSourceURL()
 {
-    if(_path!=null) return _path;
-    _path = "chars/" + _name + '/' + _name + ".pup";
-    return _path;
+    // If already set, just return
+    if(_srcURL!=null) return _srcURL;
+    
+    // Get source - if null and name exists, create default
+    Object src = getSource();
+    if(src==null && getName()!=null)
+        src = PuppetUtils.ROOT + "chars/" + getName() + '/' + getName() + ".pup";
+     
+    // Create SourceURL from source and return
+    _srcURL = WebURL.getURL(src);
+    return _srcURL;
+}
+
+/**
+ * Returns the sub-path of the source relative to ROOT.
+ */
+public String getSourceRelPath()
+{
+    WebURL url = getSourceURL(); if(url==null) return null;
+    String path = url.getPath();
+    if(path.startsWith(PuppetUtils.ROOT))
+        path = path.substring(PuppetUtils.ROOT.length());
+    return path;
 }
 
 /**
  * Sets the puppet path.
  */
-public void setPath(String aPath)  { _path = aPath; }
+public void setSourceRelPath(String aPath)
+{
+    String path = aPath;
+    if(!path.startsWith(PuppetUtils.ROOT)) path = PuppetUtils.ROOT + path;
+    setSource(path);
+}
+
+/**
+ * Returns the URL of the directory.
+ */
+public WebURL getSourceDirURL()
+{
+    WebURL url = getSourceURL(); if(url==null) return null;
+    WebURL parURL = url.getParent();
+    return parURL;
+}
+
+/**
+ * Returns the URL path of the directory.
+ */
+public String getSourceDirPath()
+{
+    WebURL url = getSourceDirURL();
+    String path = url!=null? url.getPath() : null;
+    return path;
+}
 
 /**
  * Returns the schema.
@@ -179,8 +226,17 @@ public PuppetJoint[] getJoints()
  */
 public PuppetPart[] getMotherParts()
 {
+    // Iterate over parts and replace parts with their mother (if found)
     PuppetPart parts[] = getParts();
-    return null;
+    List <PuppetPart> motherParts = new ArrayList(parts.length);
+    for(PuppetPart part : parts) {
+        if(part.getMotherPart()!=null) part = part.getMotherPart();
+        if(!motherParts.contains(part))
+            motherParts.add(part);
+    }
+    
+    // Return MotherParts as array
+    return motherParts.toArray(new PuppetPart[motherParts.size()]);
 }
 
 /**
@@ -231,20 +287,15 @@ protected Loadable getLoadable()
 /**
  * Reads the puppet.
  */
-public void readSource(String aPath)
+public void readSource()
 {
     // Get file string as XMLElement
-    WebURL url = WebURL.getURL(aPath);
-    String fileStr = url.getText(); if(fileStr==null) System.err.println("Puppet.readSource: File not found: " + aPath);
+    WebURL url = getSourceURL(); if(url==null) { System.err.println("Puppet.readSource: No source"); return; }
+    String text = url.getText(); if(text==null) { System.err.println("Puppet.readSource: No text at "+url); return; }
     XMLElement puppetXML = XMLElement.getElement(url);
         
     // Read puppet
     fromXML(puppetXML);
-    
-    // Set source for parts
-    String dirPath = PathUtils.getParent(aPath);
-    for(PuppetPart part : getParts())
-        part._isrc = dirPath + '/' + part.getName() + ".png";
 }
 
 /**
@@ -255,24 +306,21 @@ public void save()
     if(SnapUtils.isTeaVM) return;
     
     // Create dir
-    String path = PuppetUtils.ROOT + getPath();
-    String dirPath = PathUtils.getParent(path);
-    java.io.File dir = FileUtils.getDirectoryForSource(dirPath, true);
-    if(dir==null) { System.err.println("Puppet.save: Failed"); return; }
+    WebURL url = getSourceURL();
+    if(url==null) { System.err.println("Puppet.save: No source set"); return; }
+    String dirPath = getSourceDirPath();
+    java.io.File dir = FileUtils.getDirForSource(dirPath, true);
+    if(dir==null) { System.err.println("Puppet.save: Failed to create dir: " + dirPath); return; }
     
     // Create element for puppet, get as bytes and write to file
     XMLElement puppetXML = toXML(null);
     byte bytes[] = puppetXML.getBytes();
-    SnapUtils.writeBytes(bytes, path);
+    SnapUtils.writeBytes(bytes, url.getJavaFile());
     
     // Write images
-    for(PuppetPart part : getParts()) {
-        Image img = part.getImage();
-        String iname = part.getImageName();
-        String ipath = PathUtils.getChild(dirPath, iname);
-        byte ibytes[] = img.getBytesPNG();
-        SnapUtils.writeBytes(ibytes, ipath);
-    }
+    PuppetPart motherParts[] = getMotherParts();
+    for(PuppetPart part : motherParts)
+        part.saveImage();
 }
 
 /**
@@ -283,11 +331,12 @@ public XMLElement toXML(XMLArchiver anArchiver)
     // Get new element with puppet Name, Path
     XMLElement e = new XMLElement("Puppet");
     e.add("Name", getName());
-    e.add("Path", getPath());
+    e.add("Path", getSourceRelPath());
     
     // Create element for parts and iterate over poses and add each
     XMLElement partsXML = new XMLElement("Parts"); e.add(partsXML);
-    for(PuppetPart part : getParts()) {
+    PuppetPart motherParts[] = getMotherParts();
+    for(PuppetPart part : motherParts) {
         XMLElement partXML = part.toXML(anArchiver);
         partsXML.add(partXML);
     }
@@ -312,7 +361,7 @@ public Puppet fromXML(XMLElement anElement)
     String name = anElement.getAttributeValue("Name");
     setName(name);
     String path = anElement.getAttributeValue("Path");
-    setPath(path);
+    setSourceRelPath(path);
     
     // Iterate over parts element and load
     XMLElement partsXML = anElement.getElement("Parts");
@@ -347,7 +396,8 @@ public static Puppet getPuppetForSource(Object aSource)
         }
         
         Puppet puppet = new Puppet();
-        puppet.readSource(src);
+        puppet.setSource(src);
+        puppet.readSource();
         return puppet;
     }
     
