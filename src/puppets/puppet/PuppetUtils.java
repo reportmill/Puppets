@@ -236,7 +236,7 @@ public static class ActionFile {
     List <PuppetAction>  _actions;
     
     // The file path
-    String               _path = ROOT + "chars/HumanActions.xml";
+    String               _path = ROOT + "HumanActions.xml";
     
     /** Returns the list of actions. */
     public List <PuppetAction> getActions()  { return _actions!=null? _actions : (_actions = loadActions()); }
