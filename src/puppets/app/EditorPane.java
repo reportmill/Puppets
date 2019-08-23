@@ -223,15 +223,19 @@ public void resetUI()
 public void respondUI(ViewEvent anEvent)
 {
     // Handle PupList
-    if(anEvent.equals("PuppetList"))
-        open(anEvent.getStringValue());
+    if(anEvent.equals("PuppetList")) {
+        String name = anEvent.getStringValue();
+        Puppet puppet = PuppetUtils.getPuppetFile().getPuppetForName(name);
+        setPuppet(puppet);
+    }
         
     // Handle AddPuppetButton
     if(anEvent.equals("AddPuppetButton")) {
         String name = DialogBox.showInputDialog(getUI(), "Add Puppet", "Enter Puppet Name:", "Untitled");
         if(name==null || name.length()==0) return;
-        Puppet newPup = Puppet.getPuppetForSource(getPuppet().getSource());
-        //PuppetUtils.getPuppetFile().addPuppet(newPup);
+        Puppet newPup = new Puppet(getPuppet()); newPup.setName(name);
+        PuppetUtils.getPuppetFile().addPuppet(newPup);
+        _pupList.setItems(PuppetUtils.getPuppetFile().getPuppetNames());
         setPuppet(newPup);
     }
         

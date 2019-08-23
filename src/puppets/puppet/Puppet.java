@@ -9,17 +9,14 @@ import snap.web.WebURL;
  */
 public class Puppet {
     
+    // The puppet name
+    String                   _name;
+    
     // The source of puppet
     Object                   _src;
     
     // The source as URL
     WebURL                   _srcURL;
-    
-    // The puppet name
-    String                   _name;
-    
-    // The puppet path
-    String                   _path;
     
     // The description of puppet parts and joints
     PuppetSchema             _schema = new PuppetSchema();
@@ -30,9 +27,30 @@ public class Puppet {
     // Cached joints
     Map <String,PuppetJoint> _joints = new HashMap();
     
+    // The puppet that this puppet is based on
+    Puppet                   _parent;
+    
     // The bounds
     Rect                     _bounds;
-    
+
+/**
+ * Creates a Puppet.
+ */
+public Puppet()  { }
+
+/**
+ * Creates a Puppet for source.
+ */
+public Puppet(Object aSource)  { setSource(aSource); }
+
+/**
+ * Creates a Puppet for master.
+ */
+public Puppet(Puppet aPuppet)
+{
+    _parent = aPuppet;
+}
+
 /**
  * Returns the puppet name.
  */
@@ -119,6 +137,11 @@ public String getSourceDirPath()
 public PuppetSchema getSchema()  { return _schema; }
 
 /**
+ * Returns the parent.
+ */
+public Puppet getParent()  { return _parent; }
+
+/**
  * Returns the part for given name.
  */
 public PuppetPart getPart(String aName)
@@ -130,8 +153,10 @@ public PuppetPart getPart(String aName)
     part = createPart(aName);
     if(part==null)
         part = createDerivedPart(aName);
+    if(part==null && _parent!=null)
+        part = _parent.getPart(aName);
     if(part==null) {
-        System.out.println("Puppet.getPart: part not found " + aName); return null; }
+        System.out.println("Puppet.getPart: part not found " + getName() + ' ' + aName); return null; }
     
     // Add part to cache and return
     setPart(part);
@@ -167,6 +192,8 @@ public PuppetJoint getJoint(String aName)
     
     // Try to create joint
     joint = createJoint(aName);
+    if(joint==null && _parent!=null)
+        joint = _parent.getJoint(aName);
     if(joint==null) {
         System.out.println("Puppet.getJoint: part not found " + aName); return null; }
     
@@ -319,8 +346,10 @@ public void save()
     
     // Write images
     PuppetPart motherParts[] = getMotherParts();
-    for(PuppetPart part : motherParts)
+    for(PuppetPart part : motherParts) {
+        if(part.getPuppet()!=this) continue;
         part.saveImage();
+    }
 }
 
 /**
@@ -333,10 +362,15 @@ public XMLElement toXML(XMLArchiver anArchiver)
     e.add("Name", getName());
     e.add("Path", getSourceRelPath());
     
+    // Set parent puppet name (if parent exists)
+    if(getParent()!=null)
+        e.add("Parent", getParent().getName());
+
     // Create element for parts and iterate over poses and add each
     XMLElement partsXML = new XMLElement("Parts"); e.add(partsXML);
     PuppetPart motherParts[] = getMotherParts();
     for(PuppetPart part : motherParts) {
+        if(part.getPuppet()!=this) continue;
         XMLElement partXML = part.toXML(anArchiver);
         partsXML.add(partXML);
     }
@@ -344,6 +378,7 @@ public XMLElement toXML(XMLArchiver anArchiver)
     // Create element for joints and iterate over joints and add each
     XMLElement jointsXML = new XMLElement("Joints"); e.add(jointsXML);
     for(PuppetJoint joint : getJoints()) {
+        if(joint.getPuppet()!=this) continue;
         XMLElement jointXML = joint.toXML(anArchiver);
         jointsXML.add(jointXML);
     }
@@ -363,6 +398,13 @@ public Puppet fromXML(XMLElement anElement)
     String path = anElement.getAttributeValue("Path");
     setSourceRelPath(path);
     
+    // Set Parent puppet if parent name found
+    if(anElement.hasAttribute("Parent")) {
+        String pname = anElement.getAttributeValue("Parent");
+        Puppet par = PuppetUtils.getPuppetFile().getPuppetForName(pname);
+        _parent = par;
+    }
+    
     // Iterate over parts element and load
     XMLElement partsXML = anElement.getElement("Parts");
     for(XMLElement partXML : partsXML.getElements()) {
@@ -380,6 +422,11 @@ public Puppet fromXML(XMLElement anElement)
     // Return this
     return this;
 }
+
+/**
+ * Standard toString implementation.
+ */
+public String toString()  { return getClass().getSimpleName() + ": " + getName(); }
 
 /**
  * Returns a puppet for given source.

@@ -108,7 +108,7 @@ public static class PuppetFile {
     public PuppetEntry getEntry(int anIndex)  { return getEntries().get(anIndex); }
     
     /** Returns the puppet with given name. */
-    public Puppet getPuppet(String aName)
+    public Puppet getPuppetForName(String aName)
     {
         for(PuppetEntry pupEnt : getEntries())
             if(pupEnt.getName().equals(aName))
@@ -123,14 +123,14 @@ public static class PuppetFile {
     public void addPuppet(Puppet aPuppet, int anIndex)
     {
         PuppetEntry pe = new PuppetEntry(aPuppet);
-        getEntries().add(anIndex, pe);
+        getEntries().add(anIndex, pe); _names = null;
         savePuppets();
     }
     
     /** Removes an puppet. */
     public Puppet removePuppet(int anIndex)
     {
-        PuppetEntry pe = getEntries().remove(anIndex);
+        PuppetEntry pe = getEntries().remove(anIndex); _names = null;
         savePuppets();
         return pe.getPuppet();
     }
@@ -197,7 +197,7 @@ public static class PuppetEntry {
     public String getName()  { return _name; }
     
     /** Return path. */
-    public String getPath()  { return _path; }
+    public String getPath()  { return _puppet!=null? _puppet.getSourceRelPath() : _path; }
     
     /** The puppet. */
     public Puppet getPuppet()
@@ -248,7 +248,7 @@ public static class ActionFile {
     public PuppetAction getAction(int anIndex)  { return getActions().get(anIndex); }
     
     /** Returns the action with given name. */
-    public PuppetAction getAction(String aName)
+    public PuppetAction getActionForName(String aName)
     {
         for(PuppetAction act : getActions())
             if(act.getName().equals(aName))

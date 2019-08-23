@@ -8,9 +8,6 @@ import snap.web.WebURL;
  */
 public class PuppetPart implements Loadable {
     
-    // The Puppet
-    Puppet        _puppet;
-
     // The name of the part
     String        _name;
     
@@ -20,6 +17,9 @@ public class PuppetPart implements Loadable {
     // The image
     Image         _img;
     
+    // The Puppet that owns this part
+    Puppet        _puppet;
+
     // The original part
     PuppetPart    _origPart;
     
@@ -127,6 +127,11 @@ public void saveImage()
 }
 
 /**
+ * Returns the puppet that owns this part.
+ */
+public Puppet getPuppet()  { return _puppet; }
+
+/**
  * Returns the mother part, if this part was derived from another.
  */
 public PuppetPart getMotherPart()  { return _motherPart; }
@@ -205,9 +210,9 @@ static PuppetPart splitPartAroundJoint(Puppet aPuppet, String aPartName, String 
 {
     boolean isTop = aName2.contains("Top");
     PuppetPart part = aPuppet.getPart(aPartName);
-    if(part==null) { System.err.println("ORAPuppet.splitPart: Part not found " + aPartName); return null; }
+    if(part==null) { System.err.println("PuppetPart.splitPart: Part not found " + aPartName); return null; }
     PuppetJoint joint = aPuppet.getJoint(aJointName);
-    if(joint==null) { System.err.println("ORAPuppet.splitView: Joint not found " + aJointName); return null; }
+    if(joint==null) { System.err.println("PuppetPart.splitView: Joint not found " + aJointName); return null; }
     
     Rect pbnds = getSplitBoundsForView(part, joint, isTop);
     Rect ibnds = new Rect(pbnds.x - part.getX(), pbnds.y - part.getY(), pbnds.width, pbnds.height);

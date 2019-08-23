@@ -7,9 +7,6 @@ import snap.util.*;
  */
 public class PuppetJoint {
 
-    // The Puppet
-    Puppet        _puppet;
-
     // The name of the part
     String        _name;
     
@@ -18,6 +15,9 @@ public class PuppetJoint {
     
     // The image
     Image         _img;
+
+    // The Puppet that owns this joint
+    Puppet        _puppet;
 
 /**
  * Creates a PuppetJoint.
@@ -72,6 +72,11 @@ protected Image getImageImpl()
  * Returns the bounds.
  */
 public Rect getBounds()  { return new Rect(_x, _y, getImage().getWidth(), getImage().getHeight()); }
+
+/**
+ * Returns the puppet that owns this joint.
+ */
+public Puppet getPuppet()  { return _puppet; }
 
 /**
  * XML Archival.
