@@ -47,7 +47,12 @@ public Map <String,Point> getMarkers()  { return _markers; }
 /**
  * Returns the point for given marker.
  */
-public Point getMarkerPoint(String aName)  { return _markers.get(aName); }
+public Point getMarkerPoint(String aName)
+{
+    Point pnt = _markers.get(aName);
+    if(pnt==null && aName.equals(PuppetSchema.Anchor_Joint)) pnt = new Point();
+    return pnt;
+}
 
 /**
  * Sets a point for given marker name.
@@ -137,6 +142,64 @@ void setBlendPoseMarker(PuppetPose aPose1, PuppetPose aPose2, String aJointName1
 }
 
 /**
+ * Returns the angle between two joints.
+ */
+public double getAngle(String aJName0, String aJName1)
+{
+    Point p0 = getMarkerPoint(aJName0);
+    Point p1 = getMarkerPoint(aJName1);
+    return getAngle(p0, p1);
+}
+
+/**
+ * Sets the angle between two joints, preserving the distance.
+ */
+public void setAngle(String aJName0, String aJName1, double anAng)
+{
+    Point p0 = getMarkerPoint(aJName0);
+    Point p1 = getMarkerPoint(aJName1);
+    double dist = p0.getDistance(p1);
+    double x2 = p0.x + Math.cos(anAng)*dist;
+    double y2 = p0.y + Math.sin(anAng)*dist;
+    p1.setXY(x2, y2);
+}
+
+/**
+ * Returns the distance between two joints.
+ */
+public double getDistance(String aJName0, String aJName1)
+{
+    Point p0 = getMarkerPoint(aJName0);
+    Point p1 = getMarkerPoint(aJName1);
+    return p0.getDistance(p1);
+}
+
+/**
+ * Sets the distance between two joints, preserving the angle.
+ */
+public void setDistance(String aJName0, String aJName1, double aDist)
+{
+    Point p0 = getMarkerPoint(aJName0);
+    Point p1 = getMarkerPoint(aJName1);
+    double ang = getAngle(p0, p1);
+    double x2 = p0.x + Math.cos(ang)*aDist;
+    double y2 = p0.y + Math.sin(ang)*aDist;
+    p1.setXY(x2, y2);
+}
+
+/**
+ * Sets the distance between two joints, preserving the angle.
+ */
+public void setAngleAndDistance(String aJName0, String aJName1, double anAng, double aDist)
+{
+    Point p0 = getMarkerPoint(aJName0);
+    Point p1 = getMarkerPoint(aJName1);
+    double x2 = p0.x + Math.cos(anAng)*aDist;
+    double y2 = p0.y + Math.sin(anAng)*aDist;
+    p1.setXY(x2, y2);
+}
+
+/**
  * Returns the angle for a set of line points.
  */
 public static double getAngle(Point p0, Point p1)  { return getAngle(p0.x, p0.y, p1.x, p1.y); }
@@ -157,6 +220,14 @@ public PuppetPose clone()
     for(String name : _markers.keySet())
         clone._markers.put(name, _markers.get(name).clone());
     return clone;
+}
+
+/**
+ * Creates a new pose for given pose in given puppet at given scale for final given puppet.
+ */
+public static PuppetPose newPoseForPuppet(Puppet aPuppet, PuppetPose aPose, double aScale, Puppet aPup2)
+{
+    return null;
 }
 
 /**

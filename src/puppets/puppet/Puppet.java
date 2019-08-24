@@ -30,8 +30,11 @@ public class Puppet {
     // The puppet that this puppet is based on
     Puppet                   _parent;
     
-    // The bounds
+    // The bounds of parts
     Rect                     _bounds;
+
+    // The bounds of joints
+    Rect                     _jntBnds;
 
 /**
  * Creates a Puppet.
@@ -286,6 +289,48 @@ public Rect getBounds()
     
     // Return rect
     return _bounds = new Rect(x, y, mx - x, my - y);
+}
+
+/**
+ * Returns the joint bounds.
+ */
+public Rect getJointBounds()
+{
+    // If already set, just return
+    if(_jntBnds!=null) return _jntBnds;
+    
+    // Iterate over parts and expand bounds
+    double x = Float.MAX_VALUE, y = x, mx = -Float.MAX_VALUE, my = mx;
+    for(PuppetJoint jnt : getJoints()) { double jx = jnt.getMidX(), jy = jnt.getMidY();
+        x = Math.min(x, jx);
+        y = Math.min(y, jy);
+        mx = Math.max(mx, jx);
+        my = Math.max(my, jy);
+    }
+    
+    // Return rect
+    return _jntBnds = new Rect(x, y, mx - x, my - y);
+}
+
+/**
+ * Returns a pose of puppet as defined.
+ */
+public PuppetPose getPose(double aScale)
+{
+    PuppetJoint anchorJnt = getJoint(PuppetSchema.Anchor_Joint);
+    Point anchor = new Point(anchorJnt.getMidX(), anchorJnt.getMidY());
+    Map <String,Point> map = new LinkedHashMap();
+    
+    // Iterate over pose keys and add pose marker and x/y location to map
+    for(String pkey : getSchema().getPoseKeys()) { PuppetJoint pjnt = getJoint(pkey);
+        Point pnt = new Point(pjnt.getMidX(), pjnt.getMidY());
+        pnt.x = (pnt.x - anchor.x)*aScale;
+        pnt.y = (anchor.y - pnt.y)*aScale;
+        map.put(pkey, pnt);
+    }
+
+    // Return map wrapped in map to get Pose { ... }
+    return new PuppetPose("Untitled", map);
 }
 
 /**

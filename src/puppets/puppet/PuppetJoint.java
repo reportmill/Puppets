@@ -50,6 +50,16 @@ public double getX()  { return _x; }
 public double getY()  { return _y; }
 
 /**
+ * Returns the puppet X.
+ */
+public double getMidX()  { return _x + getImage().getWidth()/2; }
+
+/**
+ * Returns the puppet Y.
+ */
+public double getMidY()  { return _y + getImage().getHeight()/2; }
+
+/**
  * Returns the image.
  */
 public Image getImage()  { return _img!=null? _img : (_img=getImageImpl()); }
@@ -77,6 +87,16 @@ public Rect getBounds()  { return new Rect(_x, _y, getImage().getWidth(), getIma
  * Returns the puppet that owns this joint.
  */
 public Puppet getPuppet()  { return _puppet; }
+
+/**
+ * Returns the next joint.
+ */
+public PuppetJoint getNext()
+{
+    String nextName = getPuppet().getSchema().getNextJointNameForName(getName());
+    PuppetJoint next = nextName!=null? getPuppet().getJoint(nextName) : null;
+    return next;
+}
 
 /**
  * XML Archival.
