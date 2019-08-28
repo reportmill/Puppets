@@ -12,7 +12,7 @@ public class PuppetPart implements Loadable {
     String        _name;
     
     // The location of the part
-    double        _x, _y;
+    double        _x, _y, _w, _h;
     
     // The image
     Image         _img;
@@ -34,9 +34,15 @@ public PuppetPart()  { }
 /**
  * Creates a PuppetPart.
  */
-public PuppetPart(String aName, Image anImage, double aX, double aY)
+public PuppetPart(String aName, Image anImage, double aX, double aY)  { this(aName, anImage, aX, aY, 0, 0); }
+
+/**
+ * Creates a PuppetPart.
+ */
+public PuppetPart(String aName, Image anImage, double aX, double aY, double aW, double aH)
 {
-    setName(aName); setImage(anImage); _x = aX; _y = aY;
+    setName(aName); _x = aX; _y = aY; _w = aW; _h = aH;
+    setImage(anImage);
 }
 
 /**
@@ -60,9 +66,29 @@ public double getX()  { return _x; }
 public double getY()  { return _y; }
 
 /**
+ * Returns the puppet width.
+ */
+public double getWidth()  { return _w; }
+
+/**
+ * Returns the puppet height.
+ */
+public double getHeight()  { return _h; }
+
+/**
+ * Returns the puppet max X.
+ */
+public double getMaxX()  { return _x + _w; }
+
+/**
+ * Returns the puppet max Y.
+ */
+public double getMaxY()  { return _y + _h; }
+
+/**
  * Returns the bounds.
  */
-public Rect getBounds()  { return new Rect(_x, _y, getImage().getWidth(), getImage().getHeight()); }
+public Rect getBounds()  { return new Rect(_x, _y, _w, _h); }
 
 /**
  * Returns the scale.
@@ -77,7 +103,16 @@ public Image getImage()  { return _img!=null? _img : (_img=getImageImpl()); }
 /**
  * Sets the image.
  */
-public void setImage(Image anImage)  { _img = anImage; }
+public void setImage(Image anImage)
+{
+    _img = anImage;
+    
+    // Set size - probably don't need this
+    if(_w==0) {
+        if(anImage.isLoaded()) { _w = anImage.getWidth(); _h = anImage.getHeight(); }
+        else anImage.addLoadListener(() -> { _w = anImage.getWidth(); _h = anImage.getHeight(); });
+    }
+}
 
 /**
  * Returns the image.
@@ -156,15 +191,8 @@ protected Loadable getLoadable()  { return getImage(); }
  */
 public PuppetPart cloneForImage(Image anImage)
 {
-    // Create new version of image for current size
-    Image img = getImage();
-    int pw = (int)img.getWidth(), ph = (int)img.getHeight();
-    Image img2 = Image.get(pw, ph, true);
-    Painter pntr = img2.getPainter(); pntr.drawImage(anImage, 0, 0, img2.getWidth(), img2.getHeight());
-    
-    // Create new part for image and return
-    PuppetPart part2 = new PuppetPart(getName(), img2, getX(), getY());
-    return part2;
+    PuppetPart clone = new PuppetPart(getName(), anImage, getX(), getY(), getWidth(), getHeight());
+    return clone;
 }
 
 /**
@@ -172,19 +200,18 @@ public PuppetPart cloneForImage(Image anImage)
  */
 public PuppetPart cloneForScale(double aScale)
 {
+    // Calc new bounds for scale
     PuppetPart part1 = _origPart!=null? _origPart : this;
     Image img = part1.getImage();
-    int w1 = (int)img.getWidth(), h1 = (int)img.getHeight();
-    int w2 = (int)Math.round(w1*aScale), h2 = (int)Math.round(h1*aScale);
-    Image img2 = Image.get(w2, h2, true);
-    Painter pntr = img2.getPainter(); pntr.drawImage(img, 0, 0, img2.getWidth(), img2.getHeight());
-    Rect bnds1 = part1.getBounds();
-    double x2 = Math.round(bnds1.x - (img2.getWidth() - bnds1.width)/2);
-    double y2 = Math.round(bnds1.y - (img2.getHeight() - bnds1.height)/2);
+    double w2 = Math.round(part1.getWidth()*aScale);
+    double h2 = Math.round(part1.getHeight()*aScale);
+    double x2 = Math.round(part1.getX() + part1.getWidth()/2 - w2/2);
+    double y2 = Math.round(part1.getY() + part1.getHeight()/2 - h2/2);
     
-    PuppetPart part2 = new PuppetPart(getName(), img2, x2, y2);
-    part2._origPart = _origPart!=null? _origPart : this;
-    return part2;
+    // Create clone for new bounds and return
+    PuppetPart clone = new PuppetPart(getName(), img, x2, y2, w2, h2);
+    clone._origPart = _origPart!=null? _origPart : this;
+    return clone;
 }
 
 /**
@@ -208,21 +235,35 @@ static PuppetPart createDerivedPart(Puppet aPuppet, String aName)
  */
 static PuppetPart splitPartAroundJoint(Puppet aPuppet, String aPartName, String aJointName, String aName2)
 {
+    // Get part to split
     boolean isTop = aName2.contains("Top");
     PuppetPart part = aPuppet.getPart(aPartName);
     if(part==null) { System.err.println("PuppetPart.splitPart: Part not found " + aPartName); return null; }
+    
+    // Get joint to split around
     PuppetJoint joint = aPuppet.getJoint(aJointName);
     if(joint==null) { System.err.println("PuppetPart.splitView: Joint not found " + aJointName); return null; }
     
+    // Get bounds of new part
     Rect pbnds = getSplitBoundsForView(part, joint, isTop);
-    Rect ibnds = new Rect(pbnds.x - part.getX(), pbnds.y - part.getY(), pbnds.width, pbnds.height);
     
+    // Get bounds in image
     Image img = part.getImage();
-    Image img1 = img.getSubimage(ibnds.x, ibnds.y, ibnds.width, ibnds.height);
+    double iw = img.getWidth();
+    double ih = img.getHeight();
+    double isx = iw/part.getWidth();
+    double isy = ih/part.getHeight();
+    
+    // Get bounds of new part image in old image
+    double pix = (pbnds.x - part.getX())*isx;
+    double piy = ih - (pbnds.getMaxY() - part.getY())*isy;
+    double piw = pbnds.width*isx;
+    double pih = pbnds.height*isy;
+    Image img1 = img.getSubimage(pix, piy, piw, pih);
     
     // Create/add new parts
-    PuppetPart np = new PuppetPart(); np.setName(aName2); np._x = pbnds.x; np._y = pbnds.y; np._img = img1;
-    np._motherPart = part;
+    PuppetPart np = new PuppetPart(aName2, img1, pbnds.x, pbnds.y, pbnds.width, pbnds.height);
+    np._puppet = part.getPuppet(); np._motherPart = part;
     return np;
 }
 
@@ -235,10 +276,10 @@ static Rect getSplitBoundsForView(PuppetPart aPart, PuppetJoint aJoint, boolean 
     Rect pbnds = aPart.getBounds(), jbnds = aJoint.getBounds();
     double x = pbnds.x, y = pbnds.y, w = pbnds.width, h = pbnds.height, asp = w/h;
     
-    // Handle horizontal arm/let
+    // Handle horizontal arm/leg
     if(asp<.3333) {
-        if(doTop) h = jbnds.getMaxY() - y;
-        else { y = jbnds.y; h = pbnds.getMaxY() - y; }
+        if(doTop) { y = jbnds.y; h = pbnds.getMaxY() - y; }
+        else h = jbnds.getMaxY() - y;
     }
     
     // Handle diagonal arm/leg
@@ -246,14 +287,14 @@ static Rect getSplitBoundsForView(PuppetPart aPart, PuppetJoint aJoint, boolean 
         
         // Handle Right arm/leg
         if(aPart.getName().startsWith("R")) {
-            if(doTop) { x = jbnds.x; w = pbnds.getMaxX() - x; h = jbnds.getMaxY() - y; }
-            else { y = jbnds.y; w = jbnds.getMaxX() - x; h = pbnds.getMaxY() - y; }
+            if(doTop) { x = jbnds.x; y = jbnds.y; w = pbnds.getMaxX() - x; h = pbnds.getMaxY() - y; }
+            else { w = jbnds.getMaxX() - x; h = jbnds.getMaxY() - y; }
         }
         
         // Handle Left arm/leg
         else {
-            if(doTop) { w = jbnds.getMaxX() - x; h = jbnds.getMaxY() - y; }
-            else { x = jbnds.x; y = jbnds.y; w = pbnds.getMaxX() - x; h = pbnds.getMaxY() - y; }
+            if(doTop) { y = jbnds.y; w = jbnds.getMaxX() - x; h = pbnds.getMaxY() - y; }
+            else { x = jbnds.x; w = pbnds.getMaxX() - x; h = jbnds.getMaxY() - y; }
         }
     }
     
@@ -277,11 +318,10 @@ public XMLElement toXML(XMLArchiver anArchiver)
     e.add("Name", getName());
     
     // Write bounds
-    Rect bnds = getBounds();
-    e.add("X", StringUtils.formatNum("#.##", bnds.x));
-    e.add("Y", StringUtils.formatNum("#.##", bnds.y));
-    e.add("Width", StringUtils.formatNum("#.##", bnds.width));
-    e.add("Height", StringUtils.formatNum("#.##", bnds.height));
+    e.add("X", StringUtils.formatNum("#.##", _x));
+    e.add("Y", StringUtils.formatNum("#.##", _y));
+    e.add("Width", StringUtils.formatNum("#.##", _w));
+    e.add("Height", StringUtils.formatNum("#.##", _h));
     
     // Write ImageName
     String iname = getImageName();
@@ -301,12 +341,10 @@ public PuppetPart fromXML(XMLElement anElement)
     setName(name);
     
     // Unarchive bounds
-    double x = anElement.getAttributeDoubleValue("X");
-    double y = anElement.getAttributeDoubleValue("Y");
-    double w = anElement.getAttributeDoubleValue("Width");
-    double h = anElement.getAttributeDoubleValue("Height");
-    _x = x;
-    _y = y;
+    _x = anElement.getAttributeDoubleValue("X");
+    _y = anElement.getAttributeDoubleValue("Y");
+    _w = anElement.getAttributeDoubleValue("Width");
+    _h = anElement.getAttributeDoubleValue("Height");
     
     // Unarchive Image
     String iname = anElement.getAttributeValue("Image");
@@ -318,6 +356,6 @@ public PuppetPart fromXML(XMLElement anElement)
 /**
  * Standard toString implementation.
  */
-public String toString()  { return "Part: name=" + _name + ", x=" + _x + ", y=" + _y; }
+public String toString()  { return "Part: name=" + _name + ", bounds=" + getBounds(); }
 
 }

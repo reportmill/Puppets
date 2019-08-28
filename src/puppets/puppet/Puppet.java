@@ -220,34 +220,42 @@ public void setJoint(PuppetJoint aJoint)
 }
 
 /**
- * Returns the puppet part names in paint order.
+ * Returns the parts in natural order.
  */
-public String[] getPartNames()  { return _schema.getPartNames(); }
+public PuppetPart[] getParts()  { return getPartsForNames(getSchema().getPartNamesNaturalOrder()); }
 
 /**
- * Returns the puppet joint names.
+ * Returns the parts in paint order.
  */
-public String[] getJointNames()  { return _schema.getJointNames(); }
+public PuppetPart[] getPartsPaintOrder()  { return getPartsForNames(getSchema().getPartNames()); }
 
 /**
- * Returns the parts.
+ * Returns the parts for given names.
  */
-public PuppetPart[] getParts()
+public PuppetPart[] getPartsForNames(String theNames[])
 {
-    String names[] = getSchema().getPartNamesNaturalOrder();
-    PuppetPart parts[] = new PuppetPart[names.length];
-    for(int i=0;i<names.length;i++) parts[i] = getPart(names[i]);
+    PuppetPart parts[] = new PuppetPart[theNames.length];
+    for(int i=0;i<theNames.length;i++) parts[i] = getPart(theNames[i]);
     return parts;
 }
 
 /**
- * Returns the joints.
+ * Returns the joints in natural order.
  */
-public PuppetJoint[] getJoints()
+public PuppetJoint[] getJoints()  { return getJointsForNames(getSchema().getJointNamesNaturalOrder()); }
+
+/**
+ * Returns the joints in paint order.
+ */
+public PuppetJoint[] getJointsPaintOrder()  { return getJointsForNames(getSchema().getJointNames()); }
+
+/**
+ * Returns the joints for given names.
+ */
+public PuppetJoint[] getJointsForNames(String theNames[])
 {
-    String names[] = getSchema().getJointNamesNaturalOrder();
-    PuppetJoint joints[] = new PuppetJoint[names.length];
-    for(int i=0;i<names.length;i++) joints[i] = getJoint(names[i]);
+    PuppetJoint joints[] = new PuppetJoint[theNames.length];
+    for(int i=0;i<theNames.length;i++) joints[i] = getJoint(theNames[i]);
     return joints;
 }
 
@@ -279,12 +287,11 @@ public Rect getBounds()
     
     // Iterate over parts and expand bounds
     double x = Float.MAX_VALUE, y = x, mx = -Float.MAX_VALUE, my = mx;
-    for(String pname : getPartNames()) {
-        PuppetPart part = getPart(pname);
+    for(PuppetPart part : getParts()) {
         x = Math.min(x, part.getX());
         y = Math.min(y, part.getY());
-        mx = Math.max(mx, part.getX() + part.getImage().getWidth());
-        my = Math.max(my, part.getY() + part.getImage().getHeight());
+        mx = Math.max(mx, part.getMaxX());
+        my = Math.max(my, part.getMaxY());
     }
     
     // Return rect
@@ -301,7 +308,7 @@ public Rect getJointBounds()
     
     // Iterate over parts and expand bounds
     double x = Float.MAX_VALUE, y = x, mx = -Float.MAX_VALUE, my = mx;
-    for(PuppetJoint jnt : getJoints()) { double jx = jnt.getMidX(), jy = jnt.getMidY();
+    for(PuppetJoint jnt : getJoints()) { double jx = jnt.getX(), jy = jnt.getY();
         x = Math.min(x, jx);
         y = Math.min(y, jy);
         mx = Math.max(mx, jx);
@@ -317,15 +324,10 @@ public Rect getJointBounds()
  */
 public PuppetPose getPose(double aScale)
 {
-    PuppetJoint anchorJnt = getJoint(PuppetSchema.Anchor_Joint);
-    Point anchor = new Point(anchorJnt.getMidX(), anchorJnt.getMidY());
-    Map <String,Point> map = new LinkedHashMap();
-    
     // Iterate over pose keys and add pose marker and x/y location to map
+    Map <String,Point> map = new LinkedHashMap();
     for(String pkey : getSchema().getPoseKeys()) { PuppetJoint pjnt = getJoint(pkey);
-        Point pnt = new Point(pjnt.getMidX(), pjnt.getMidY());
-        pnt.x = (pnt.x - anchor.x)*aScale;
-        pnt.y = (anchor.y - pnt.y)*aScale;
+        Point pnt = new Point(pjnt.getX()*aScale, pjnt.getY()*aScale);
         map.put(pkey, pnt);
     }
 
@@ -406,6 +408,7 @@ public XMLElement toXML(XMLArchiver anArchiver)
     XMLElement e = new XMLElement("Puppet");
     e.add("Name", getName());
     e.add("Path", getSourceRelPath());
+    e.add("Version", 1);
     
     // Set parent puppet name (if parent exists)
     if(getParent()!=null)
@@ -462,6 +465,26 @@ public Puppet fromXML(XMLElement anElement)
     for(XMLElement jointXML : jointsXML.getElements()) {
         PuppetJoint joint = new PuppetJoint().fromXML(jointXML);
         setJoint(joint);
+    }
+    
+    // Convert part and joints to zero
+    int version = anElement.getAttributeIntValue("Version", 0);
+    if(version==0) {
+        PuppetJoint anchor = _joints.get(PuppetSchema.Anchor_Joint);
+        double ancX = anchor!=null? anchor.getX() : 419;
+        double ancY = anchor!=null? anchor.getY() : 1063;
+        double scale = 575d/977;
+        
+        for(PuppetPart part : _parts.values()) {
+            part._x = (part._x - ancX)*scale;
+            part._y = (ancY - part.getMaxY())*scale;
+            part._w *= scale;
+            part._h *= scale;
+        }
+        for(PuppetJoint jnt : _joints.values()) {
+            jnt._x = (jnt._x - ancX)*scale;
+            jnt._y = (ancY - jnt._y)*scale;
+        }
     }
 
     // Return this

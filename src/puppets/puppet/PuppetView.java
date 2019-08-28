@@ -12,7 +12,7 @@ public class PuppetView extends ParentView {
     Puppet          _puppet;
     
     // The scale
-    double          _scale = 1;
+    double          _scale = .87;
     
     // The puppet height in points
     double          _pupHeight = 500;
@@ -26,13 +26,18 @@ public class PuppetView extends ParentView {
 /**
  * Creates a PuppetView.
  */
-public PuppetView()  { }
+public PuppetView()
+{
+    setPadding(50,50,50,50);
+    setBorder(Color.LIGHTGRAY, 1);
+}
 
 /**
  * Creates a PuppetView.
  */
 public PuppetView(String aSource)
 {
+    this();
     Puppet puppet = new ORAPuppet(aSource);
     setPuppet(puppet);
 }
@@ -40,7 +45,11 @@ public PuppetView(String aSource)
 /**
  * Creates a PuppetView.
  */
-public PuppetView(Puppet aPuppet)  { setPuppet(aPuppet); }
+public PuppetView(Puppet aPuppet)
+{
+    this();
+    setPuppet(aPuppet);
+}
 
 /**
  * Returns the puppet.
@@ -68,46 +77,139 @@ public PuppetSchema getSchema()  { return _puppet.getSchema(); }
 /**
  * Sets the puppet height.
  */
-public void setPuppetHeight(double aHeight)  { _pupHeight = aHeight; }
+public void setPuppetHeight(double aHeight)
+{
+    _scale = .87/500*aHeight;
+    rebuildChildren();
+}
+
+/**
+ * Returns a puppet point in local view coords.
+ */
+public Point puppetToLocalForXY(double aX, double aY)
+{
+    Transform xfm = getPuppetToLocal();
+    Point pnt = xfm.transform(aX, aY);
+    return pnt;
+}
+
+/**
+ * Returns a local view point in puppet coords.
+ */
+public Point localToPuppetForXY(double aX, double aY)
+{
+    Transform xfm = getLocalToPuppet();
+    Point pnt = xfm.transform(aX, aY);
+    return pnt;
+}
+
+/**
+ * Returns a puppet shape in local view coords.
+ */
+public Shape puppetToLocalForShape(Shape aShape)
+{
+    Transform xfm = getPuppetToLocal();
+    Shape shp = aShape.copyFor(xfm);
+    return shp;
+}
+
+/**
+ * Returns a local view shape in puppet coords.
+ */
+public Shape localToPuppetForShape(Shape aShape)
+{
+    Transform xfm = getLocalToPuppet();
+    Shape shp = aShape.copyFor(xfm);
+    return shp;
+}
+
+/**
+ * Returns the transform from puppet to local.
+ */
+public Transform getLocalToPuppet()
+{
+    Transform xfm = getPuppetToLocal();
+    xfm.invert();
+    return xfm;
+}
+
+/**
+ * Returns the transform from puppet to local.
+ */
+public Transform getPuppetToLocal()
+{
+    // Get puppet bounds and fromBounds of transform
+    Rect pbnds = getPuppet().getBounds();
+    Rect fromBnds = new Rect(pbnds.x, pbnds.getMaxY(), pbnds.width, -pbnds.height);
+    
+    // Get bounds of puppet in view
+    Insets ins = getInsetsAll();
+    double pw = Math.round(pbnds.width*_scale);
+    double ph = Math.round(pbnds.height*_scale);
+    Rect toBnds = new Rect(ins.left, ins.top, pw, ph);
+    
+    // Create transform and return
+    double sx = toBnds.width/fromBnds.width;
+    double sy = toBnds.height/fromBnds.height;
+    double tx = toBnds.x - fromBnds.x*sx;
+    double ty = toBnds.y - fromBnds.y*sy;
+    Transform xfm = new Transform(sx,0,0,sy,tx,ty);
+    return xfm;
+}
+
+/**
+ * Calculates the preferred width.
+ */
+protected double getPrefWidthImpl(double aH)
+{
+    Insets ins = getInsetsAll();
+    Rect bnds = getPuppet().getBounds();
+    return ins.getWidth() + Math.round(bnds.width*_scale);
+}
+
+/**
+ * Calculates the preferred height.
+ */
+protected double getPrefHeightImpl(double aW)
+{
+    Insets ins = getInsetsAll();
+    Rect bnds = getPuppet().getBounds();
+    return ins.getHeight() + Math.round(bnds.height*_scale);
+}
 
 /**
  * Rebuilds children.
  */
 public void rebuildChildren()
 {
+    // Reset size
+    setSize(getPrefSize());
+    
     // Remove children
     removeChildren();
     
-    // Iterate over parts
-    for(String pname : _puppet.getPartNames()) {
-        PuppetPart part = _puppet.getPart(pname);
+    // Iterate over parts and add PartView for each
+    for(PuppetPart part : _puppet.getPartsPaintOrder()) {
         PartView partView = new PartView(part);
+        Rect pbnds = part.getBounds();
+        Rect vbnds = puppetToLocalForShape(pbnds).getBounds();
+        partView.setBounds(vbnds);
         addChild(partView);
     }
     
-    // Iterate over joints
-    for(String jname : _puppet.getJointNames()) {
-        PuppetJoint joint = _puppet.getJoint(jname);
-        JointView jointView = new JointView(joint, getSchema().isMarkerName(jname));
+    // Iterate over joints and add joint view for each
+    for(PuppetJoint joint : _puppet.getJointsPaintOrder()) {
+        JointView jointView = new JointView(joint);
+        double w = jointView.getWidth()*500/977;
+        double h = jointView.getHeight()*500/977;
+        Point jntPnt = puppetToLocalForXY(joint.getX(), joint.getY());
+        jointView.setBounds(jntPnt.x - w/2, jntPnt.y - h/2, w, h);
         addChild(jointView);
+        jointView.setVisible(isShowMarkers());
     }
     
     // Make Torso really dense
     getChild(PuppetSchema.Torso).getPhysics().setDensity(1000);
-    
-    // Calculate scale to make puppet 500 pnts tall
-    Rect bnds = _puppet.getBounds();
-    _scale = _pupHeight/bnds.height;
-    
-    // Resize children
-    for(View c : getChildren())
-        c.setBounds(c.getX()*_scale, c.getY()*_scale, c.getWidth()*_scale, c.getHeight()*_scale);
-        
-    // Resize PuppetView
-    double pw = bnds.x*2 + bnds.width; pw *= _scale;
-    double ph = bnds.y*2 + bnds.height; ph *= _scale;
-    setSize(pw, ph); setPrefSize(pw, ph);
-    relayoutParent();
 }
 
 /**
@@ -115,19 +217,20 @@ public void rebuildChildren()
  */
 public PuppetPose getPose()
 {
+    // Get anchor point
     View anchorView = getChild(PuppetSchema.Anchor_Joint);
     Point anchor = anchorView.localToParent(anchorView.getWidth()/2, anchorView.getHeight()/2);
-    Map <String,Point> map = new LinkedHashMap();
     
-    // Iterate over pose keys and add pose marker and x/y location to map
+    // Iterate over pose keys and add pose marker and x/y location to poseKeyPoints map
+    Map <String,Point> poseKeyPoints = new LinkedHashMap();
     for(String pkey : getSchema().getPoseKeys()) { View pview = getChild(pkey);
         Point pnt = pview.localToParent(pview.getWidth()/2, pview.getHeight()/2);
         pnt.x = pnt.x - anchor.x; pnt.y = anchor.y - pnt.y;
-        map.put(pkey, pnt);
+        poseKeyPoints.put(pkey, pnt);
     }
 
     // Return map wrapped in map to get Pose { ... }
-    return new PuppetPose("Untitled", map);
+    return new PuppetPose("Untitled", poseKeyPoints);
 }
 
 /**
@@ -142,7 +245,7 @@ public void setPose(PuppetPose aPose)
     // Calculate PointScale for this puppet height change from Man puppet height
     Puppet pupX = getPuppet(), pup0 = PuppetUtils.getPuppetFile().getPuppet(0);
     double pup0Scale = 500/pup0.getBounds().height;
-    double pupXScale = _pupHeight/pupX.getBounds().height;
+    double pupXScale = _scale;//_pupHeight/pupX.getBounds().height;
     
     // Get pose for view puppet
     PuppetPose pose = convertPoseToPuppet(aPose, pup0, pup0Scale, pupX, pupXScale);
@@ -219,7 +322,7 @@ private static double getJointDistance(Puppet aPuppet, double aScale, String aJN
 {
     PuppetJoint jnt0 = aPuppet.getJoint(aJName);
     PuppetJoint jnt1 = jnt0.getNext();
-    double dist = Point.getDistance(jnt0.getMidX(), jnt0.getMidY(), jnt1.getMidX(), jnt1.getMidY());
+    double dist = Point.getDistance(jnt0.getX(), jnt0.getY(), jnt1.getX(), jnt1.getY());
     dist *= aScale;
     return dist;
 }
@@ -287,7 +390,6 @@ protected static class PartView extends ImageView {
     public PartView(PuppetPart aPart)
     {
         _part = aPart; setImage(aPart.getImage()); setName(aPart.getName());
-        setXY(aPart.getX(), aPart.getY()); setSize(getPrefSize());
         getPhysics(true).setGroupIndex(-1);
     }
 }
@@ -301,12 +403,12 @@ protected static class JointView extends ImageView {
     PuppetJoint     _joint;
     
     /** Creates a JointView for given PuppetJoint. */
-    public JointView(PuppetJoint aJoint, boolean isMarker)
+    public JointView(PuppetJoint aJoint)
     {
         _joint = aJoint; setImage(aJoint.getImage()); setName(aJoint.getName());
-        setXY(aJoint.getX(), aJoint.getY()); setSize(getPrefSize());
-        if(!isMarker) getPhysics(true).setJoint(true);
-        else getPhysics(true).setGroupIndex(-1);
+        setSize(getPrefSize());
+        if(aJoint.isMarker()) getPhysics(true).setGroupIndex(-1);
+        else getPhysics(true).setJoint(true);
     }
 }
 

@@ -145,7 +145,7 @@ public Image getImage(Puppet aPuppet, PuppetAction anAction)
     actView.setFill(null);
     actView.setBorder(null);
     
-    int FRAME_DELAY_MILLIS = 25, frameCount = anAction.getMaxTime()/25;
+    int FRAME_DELAY_MILLIS = 25, frameCount = anAction.getMaxTime()/25 + 1;
     List <Image> images = new ArrayList();
     for(int i=0; i<frameCount; i++) {
         actView.setActionTime(i*25);

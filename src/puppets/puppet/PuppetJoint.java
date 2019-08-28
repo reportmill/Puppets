@@ -50,16 +50,6 @@ public double getX()  { return _x; }
 public double getY()  { return _y; }
 
 /**
- * Returns the puppet X.
- */
-public double getMidX()  { return _x + getImage().getWidth()/2; }
-
-/**
- * Returns the puppet Y.
- */
-public double getMidY()  { return _y + getImage().getHeight()/2; }
-
-/**
  * Returns the image.
  */
 public Image getImage()  { return _img!=null? _img : (_img=getImageImpl()); }
@@ -79,9 +69,24 @@ protected Image getImageImpl()
 }
 
 /**
+ * Returns whether joint is really just a marker (associated with only one part).
+ */
+public boolean isMarker()
+{
+    return getPuppet().getSchema().isMarkerName(getName());
+}
+
+/**
  * Returns the bounds.
  */
-public Rect getBounds()  { return new Rect(_x, _y, getImage().getWidth(), getImage().getHeight()); }
+public Rect getBounds()
+{
+    double w = getImage().getWidth()*500/977d;
+    double h = getImage().getHeight()*500/977d;
+    double x = getX() - w/2;
+    double y = getY() - h/2;
+    return new Rect(x, y, w, h);
+}
 
 /**
  * Returns the puppet that owns this joint.
@@ -108,9 +113,8 @@ public XMLElement toXML(XMLArchiver anArchiver)
     e.add("Name", getName());
     
     // Write bounds
-    Rect bnds = getBounds();
-    e.add("X", StringUtils.formatNum("#.##", bnds.getMidX()));
-    e.add("Y", StringUtils.formatNum("#.##", bnds.getMidY()));
+    e.add("X", StringUtils.formatNum("#.##", getX()));
+    e.add("Y", StringUtils.formatNum("#.##", getY()));
         
     // Return element
     return e;
@@ -126,14 +130,12 @@ public PuppetJoint fromXML(XMLElement anElement)
     setName(name);
     
     // Unarchive bounds
-    double x = anElement.getAttributeDoubleValue("X");
-    double y = anElement.getAttributeDoubleValue("Y");
+    _x = anElement.getAttributeDoubleValue("X");
+    _y = anElement.getAttributeDoubleValue("Y");
     
     // Unarchive Image
     _img = PuppetUtils.getMarkerImage();
     if(name.equals(PuppetSchema.Anchor_Joint)) _img = PuppetUtils.getAnchorImage();
-    _x = x - _img.getWidth()/2;
-    _y = y - _img.getHeight()/2;
         
     // Return this
     return this;
