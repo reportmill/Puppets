@@ -285,9 +285,30 @@ public Rect getBounds()
     // If already set, just return
     if(_bounds!=null) return _bounds;
     
+    // If not loaded, just return bounds for current loaded parts
+    if(!isLoaded()) {
+        PuppetPart parts[] = _parts.values().toArray(new PuppetPart[0]);
+        Rect bnds = getBoundsForParts(parts);
+        if(getParent()!=null) {
+            Rect pbnds = getParent().getBounds();
+            bnds.union(pbnds);
+        }
+        return bnds;
+    }
+    
+    // Return rect
+    PuppetPart parts[] = getParts();
+    return _bounds = getBoundsForParts(parts);
+}
+
+/**
+ * Returns the bounds for given parts.
+ */
+protected Rect getBoundsForParts(PuppetPart theParts[])
+{
     // Iterate over parts and expand bounds
     double x = Float.MAX_VALUE, y = x, mx = -Float.MAX_VALUE, my = mx;
-    for(PuppetPart part : getParts()) {
+    for(PuppetPart part : theParts) {
         x = Math.min(x, part.getX());
         y = Math.min(y, part.getY());
         mx = Math.max(mx, part.getMaxX());
@@ -295,7 +316,7 @@ public Rect getBounds()
     }
     
     // Return rect
-    return _bounds = new Rect(x, y, mx - x, my - y);
+    return new Rect(x, y, mx - x, my - y);
 }
 
 /**
@@ -350,11 +371,9 @@ public void addLoadListener(Runnable aRun)  { getLoadable().addLoadListener(aRun
  */
 protected Loadable getLoadable()
 {
-    //String names[] = { PuppetSchema.RArm, PuppetSchema.RHand, PuppetSchema.RLeg, PuppetSchema.RFoot, PuppetSchema.Torso,
-    //    PuppetSchema.Head, PuppetSchema.LLeg, PuppetSchema.LFoot, PuppetSchema.LArm, PuppetSchema.LHand };
-    //PuppetPart parts[] = new PuppetPart[names.length];
-    //for(int i=0;i<names.length;i++) parts[i] = getPart(names[i]);
-    PuppetPart parts[] = getParts();
+    String names[] = { PuppetSchema.RArm, PuppetSchema.RHand, PuppetSchema.RLeg, PuppetSchema.RFoot, PuppetSchema.Torso,
+        PuppetSchema.Head, PuppetSchema.LLeg, PuppetSchema.LFoot, PuppetSchema.LArm, PuppetSchema.LHand };
+    PuppetPart parts[] = getPartsForNames(names);
     return Loadable.getAsLoadable(parts);
 }
 

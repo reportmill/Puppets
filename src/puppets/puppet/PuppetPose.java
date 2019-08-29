@@ -204,7 +204,7 @@ public PuppetPose clone()
  */
 public PuppetPose cloneForPuppetAtScale(Puppet toPup, double toScale)
 {
-    // Get Puppet/Scale that pose was set from
+    // Get reference Puppet/Scale that pose was set from
     Puppet pup0 = PuppetUtils.getPuppetFile().getPuppet(0);
     double pup0Scale = 500/pup0.getBounds().height;
 
@@ -261,14 +261,6 @@ private static double getJointDistance(Puppet aPuppet, double aScale, String aJN
     return Point.getDistance(jnt0.getX(), jnt0.getY(), jnt1.getX(), jnt1.getY())*aScale;
 }
         
-/**
- * Creates a new pose for given pose in given puppet at given scale for final given puppet.
- */
-public static PuppetPose newPoseForPuppet(Puppet aPuppet, PuppetPose aPose, double aScale, Puppet aPup2)
-{
-    return null;
-}
-
 /**
  * XML Archival.
  */
