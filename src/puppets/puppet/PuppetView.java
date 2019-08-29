@@ -242,13 +242,8 @@ public void setPose(PuppetPose aPose)
     View anchorView = getChild(PuppetSchema.Anchor_Joint);
     Point anchor = anchorView.localToParent(anchorView.getWidth()/2, anchorView.getHeight()/2);
     
-    // Calculate PointScale for this puppet height change from Man puppet height
-    Puppet pupX = getPuppet(), pup0 = PuppetUtils.getPuppetFile().getPuppet(0);
-    double pup0Scale = 500/pup0.getBounds().height;
-    double pupXScale = _scale;//_pupHeight/pupX.getBounds().height;
-    
-    // Get pose for view puppet
-    PuppetPose pose = convertPoseToPuppet(aPose, pup0, pup0Scale, pupX, pupXScale);
+    // Get pose for view puppet and scale
+    PuppetPose pose = aPose.cloneForPuppetAtScale(getPuppet(), _scale);
     
     // Iterate over pose keys and add pose marker and x/y location to map
     for(String pkey : getSchema().getPoseKeys()) {
@@ -259,74 +254,6 @@ public void setPose(PuppetPose aPose)
     }
 }
 
-/**
- * Creates a new pose for given pose in given puppet at given scale for final given puppet.
- */
-private static PuppetPose convertPoseToPuppet(PuppetPose aPose, Puppet aPuppet, double aScale, Puppet toPup, double toScale)
-{
-    // Create new pose
-    PuppetPose clone = aPose.clone();
-    
-    // Get poses for pup0 and pupX
-    PuppetPose pose0 = aPuppet.getPose(aScale);
-    PuppetPose poseX = toPup.getPose(toScale);
-    
-    // Iterate over root joints
-    for(String rkey : aPuppet.getSchema().getRootJointNames()) {
-        
-        // Get distance from anchor to root joint for pose0 && poseX
-        double dist0 = pose0.getDistance(PuppetSchema.Anchor_Joint, rkey);
-        double distX = poseX.getDistance(PuppetSchema.Anchor_Joint, rkey);
-        double scale = distX/dist0;
-        double distN = aPose.getDistance(PuppetSchema.Anchor_Joint, rkey)*scale;
-        clone.setDistance(PuppetSchema.Anchor_Joint, rkey, distN);
-        
-        // Get angle from anchor to root joint for pose0 && poseX
-        double ang0 = pose0.getAngle(PuppetSchema.Anchor_Joint, rkey);
-        clone.setAngle(PuppetSchema.Anchor_Joint, rkey, ang0);
-        
-        // Iterate over outer joints and adjust
-        String thisKey = rkey;
-        String nextKey = aPuppet.getSchema().getNextJointNameForName(thisKey);
-        while(nextKey!=null) {
-            convertNextPosePointToPuppet(aPose, clone, toPup, toScale, thisKey);
-            thisKey = nextKey;
-            nextKey = aPuppet.getSchema().getNextJointNameForName(thisKey);
-        }
-    }
-    
-    return clone;
-}
-
-/**
- * Returns a point.
- */
-private static void convertNextPosePointToPuppet(PuppetPose aPose0, PuppetPose aPose1,
-    Puppet aPuppet1, double aScale1, String aJName0)
-{
-    // Get joint angle from original pose
-    String jname1 = aPuppet1.getSchema().getNextJointNameForName(aJName0);
-    double ang = aPose0.getAngle(aJName0, jname1);
-    
-    // Get joint distance from new pose puppet
-    double dist = getJointDistance(aPuppet1, aScale1, aJName0);
-    
-    // Update pose1 joint point with new angle and distance
-    aPose1.setAngleAndDistance(aJName0, jname1, ang, dist);
-}
-
-/**
- * Returns the distance between joints for given puppet, scale and joint name. 
- */
-private static double getJointDistance(Puppet aPuppet, double aScale, String aJName)
-{
-    PuppetJoint jnt0 = aPuppet.getJoint(aJName);
-    PuppetJoint jnt1 = jnt0.getNext();
-    double dist = Point.getDistance(jnt0.getX(), jnt0.getY(), jnt1.getX(), jnt1.getY());
-    dist *= aScale;
-    return dist;
-}
-        
 /**
  * Returns whether to show markers.
  */
