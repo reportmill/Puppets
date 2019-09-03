@@ -359,7 +359,11 @@ public PuppetPose getPose(double aScale)
 /**
  * Returns whether resource is loaded.
  */
-public boolean isLoaded()  { return getLoadable().isLoaded(); }
+public boolean isLoaded()
+{
+    Loadable ldb = getLoadable();
+    return ldb==null || ldb.isLoaded();
+}
 
 /**
  * Adds a callback to be triggered when resources loaded (cleared automatically when loaded).

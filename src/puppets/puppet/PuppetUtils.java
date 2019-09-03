@@ -4,6 +4,7 @@ import snap.gfx.*;
 import snap.util.SnapUtils;
 import snap.util.XMLArchiver;
 import snap.util.XMLElement;
+import snap.view.ViewUtils;
 import snap.web.WebURL;
 
 /**
@@ -41,6 +42,68 @@ public static PuppetFile getPuppetFile()  { return _puppetFile!=null? _puppetFil
  * Returns the ActionFile.
  */
 public static ActionFile getActionFile()  { return _actionFile!=null? _actionFile : (_actionFile = new ActionFile()); }
+
+/**
+ * Returns an image for given action.
+ */
+public static Image getImage(Puppet aPuppet, PuppetAction anAction, double aScale, Insets theIns)
+{
+    ActionView actView = new ActionView(aPuppet);
+    if(theIns==null) theIns = Insets.EMPTY;
+    actView.setPadding(theIns);
+    actView.setPuppetHeight(400);
+    actView.setPuppet(aPuppet);
+    actView.setPosable(true);
+    actView.setAction(anAction);
+    actView.setFill(null);
+    actView.setBorder(null);
+    
+    int FRAME_DELAY_MILLIS = 25;
+    int frameCount = anAction.getMaxTime()/FRAME_DELAY_MILLIS + 1;
+    List <Image> images = new ArrayList();
+    for(int i=0; i<frameCount; i++) {
+        actView.setActionTime(i*25);
+        actView.finishPose();
+        Image img = ViewUtils.getImage(actView);
+        images.add(img);
+    }
+    
+    ImageSet imgSet = new ImageSet(images);
+    Image img = imgSet.getImage(0);
+    return img;
+}
+
+/**
+ * Returns the flipped image.
+ */
+public static Image getImageFlipped(Image anImage)
+{
+    int w = (int)Math.round(anImage.getWidth()), h = (int)Math.round(anImage.getHeight());
+    Image img = Image.get(w, h, anImage.hasAlpha());
+    Painter pntr = img.getPainter();
+    Transform xfm = new Transform(w/2, h/2); xfm.scale(-1, 1); xfm.translate(-w/2, -h/2);
+    pntr.transform(xfm);
+    pntr.drawImage(anImage, 0, 0);
+    return img;
+}
+
+/**
+ * Returns the flipped image.
+ */
+public static Image getImagesFlipped(Image anImage)
+{
+    // Get image set (if null, just return flipped image)
+    ImageSet iset = anImage.getImageSet();
+    if(iset==null)
+        return getImageFlipped(anImage);
+        
+    int count = iset.getCount();
+    List <Image> imgs2 = new ArrayList(count);
+    for(int i=0;i<count;i++) { Image img = iset.getImage(i);
+        imgs2.add(getImageFlipped(img)); }
+    ImageSet iset2 = new ImageSet(imgs2);
+    return iset2.getImage(0);
+}
 
 /**
  * Returns the joint/marker image.
@@ -111,7 +174,7 @@ public static class PuppetFile {
     public Puppet getPuppetForName(String aName)
     {
         for(PuppetEntry pupEnt : getEntries())
-            if(pupEnt.getName().equals(aName))
+            if(pupEnt.getName().equalsIgnoreCase(aName))
                 return pupEnt.getPuppet();
         return null;
     }
@@ -251,7 +314,7 @@ public static class ActionFile {
     public PuppetAction getActionForName(String aName)
     {
         for(PuppetAction act : getActions())
-            if(act.getName().equals(aName))
+            if(act.getName().equalsIgnoreCase(aName))
                 return act;
         return null;
     }
