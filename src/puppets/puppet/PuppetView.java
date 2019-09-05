@@ -259,10 +259,8 @@ public void setPose(PuppetPose aPose)
         _phys.setJointOrMarkerToViewXY(pkey, px, py);
     }
     
-    if(isPoseSmoothly()) {
+    if(isPoseSmoothly())
        _phys.resolveMouseJointsOverTime();
-       System.out.println("Posing smoothly");
-   }
    else _phys.resolveMouseJoints();
 }
 
