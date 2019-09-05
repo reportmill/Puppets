@@ -187,6 +187,33 @@ public void updateView(View aView)
 }
 
 /**
+ * Returns whether any body is awake.
+ */
+public boolean isAwake()
+{
+    for(int i=0,iMax=_pupView.getChildCount();i<iMax;i++) { View view = _pupView.getChild(i);
+        if(isAwake(view))
+            return true; }
+    return false;
+}
+
+/**
+ * Returns whether given body is awake.
+ */
+public boolean isAwake(View aView)
+{
+    // Get ViewPhysics and body
+    ViewPhysics <Body> phys = aView.getPhysics(); if(phys==null) return false;
+    Object ntv = phys.getNative();
+    
+    // Handle Body
+    if(ntv instanceof Body) { Body body = (Body)ntv; if(!phys.isDynamic()) return false;
+        return body.isAwake(); }
+    
+    return false;
+}
+
+/**
  * Returns a body for a view.
  */
 public Body createBody(View aView)
@@ -390,9 +417,6 @@ public void setJointOrMarkerToViewXY(String aName, double aX, double aY)
     body.setAwake(true);
     _poseMouseJoints.add(mjnt);
     _poseMouseTime = System.currentTimeMillis();
-    
-    // If not running, register to resolve MouseJoints
-    if(!isRunning()) resolveMouseJointsOverTimeLater();
 }
 
 /**
@@ -400,8 +424,17 @@ public void setJointOrMarkerToViewXY(String aName, double aX, double aY)
  */
 public void resolveMouseJoints()
 {
+    // If no unresolved pose, just return
     if(_poseMouseTime==0) return;
-    for(int i=0;i<40 && _poseMouseTime!=0;i++) timerFired();
+    
+    // Iterate over 40 frames to resolve pose 
+    for(int i=0;i<40 && _poseMouseTime!=0;i++) {
+        timerFired();
+        if(i>20 && !isAwake())
+            break; //System.out.println("PupViewPhys: Not awake at frame " + i);
+    }
+    
+    // Clear mouse joints
     clearMouseJoints();
 }
 
@@ -414,12 +447,6 @@ void resolveMouseJointsOverTime()
     timerFired();
     ViewUtils.runDelayed(() -> resolveMouseJointsOverTime(), FRAME_DELAY_MILLIS, true);
 }
-
-/**
- * Resolve mouse joints.
- */
-void resolveMouseJointsOverTimeLater()  { if(_rmjRun==null) ViewUtils.runLater(_rmjRun = _rmjRunCached); }
-Runnable _rmjRun, _rmjRunCached = () -> { resolveMouseJointsOverTime(); _rmjRun = null; };
 
 /**
  * Clear mouse joints.

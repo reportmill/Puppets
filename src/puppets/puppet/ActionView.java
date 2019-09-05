@@ -206,7 +206,13 @@ void timerFired()
     // Get timer time (adjust if looping) and set
     int time = _timer.getTime();
     if(_loops) time = time%_action.getMaxTime();
+    
+    // Set time
+    boolean isSmooth = isPoseSmoothly();
+    setPoseSmoothly(false);
     setActionTime(time);
+    setPoseSmoothly(isSmooth);
+    
     
     // If beyond Action.MaxTime, stop anim
     if(!_loops && time>_action.getMaxTime())

@@ -16,6 +16,9 @@ public class PuppetView extends ParentView {
     
     // The puppet height in points
     double          _pupHeight = 500;
+    
+    // Whether poses should set over time (instead of instantly)
+    boolean         _poseSmoothly = true;
 
     // The Physics runner
     PuppetViewPhys  _phys;
@@ -234,11 +237,14 @@ public PuppetPose getPose()
 }
 
 /**
- * Sets a Puppet pose.
+ * Sets a Puppet pose (resolves immediately).
  */
 public void setPose(PuppetPose aPose)
 {
+    // Make sure last pose is resolved
     _phys.resolveMouseJoints();
+    
+    // Get anchor point so we can make convert pose points to view
     View anchorView = getChild(PuppetSchema.Anchor_Joint);
     Point anchor = anchorView.localToParent(anchorView.getWidth()/2, anchorView.getHeight()/2);
     
@@ -252,7 +258,23 @@ public void setPose(PuppetPose aPose)
         double px = pnt.x + anchor.x, py = anchor.y - pnt.y;
         _phys.setJointOrMarkerToViewXY(pkey, px, py);
     }
+    
+    if(isPoseSmoothly()) {
+       _phys.resolveMouseJointsOverTime();
+       System.out.println("Posing smoothly");
+   }
+   else _phys.resolveMouseJoints();
 }
+
+/**
+ * Returns whether poses are set over time (animated) as opposed to instantly.
+ */
+public boolean isPoseSmoothly()  { return _poseSmoothly; }
+
+/**
+ * Sets whether poses are set over time (animated) as opposed to instantly.
+ */
+public void setPoseSmoothly(boolean aValue)  { _poseSmoothly = aValue; }
 
 /**
  * Returns whether to show markers.
