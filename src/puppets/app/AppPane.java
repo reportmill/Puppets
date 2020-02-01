@@ -46,7 +46,7 @@ public Puppet getPuppet()  { return _editorPane.getPuppet(); }
  */
 public void showEditorPane()
 {
-    _docBox.removeChildren();
+    //_docBox.removeChildren();
     _docBox.setContent(_editorPane.getUI());
     setViewValue("PuppetButton", true);
 }
@@ -56,7 +56,7 @@ public void showEditorPane()
  */
 public void showActionPane()
 {
-    _docBox.removeChildren();
+    //_docBox.removeChildren();
     
     _actionPane = new ActionPane(this);
     _docBox.setContent(_actionPane.getUI());
@@ -68,7 +68,7 @@ public void showActionPane()
  */
 public void showSpritePane()
 {
-    _docBox.removeChildren();
+    //_docBox.removeChildren();
     
     _spritePane = new SpritePane(this);
     _docBox.setContent(_spritePane.getUI());

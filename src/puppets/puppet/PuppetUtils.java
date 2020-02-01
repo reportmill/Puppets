@@ -10,7 +10,7 @@ import snap.web.WebURL;
 public class PuppetUtils {
     
     // Constants
-    public static String ROOT = "/Temp/ComicLib/";
+    public static String ROOT = "/Users/jeff/Dev/ComicLib/";
 
     // The PuppetFile
     private static PuppetFile  _puppetFile;
