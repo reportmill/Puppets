@@ -1,4 +1,5 @@
 package puppets.puppet;
+import snap.geom.Rect;
 import snap.gfx.*;
 import snap.util.*;
 import snap.web.WebURL;

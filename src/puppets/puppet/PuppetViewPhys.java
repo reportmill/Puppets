@@ -5,6 +5,7 @@ import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.joints.*;
+import snap.geom.*;
 import snap.gfx.*;
 import snap.view.*;
 import snap.view.EventListener;
@@ -30,7 +31,7 @@ public class PuppetViewPhys {
     Runnable       _runner;
     
     // Transforms
-    Transform      _localToBox;
+    Transform _localToBox;
     
     // Listener to handle drags
     EventListener  _dragFilter = e -> handleDrag(e);

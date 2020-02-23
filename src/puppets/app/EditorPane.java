@@ -1,6 +1,8 @@
 package puppets.app;
 import java.util.*;
 import puppets.puppet.*;
+import snap.geom.HPos;
+import snap.geom.Point;
 import snap.gfx.*;
 import snap.view.*;
 import snap.viewx.DialogBox;

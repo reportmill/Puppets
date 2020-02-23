@@ -1,5 +1,8 @@
 package puppets.puppet;
 import java.util.*;
+
+import snap.geom.Insets;
+import snap.geom.Transform;
 import snap.gfx.*;
 import snap.view.*;
 

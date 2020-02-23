@@ -1,5 +1,9 @@
 package puppets.puppet;
 import java.util.*;
+
+import snap.geom.Arc;
+import snap.geom.Shape;
+import snap.geom.Transform;
 import snap.gfx.*;
 import snap.util.*;
 import snap.web.WebURL;

@@ -1,6 +1,8 @@
 package puppets.app;
 import puppets.puppet.*;
 import java.util.*;
+
+import snap.geom.Transform;
 import snap.view.*;
 import snap.gfx.*;
 

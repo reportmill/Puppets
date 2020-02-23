@@ -1,5 +1,8 @@
 package puppets.puppet;
 import java.util.*;
+
+import snap.geom.Point;
+import snap.geom.Rect;
 import snap.gfx.*;
 import snap.util.*;
 import snap.web.WebURL;
@@ -31,7 +34,7 @@ public class Puppet {
     Puppet                   _parent;
     
     // The bounds of parts
-    Rect                     _bounds;
+    Rect _bounds;
 
     // The bounds of joints
     Rect                     _jntBnds;
@@ -346,7 +349,7 @@ public Rect getJointBounds()
 public PuppetPose getPose(double aScale)
 {
     // Iterate over pose keys and add pose marker and x/y location to map
-    Map <String,Point> map = new LinkedHashMap();
+    Map <String, Point> map = new LinkedHashMap();
     for(String pkey : getSchema().getPoseKeys()) { PuppetJoint pjnt = getJoint(pkey);
         Point pnt = new Point(pjnt.getX()*aScale, pjnt.getY()*aScale);
         map.put(pkey, pnt);
